@@ -11,3 +11,12 @@ assets/output/*
 !assets/output/.gitkeep
 
 .idea
+
+*.gem
+
+tools/bedtools2/*
+tools/clinEff/*
+tools/picard/*
+tools/snpEff/*
+tools/Trimmomatic*
+tools/varscan/*
