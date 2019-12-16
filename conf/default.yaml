@@ -185,9 +185,9 @@ tools:
 
 reference:
   # define reference genome
-  genome: hg19.fa
+  genome: genome.fa
   # file containing the length of the chromosomes
-  length: hg19_chr.len
+  length: hg19.len
   # database of known SNPs
   dbSNP: snp150hg19.vcf.gz
   # Mappability file needed for calling CNVs with ControlFREEC
