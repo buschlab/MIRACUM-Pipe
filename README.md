@@ -7,6 +7,7 @@ MIRACUM-Pipe incorporates tools for detecting single nucleotide variants (SNVs),
 This repo is intended to be run as docker (see [MIRACUM-Pipe-docker](https://github.com/AG-Boerries/MIRACUM-Pipe-docker)). Alternatively, you can pick a [Galaxy version](https://github.com/AG-Boerries/MIRACUM-Pipe-galaxy).
 
 In some cases Docker or Galaxy might be inapropriate. Therefore, one can install this software on a [Debian 10](https://www.debian.org/) system.
+Caution: This repository contains submodules from other projects. Make sure to use the `--recurse-submodules` argument when cloning the repository using git.
 
 ### Prerequisites
 
