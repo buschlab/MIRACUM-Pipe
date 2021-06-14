@@ -337,6 +337,20 @@ collapse_rows(kable(new_tmp, format = "latex", caption = "Sequenzen der identifi
 @
 % \clearpage
 
+\clearpage
+\section{Mutationssignaturen}
+Untersucht werden die Mutationssignaturen basierend auf den COSMIC Mutation Signatures (V2) für alle somatischen Mutationen in der Probe. In der folgenden Tabelle \ref{mut_sig} werden nur Signaturen gelistet, die einen Anteil größer als 1\% haben. Die Signatur AC3 wird als \textit{BRCAness} bezeichnet.
+
+<<mut_sig, echo=FALSE, eval=TRUE, results='tex'>>=
+tmp <- mut_sig_analysis$CosmicValid_cutoffGen_LCDlist
+tmp <- data.frame(tmp$out_sig_ind_df$sig, tmp$out_sig_ind_df$process)
+rownames(tmp) <- tmp[,1]
+tmp <- merge(tmp,mut_sig_analysis$CosmicValid_cutoffGen_LCDlist$norm_exposures,by="row.names",all.x=TRUE)[,-c(1)]
+tmp[,3] <- tmp[,3]*100
+colnames(tmp) <- c("Signatur", "Beschreibung", "Anteil in %")
+kable(tmp, caption = "Ergebnisse Mutationssignatur Analyse\\label{mut_sig}", booktabs = T, row.names = F, digits = 2) %>% kable_styling(latex_options = c("striped", "HOLD_position"), font_size = 9, full_width = T)
+@
+
 %%%% QUALITÄT %%%%
 \section{Qualit\"{a}tskontrollen und Sequenzierungsstatistiken}
 

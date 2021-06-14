@@ -500,8 +500,8 @@ if (any(unlist(lapply(lapply(tmp,length), function(x){x == 0})))){
 \clearpage
 \section{Weitere Analysen}
 \subsection{Mutationssignaturen}
-Untersucht werden die Mutationssignaturen basierend auf den COSMIC Mutation Signatures (V1) für alle somatischen Mutationen in der Probe. In der folgenden Tabelle \ref{mut_sig} werden nur Signaturen gelistet, die einen Anteil größer als 1\% haben. In der Tabelle sind außer dem Anteil auch noch die Konfidenzintervalle (KI) angegeben. Die Signatur AC3 wird als \textit{BRCAness} bezeichnet.\\
-Der TopArt-Score besteht aus vier verschiedenen Anteilen. Die ersten beiden Kategorien P1 und P2 sind phänotypische Kriterien. Für den TopArt-Score P1 ist wichtig, ob die \textit{BRCAness}-Signatur vorhanden ist. Ist sie nicht vorhanden, bekommt der Patient in dieser Kategorie null Punkte. Ist die Signatur vorhanden, das KI enthält aber die Null, erhält der Patietn einen Punkt. Enthält das KI die null nicht, so gibt es zwei Punkte. Das zweite phänotypische Kriterium P2 können wir nicht auswerten.
+Untersucht werden die Mutationssignaturen basierend auf den COSMIC Mutation Signatures (V2) für alle somatischen Mutationen in der Probe. In der folgenden Tabelle \ref{mut_sig} werden nur Signaturen gelistet, die einen Anteil größer als 1\% haben. In der Tabelle sind außer dem Anteil auch noch die Konfidenzintervalle (KI) angegeben. Die Signatur AC3 wird als \textit{BRCAness} bezeichnet.\\
+Der TopArt-Score besteht aus vier verschiedenen Anteilen. Die ersten beiden Kategorien P1 und P2 sind phänotypische Kriterien. Für den TopArt-Score P1 ist wichtig, ob die \textit{BRCAness}-Signatur vorhanden ist. Ist sie nicht vorhanden, bekommt der Patient in dieser Kategorie null Punkte. Ist die Signatur vorhanden, das KI enthält aber die Null, erhält der Patient einen Punkt. Enthält das KI die null nicht, so gibt es zwei Punkte. Das zweite phänotypische Kriterium P2 können wir nicht auswerten.
 
 <<mut_sig, echo=FALSE, eval=TRUE, results='tex'>>=
 tmp <- mut_sig_ana$output$Summary
