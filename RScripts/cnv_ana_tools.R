@@ -284,6 +284,8 @@ cnv_annotation <- function(cnv_pvalue_txt, dbfile,
   not.significant <- c()
 
 # Try annotation first with SQL server if this fails try with biomaRt
+
+  ensembl <- NULL
   
   for(i in 1:nrow(x)) {
     cat("Processing CNV#", i, "\n")
@@ -297,7 +299,9 @@ cnv_annotation <- function(cnv_pvalue_txt, dbfile,
       query <- try(del_dup_query(location), silent = TRUE)
       if (inherits(query, 'try-error')){
         # try biomaRt next
-	ensembl=useMart("ensembl", dataset="hsapiens_gene_ensembl", host="grch37.ensembl.org")
+        if (is.null(ensembl)) {
+          ensembl <- useMart("ensembl", dataset="hsapiens_gene_ensembl", host="grch37.ensembl.org")
+        }
         query <- try(getBM(c('hgnc_symbol'), filters = c('chromosome_name', 'start', 'end'), values = location, mart = ensembl), silent = TRUE)
         if (inherits(query, 'try-error')){
           error("Check your internet connection. Connection to USCS SQL and biomaRt server failed!")
