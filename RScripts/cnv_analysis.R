@@ -4,7 +4,8 @@ cnv_analysis <- function(
   cpn_file,
   cnv_pvalue_txt,
   outfile_ideogram,
-  path_data,path_script,
+  path_data,
+  path_script,
   targets_txt,
   ampl_genes_txt,
   id,
@@ -15,7 +16,8 @@ cnv_analysis <- function(
   purity_file,
   hrd_file,
   gender,
-  ucsc_server
+  ucsc_server,
+  cnv_region_annotation
 ) {
 #' CNV Analysis
 #'
@@ -59,7 +61,8 @@ cnv_analysis <- function(
     dbfile =  paste(path_data, "cancerGeneList.tsv", sep = "/"),
     path_data = path_data,
     path_script = path_script,
-    ucsc_server = ucsc_server
+    ucsc_server = ucsc_server,
+    cnv_region_annotation = cnv_region_annotation
   )
 
   cnv_analysis_results <- cnv_processing(
