@@ -135,20 +135,30 @@ noisyData = TRUE
 outputDir = ${DIR_CNV_OUTPUT}
 ploidy = ${PLOIDY}
 contamination = ${CONTAMINATION}
+contaminationAdjustment = TRUE
 printNA = FALSE
 readCountThreshold = 50
 samtools = ${BIN_SAMTOOLS}
+bedtools = ${DIR_TOOLS}/bedtools2/bin/bedtools
 sex = ${CFG_SEX}
 step = 0
 window = 0
 uniqueMatch = TRUE
-contaminationAdjustment = TRUE
+BedGraphOutput = TRUE
 
 [sample]
 
 mateFile = ${bam}
 inputFormat = BAM
 mateOrientation = FR
+
+[BAF]
+
+makePileup = ${CFG_REFERENCE_DBSNP}
+fastaFile = ${FILE_GENOME}
+minimalCoveragePerPosition = ${CFG_PANEL_VARSCAN_MPILEUP2SNP_MINCOVERAGE}
+minimalQualityPerPosition = ${CFG_GENERAL_MINBASEQUAL}
+SNPfile = ${CFG_REFERENCE_DBSNP}
 
 [target]
 
