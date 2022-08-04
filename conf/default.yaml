@@ -552,6 +552,7 @@ sequenza:
   # --window WINDOW; Window size used for binning the original seqz file. Default is 50.
   window: 50
   # if used for samples without mathcing normal as control a separate non-matching-normal file in bam format is needed
+  # file should be stored in references/sequenza
   nonMatchingNormal: non_matching_normal.bam
   chromosomes: chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX
 
@@ -580,7 +581,7 @@ reference:
     # target capture correlation factors for mutation signature analysis
     captureCorFactors : targetCapture_cor_factors.rda
     # covered exons by capture kit; basically intersection of exons with capture regions
-    # e.g. bedtools intersect -a targets.bed -b bed_exons_hg19.bed > exons_Routine.bed -u
+    # e.g. bedtools intersect -u -a targets.bed -b bed_exons_hg19.bed > exons_Routine.bed
     coveredExons: exons_5UTR.bed
     # positive list for genes in germline to be reported (e.g. by ACMG)
     # actionableGenes: actionable_genes.txt
