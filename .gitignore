@@ -18,5 +18,4 @@ assets/output/*
 docker/*.log
 
 .idea
-
 .vscode
