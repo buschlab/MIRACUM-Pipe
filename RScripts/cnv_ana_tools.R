@@ -214,6 +214,8 @@ make_cnv_ideo_sig <- function(ratio_file, outfile_ideogram, protocol, ploidy) {
   ratio_new <- ratio
   ratio_new$chr <- paste('chr', ratio_new$chr, sep = '')
   
+  ploidy <- ifelse(round(ploidy) < 2, 2, round(ploidy))
+
   ploidies <- c(0, 1, 3, 4, 5, 6)
   colors <- c("darkblue",
     "mediumblue",
@@ -221,11 +223,6 @@ make_cnv_ideo_sig <- function(ratio_file, outfile_ideogram, protocol, ploidy) {
     "firebrick3",
     "red4",
     "darkred")
-  if (ploidy == 1) {
-    colors <- colors[-2]
-    ploidies[2] <- 2
-    ploidies <- ploidies[-6]
-  }
   if (ploidy > 2) {
     ploidies[3:length(ploidies)] <- ploidies[3:length(ploidies)] + ploidy - 2
   }

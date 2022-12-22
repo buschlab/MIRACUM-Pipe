@@ -96,7 +96,7 @@ ${SEQUENZA_UTILS} seqz_binning -s "${HRD_OUTPUT}" -w "${SEQUENZA_WINDOW}" -o "${
 ${BIN_RSCRIPT} "${DIR_RSCRIPT}/HRD.R" "${NameD}" "${DIR_WES}"
 
 # Extract ploidy and purity from sequenza
-PLOIDY=$(${BIN_RSCRIPT} "--vanilla" "-e" "cat(round(read.delim('${HRD_MODEL}', header = T)[1, 2]))")
+PLOIDY=$(${BIN_RSCRIPT} "--vanilla" "-e" "ploidy <- round(read.delim('${HRD_MODEL}', header = T)[1, 2]); cat(ifelse(round(ploidy) < 2, 2, round(ploidy)))")
 CONTAMINATION=$(${BIN_RSCRIPT} "--vanilla" "-e" "cat(1-read.delim('${HRD_MODEL}', header = T)[1, 1])")
 
 cat >"${DIR_WES}"/CNV_config.txt <<EOI
