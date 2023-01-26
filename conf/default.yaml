@@ -158,6 +158,9 @@ wes:
     #--intervals V6UTR.bed; One or more genomic intervals over which to operate  This argument may be specified 0 or more times. Default value: null
     #--min-allele-fraction 0.05; Minimum allele fraction required  Default value: 0.0 (VAF?)
     #--min-median-base-quality 28; Minimum median base quality of alt reads  Default value: 20
+  
+  #--panel-of-normals; VCF file of sites observed in normal.  Default value: null
+  panelOfNormals: somatic-b37_Mutect2-exome-panel.vcf
 
   ControlFREEC:
     # desired behavior in the ambiguous regions (poly-N or low mappability regions between two different copy number values)
@@ -319,6 +322,9 @@ panel:
     #--intervals V6UTR.bed; One or more genomic intervals over which to operate  This argument may be specified 0 or more times. Default value: null
     #--min-allele-fraction 0.05; Minimum allele fraction required  Default value: 0.0 (VAF?)
     #--min-median-base-quality 28; Minimum median base quality of alt reads  Default value: 20
+  
+  #--panel-of-normals; VCF file of sites observed in normal.  Default value: null
+  panelOfNormals: somatic-b37_Mutect2-exome-panel.vcf
   
   ControlFREEC:
     # desired behavior in the ambiguous regions (poly-N or low mappability regions between two different copy number values)
@@ -485,6 +491,9 @@ tumorOnly:
     #--intervals V6UTR.bed; One or more genomic intervals over which to operate  This argument may be specified 0 or more times. Default value: null
     #--min-allele-fraction 0.05; Minimum allele fraction required  Default value: 0.0 (VAF?)
     #--min-median-base-quality 28; Minimum median base quality of alt reads  Default value: 20
+  
+  #--panel-of-normals; VCF file of sites observed in normal.  Default value: null
+  panelOfNormals: somatic-b37_Mutect2-exome-panel.vcf
   
   ControlFREEC:
     # desired behavior in the ambiguous regions (poly-N or low mappability regions between two different copy number values)
