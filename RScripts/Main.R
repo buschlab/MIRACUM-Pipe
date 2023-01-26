@@ -67,6 +67,7 @@ ampl_genes_txt <- args[29]
 ucsc_server <- args[30]
 cnv_region_annotation <- args[31]
 germlineVaf <- as.numeric(args[32])*100
+vafTmb <- as.numeric(args[33])
 
 print(ref_genome)
 
@@ -327,6 +328,27 @@ if (protocol == "somatic" | protocol == "somaticGermline") {
     sureselect_type = sureselect_type
   )
 
+  filt_result_tmb <- filtering(
+    snpfile = snp_file_td,
+    indelfile = indel_file_td,
+    snpefffile_snp = snpefffile_snp,
+    snpefffile_indel = snpefffile_indel,
+    outfile = filter_out_td,
+    path_data = path_data,
+    path_script = path_script,
+    mode = "T",
+    center = center,
+    id = id,
+    protocol = protocol,
+    sureselect = bed_file,
+    vaf = vafTmb,
+    min_var_count = min_var_count,
+    maf = maf_cutoff,
+    covered_exons = covered_exons,
+    cov_t = stats$cover_exons$perc[[2]][1],
+    sureselect_type = sureselect_type
+  )
+
   # LOH
   print("Filtering for LoH.")
   filt_result_loh <- filtering(
@@ -404,7 +426,7 @@ if (protocol == "somatic" | protocol == "somaticGermline") {
   mutation_analysis_result <- mutation_analysis(
     loh = filt_result_loh$table,
     somatic = filt_result_td$table,
-    tumbu = filt_result_td$tmb,
+    tumbu = filt_result_tmb$tmb,
     outfile_circos = outfile_circos,
     path_data = path_data,
     path_script = path_script,
@@ -456,6 +478,24 @@ if (protocol == "panelTumor" | protocol == "tumorOnly") {
     sureselect_type = sureselect_type
   )
 
+    filt_result_tmb_mutect2 <- filtering_mutect2(
+    snpfile = mutect2_vcf,
+    snpefffile = mutect2_snpEff_vcf,
+    id = id,
+    path_data = path_data,
+    path_script = path_script,
+    mode = "T",
+    center = center,
+    protocol = protocol,
+    sureselect = bed_file,
+    vaf = vaf,
+    min_var_count = min_var_count,
+    maf = maf_cutoff,
+    covered_exons = covered_exons,
+    cov_t = stats$cover_exons$perc[[1]][1],
+    sureselect_type = sureselect_type
+  )
+
   filt_result_loh <- list(table = NULL, tmb = NULL)
 
   # Analyses
@@ -463,7 +503,7 @@ if (protocol == "panelTumor" | protocol == "tumorOnly") {
   mutation_analysis_result <- mutation_analysis(
     loh = filt_result_loh$table,
     somatic = filt_result_td$table,
-    tumbu = filt_result_td$tmb,
+    tumbu = filt_result_tmb$tmb,
     outfile_circos = outfile_circos,
     path_data = path_data,
     path_script = path_script,
@@ -477,7 +517,7 @@ if (protocol == "panelTumor" | protocol == "tumorOnly") {
   mutation_analysis_result_mutect2 <- mutation_analysis(
     loh = filt_result_loh$table,
     somatic = filt_result_td_mutect2$table,
-    tumbu = filt_result_td_mutect2$tmb,
+    tumbu = filt_result_tmb_mutect2$tmb,
     outfile_circos = outfile_circos_mutect2,
     path_data = path_data,
     path_script = path_script,
@@ -812,7 +852,7 @@ if(protocol == "panelTumor" & sureselect_type == "TSO500") {
     Tumor_Sample_Barcode = paste(as.character(id),"TD",sep = "_"),
     MSI_SCORE = mutation_analysis_result_mutect2$msi,
     MSI_TYPE = msi_helper,
-    CVR_TMB_SCORE = filt_result_td_mutect2$tmb,
+    CVR_TMB_SCORE = filt_result_tmb_mutect2$tmb,
     BRCAness = brca_helper,
     HRD = cnv_analysis_results$hrd$sum,
     Purity = cnv_analysis_results$purity$purity,
@@ -846,7 +886,7 @@ if (protocol == "somaticGermline" | protocol == "somatic") {
     Tumor_Sample_Barcode = paste(as.character(id), "TD", sep = "_"),
     MSI_SCORE = mutation_analysis_result$msi,
     MSI_TYPE = msi_helper,
-    CVR_TMB_SCORE = filt_result_td$tmb,
+    CVR_TMB_SCORE = filt_result_tmb$tmb,
     BRCAness = brca_helper,
     HRD = cnv_analysis_results$hrd$sum,
     Purity = cnv_analysis_results$purity$purity,
@@ -872,7 +912,7 @@ if (protocol == "tumorOnly") {
     Tumor_Sample_Barcode = paste(as.character(id), "TD", sep = "_"),
     MSI_SCORE = mutation_analysis_result_mutect2$msi,
     MSI_TYPE = msi_helper,
-    CVR_TMB_SCORE = filt_result_td$tmb,
+    CVR_TMB_SCORE = filt_result_tmb$tmb,
     BRCAness = brca_helper,
     HRD = cnv_analysis_results$hrd$sum,
     Purity = cnv_analysis_results$purity$purity,
@@ -1032,6 +1072,7 @@ if (protocol == "somaticGermline") {
     mutation_analysis_result = mutation_analysis_result,
     mutation_analysis_result_gd = mutation_analysis_result_gd,
     filt_result_td = filt_result_td,
+    filt_result_tmb = filt_result_tmb,
     cnv_analysis_results = cnv_analysis_results,
     filt_result_gd = filt_result_gd,
     med_tmb = tmb_med,
@@ -1127,6 +1168,7 @@ if (protocol == "somatic") {
     mutation_analysis_result = mutation_analysis_result,
     mutation_analysis_result_gd = NULL,
     filt_result_td = filt_result_td,
+    filt_result_tmb = filt_result_tmb,
     cnv_analysis_results = cnv_analysis_results,
     filt_result_gd = NULL,
     med_tmb = tmb_med,
@@ -1212,6 +1254,7 @@ if (protocol == "panelTumor" | protocol == "tumorOnly") {
     mutation_analysis_result = mutation_analysis_result_mutect2,
     mutation_analysis_result_gd = NULL,
     filt_result_td = filt_result_td_mutect2,
+    filt_result_tmb = filt_result_tmb_mutect2,
     cnv_analysis_results = cnv_analysis_results,
     filt_result_gd = NULL,
     med_tmb = tmb_med,

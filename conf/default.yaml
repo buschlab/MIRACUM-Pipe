@@ -37,6 +37,8 @@ general:
   # minimum variant allele / tumor frequency to call a variant
   minVAF: 0.05
   minGermlineVAF: 0.25
+  # vaf that is used to calculate tumor mutational burden
+  vafTmb: 0.05
 
 wes:
   samtools:

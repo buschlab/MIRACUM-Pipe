@@ -5,6 +5,7 @@ keys <- function(
   mutation_analysis_result_gd,
   cnv_analysis_results,
   filt_result_td,
+  filt_result_tmb,
   filt_result_gd,
   med_tmb,
   protocol,
@@ -103,9 +104,9 @@ keys <- function(
         ),
         paste0(
           round(
-            x = filt_result_td$tmb, digits = 2
+            x = filt_result_tmb$tmb, digits = 2
           ),
-          "/Mb", " (", filt_result_td$number_used_mutations_tmb, "/",
+          "/Mb", " (", filt_result_tmb$number_used_mutations_tmb, "/",
           round(x = as.numeric(filt_result_td$used_exon_region),
             digits = 2
           ), ")"

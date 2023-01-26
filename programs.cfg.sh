@@ -74,6 +74,7 @@ readonly CFG_GENERAL_MINBASEQUAL=$(get_config_value general.minBaseQual "${PARAM
 readonly CFG_GENERAL_MAFCUTOFF=$(get_config_value general.maf_cutoff "${PARAM_DIR_PATIENT}")
 readonly CFG_GENERAL_MINVAF=$(get_config_value general.minVAF "${PARAM_DIR_PATIENT}")
 readonly CFG_GENERAL_MINGERMLINEVAF=$(get_config_value general.minGermlineVAF "${PARAM_DIR_PATIENT}")
+readonly CFG_GENERAL_VAFTMB=$(get_config_value general.vafTmb "${PARAM_DIR_PATIENT}")
 
 # sametools mpileup
 readonly CFG_SAMTOOLS_MPILEUP_MINMQ=$(get_config_value wes.samtools.mpileup.minMQ "${PARAM_DIR_PATIENT}")
@@ -432,6 +433,7 @@ export CFG_GENERAL_MINBASEQUAL
 export CFG_GENERAL_MAFCUTOFF
 export CFG_GENERAL_MINVAF
 export CFG_GENERAL_MINGERMLINEVAF
+export CFG_GENERAL_VAFTMB
 
 export CFG_VARSCAN_SOMATIC_MINCOVERAGE
 export CFG_VARSCAN_SOMATIC_TUMORPURITY
