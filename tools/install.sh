@@ -233,8 +233,9 @@ VCF_file: 1kg.exome.highAF.1511.vcf
 
 
 [VariantCallerParameters]
-GATK_MEM: 4
-GATK_nt:  1
+GATK_MEM:    4
+GATK_nt:     1
+VARSCAN_MEM: 4
 
 [GenomeReference]
 REFERENCE: /opt/MIRACUM-Pipe/assets/references/genome/genome.fa
