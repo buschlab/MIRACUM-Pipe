@@ -4,6 +4,8 @@ on:
     push:
       paths:
         - debian/**  
+        - docker/Dockerfile
+        - docker/Dockerfile_base
 
 jobs:
 
