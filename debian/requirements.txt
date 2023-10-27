@@ -1,4 +1,4 @@
-wheel=0.41.2
-shyaml=0.6.2
-agfusion=1.4.1
-sequenza-utils=3.0.0
+wheel==0.41.2
+shyaml==0.6.2
+agfusion==1.4.1
+sequenza-utils==3.0.0
