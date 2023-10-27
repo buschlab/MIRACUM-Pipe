@@ -17,7 +17,7 @@ function install_java8()
 function install_texlive()
 {
   apt-get install -y --no-install-recommends texlive texlive-lang-german texlive-latex-extra
-  tlmgr option repository http://mirror.ctan.org/systems/texlive/tlnet
+  tlmgr option repository ftp://tug.org/historic/systems/texlive/2018/tlnet-final
   tlmgr init-usertree
   tlmgr install \
     breakurl \
