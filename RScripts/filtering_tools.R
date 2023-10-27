@@ -317,7 +317,7 @@ ishs <- function(x, dbfile){
             aac <- substr(aac, l, l)
             if (grepl(aac, lisths$Variant_Amino_Acid[phs][j])){
               ea <- substr(lisths$Reference_Amino_Acid[phs][j], 1, 1)
-              ap <- lisths$Amino_Acid_Positio[phs][j]
+              ap <- lisths$Amino_Acid_Position[phs][j]
               aa <- paste0(ea, ap, aac)
               hotspot[i] <- aa
               if (hotspot[i] != FALSE){
