@@ -46,7 +46,7 @@ fi
 
 # load patient yaml
 readonly CFG_SEX=$(get_config_value sex "${PARAM_DIR_PATIENT}")
-if [[ "$(get_config_value annotation.germline "${PARAM_DIR_PATIENT}")" = "True" ]]; then
+if [[ "$(get_config_value common.germline "${PARAM_DIR_PATIENT}")" = "True" ]]; then
   readonly CFG_CASE=somaticGermline
 else
   readonly CFG_CASE=somatic
@@ -70,23 +70,35 @@ fi
 
 ##################################################################################################################
 
-cd "${DIR_ANALYSIS}" || exit 1
+echo "${PARAM_DIR_PATIENT}"
+echo "${FILE_GENOME}"
 
+cd "${DIR_ANALYSES}" || exit 1
+
+# execute Main.R, i.e. complete analyses in R
 ${BIN_RSCRIPT} "${DIR_RSCRIPT}/Main.R" "${CFG_CASE}" "${PARAM_DIR_PATIENT}" "${CFG_FILE_GERMLINE_R1}" "${CFG_FILE_TUMOR_R1}" \
   "${DIR_TARGET}" "${DIR_RSCRIPT}" "${DIR_DATABASE}" "${CFG_REFERENCE_CAPTUREGENES}" "${CFG_REFERENCE_COVEREDREGION}" \
-  "${CFG_COMMON_AUTHOR}"
-  
-${BIN_RSCRIPT} --vanilla -e "load('${DIR_ANALYSIS}/WES.RData'); library(knitr); knit('${DIR_RSCRIPT}/Report.Rnw');"
+  "${CFG_AUTHOR}" "${CFG_CENTER}" "${CFG_REFERENCE_CAPTUREREGIONS}" "${CFG_REFERENCE_CAPTUREREGIONNAME}" "${FILE_GENOME}" \
+  "${CFG_REFERENCE_CAPTURECORFACTORS}" "${CFG_GENERAL_MINVAF}" "${CFG_VARSCAN_FPFILTER_MINVARCOUNT}" "${CFG_GENERAL_MAFCUTOFF}" \
+  "${CFG_REFERENCE_ACTIONABLEGENES}" "${CFG_REFERENCE_COVERED_EXONS}" "${CFG_ENTITY}" "${CFG_SEX}" "${CFG_FUSION_GENES}" \
+  "${CFG_AMPLIFICATION_GENES}" "${CFG_UCSC_SERVER}" "${CFG_CNV_ANNOTATION}" "${CFG_GENERAL_MINGERMLINEVAF}"
 
-mv "${DIR_ANALYSIS}/Report.tex" "${DIR_ANALYSIS}/${CFG_CASE}_${PARAM_DIR_PATIENT}_Report.tex"
+# translate to tex
+${BIN_RSCRIPT} -e "load('${DIR_ANALYSES}/Report.RData'); library(knitr); knit('${DIR_RSCRIPT}/Report.Rnw');"
 
-pdflatex -interaction=nonstopmode "${DIR_ANALYSIS}/${CFG_CASE}_${PARAM_DIR_PATIENT}_Report.tex" \
-  --output-directory="${DIR_ANALYSIS}"
-pdflatex -interaction=nonstopmode "${DIR_ANALYSIS}/${CFG_CASE}_${PARAM_DIR_PATIENT}_Report.tex" \
-  --output-directory="${DIR_ANALYSIS}"
+# fix possible knitr syntax issues
+sed -i 's/\\textbf{.\\textbf{.}/\\textbf{.}/' ${DIR_ANALYSES}/Report.tex
 
+# PDF report
+mv "${DIR_ANALYSES}/Report.tex" "${DIR_ANALYSES}/${CFG_CASE}_${PARAM_DIR_PATIENT}_Report.tex"
+pdflatex -interaction=nonstopmode "${DIR_ANALYSES}/${CFG_CASE}_${PARAM_DIR_PATIENT}_Report.tex" \
+  --output-directory="${DIR_ANALYSES}"
+pdflatex -interaction=nonstopmode "${DIR_ANALYSES}/${CFG_CASE}_${PARAM_DIR_PATIENT}_Report.tex" \
+  --output-directory="${DIR_ANALYSES}"
+
+# clean up
 # remove aux files which are created while pdflatex
-rm -f "${DIR_ANALYSIS}/${CFG_CASE}_${PARAM_DIR_PATIENT}_Report.aux" \
-      "${DIR_ANALYSIS}/${CFG_CASE}_${PARAM_DIR_PATIENT}_Report.toc" \
-      "${DIR_ANALYSIS}/${CFG_CASE}_${PARAM_DIR_PATIENT}_Report.log" \
-      "${DIR_ANALYSIS}/${CFG_CASE}_${PARAM_DIR_PATIENT}_Report.out"
+rm -f "${DIR_ANALYSES}/${CFG_CASE}_${PARAM_DIR_PATIENT}_Report.aux" \
+      "${DIR_ANALYSES}/${CFG_CASE}_${PARAM_DIR_PATIENT}_Report.toc" \
+      "${DIR_ANALYSES}/${CFG_CASE}_${PARAM_DIR_PATIENT}_Report.log" \
+      "${DIR_ANALYSES}/${CFG_CASE}_${PARAM_DIR_PATIENT}_Report.out"

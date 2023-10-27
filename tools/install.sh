@@ -2,9 +2,11 @@
 
 # variables
 readonly VERSION_TRIMMOMATIC="0.39"
-readonly VERSION_PICARD="2.20.6"
+# 2.20.6
+readonly VERSION_PICARD="2.27.1"
 readonly VERSION_VARSCAN="2.4.4"
-readonly VERSION_BEDTOOLS="2.28.0"
+# 2.28.0
+readonly VERSION_BEDTOOLS="2.30.0"
 
 ########
 readonly DIR_SCRIPT=$(
@@ -43,7 +45,7 @@ wget https://github.com/broadinstitute/picard/releases/download/${VERSION_PICARD
 ###########
 mkdir -p ${DIR_SCRIPT}/varscan
 cd ${DIR_SCRIPT}/varscan
-wget https://github.com/dkoboldt/varscan/raw/master/VarScan.v${VERSION_VARSCAN}.jar\
+wget https://github.com/dkoboldt/varscan/raw/master/VarScan.v${VERSION_VARSCAN}.jar \
     -O VarScan.jar
 
 
@@ -71,7 +73,7 @@ rm -f snpEff.zip
 
 # download database
 cd ${DIR_SCRIPT}/snpEff
-wget https://sourceforge.net/projects/snpeff/files/databases/v4_3/snpEff_v4_3_GRCh37.75.zip -O GRCh37.75.zip
+wget https://downloads.sourceforge.net/project/snpeff/databases/v4_3/snpEff_v4_3_GRCh37.75.zip -O GRCh37.75.zip
 unzip -o GRCh37.75.zip
 rm -f GRCh37.37.zip
 
@@ -92,14 +94,8 @@ rm -f trimmomatic.zip
 mv Trimmomatic* Trimmomatic
 mv Trimmomatic/trimmomatic-${VERSION_TRIMMOMATIC}.jar Trimmomatic/trimmomatic.jar
 
-###############
-# Trimmomatic #
-###############
-cd ${DIR_SCRIPT}
-
 
 ###### COMPILE SUBMODULES #######
-
 
 #########
 # FREEC #
@@ -117,7 +113,7 @@ chmod +x src/freec
 mv src/freec bin
 
 # add module
-cd cd ${DIR_SCRIPT}/FREEC/mappability
+cd ${DIR_SCRIPT}/FREEC/mappability
 wget https://xfer.curie.fr/get/nil/7hZIk1C63h0/hg19_len100bp.tar.gz
 tar -xzf hg19_len100bp.tar.gz
 rm -f hg19_len100bp.tar.gz
@@ -135,11 +131,13 @@ mv ${DIR_SCRIPT}/bam-readcount/build/bin ${DIR_SCRIPT}/bam-readcount/bin
 rm -rf ${DIR_SCRIPT}/bam-readcount/build
 
 #######
-# bwa #
+# bwa-mem2 #
 #######
-cd ${DIR_SCRIPT}/bwa && make && chmod +x bwa
-rm -f *.o
-
+cd ${DIR_SCRIPT}
+wget https://github.com/bwa-mem2/bwa-mem2/releases/download/v2.2.1/bwa-mem2-2.2.1_x64-linux.tar.bz2 -O bwa-mem2.tar.bz2
+tar -xf bwa-mem2.tar.bz2
+rm bwa-mem2*.tar.bz2
+mv bwa-mem2* bwa-mem2
 
 ##########
 # htslib #
@@ -175,3 +173,85 @@ rm -f ${DIR_SCRIPT}/htslib/*.o
 # add lib folder system wide
 echo "$DIR_SCRIPT/htslib" > /etc/ld.so.conf.d/htslib.conf
 
+
+#################
+# fusioncatcher #
+#################
+#cd ${DIR_SCRIPT}
+#wget http://sf.net/projects/fusioncatcher/files/bootstrap.py -O bootstrap.py
+#python bootstrap.py --prefix=${DIR_SCRIPT} -t -y
+cd ${DIR_SCRIPT}/fusioncatcher/tools/
+./install_tools.sh
+
+##################
+# sequenza-utils #
+##################
+#pip3 install sequenza-utils
+
+##############
+# msisensor2 #
+##############
+cd ${DIR_SCRIPT}/msisensor2
+chmod +x msisensor2
+
+#################
+# msisensor-pro #
+#################
+cd ${DIR_SCRIPT}/msisensor-pro
+#wget https://github.com/xjtu-omics/msisensor-pro/raw/master/binary/msisensor-pro
+#chmod +x msisensor-pro
+./INSTALL
+
+############
+# agfusion #
+############
+cd /opt/MIRACUM-Pipe/databases
+agfusion download -g hg38
+
+###############
+# bam-matcher #
+###############
+cd ${DIR_SCRIPT}/bam-matcher
+pip3 install --upgrade numpy
+pip3 install -r requirements.txt
+
+cat >"${DIR_SCRIPT}"/bam-matcher/bam-matcher.conf <<EOI
+[VariantCallers]
+caller:    gatk4
+gatk3:     /opt/MIRACUM-Pipe/tools/gatk/GenomeAnalysisTK.jar
+gatk4:     /opt/MIRACUM-Pipe/tools/gatk4/gatk
+freebayes: freebayes
+samtools:  samtools
+varscan:   /opt/MIRACUM-Pipe/tools/bam-matcher/VarScan.jar
+java:      java
+
+[ScriptOptions]
+DP_threshold: 15
+number_of_SNPs:
+fast_freebayes: True
+VCF_file: /opt/MIRACUM-Pipe/tools/bam-matcher/1kg.exome.highAF.1511.vcf
+
+
+[VariantCallerParameters]
+GATK_MEM:    4
+GATK_nt:     1
+VARSCAN_MEM: 4
+
+[GenomeReference]
+REFERENCE: /opt/MIRACUM-Pipe/assets/references/genome/genome.fa
+REF_ALTERNATE:
+CHROM_MAP:
+
+[BatchOperations]
+CACHE_DIR: ${DIR_TMP}
+[Miscellaneous]
+EOI
+
+awk '{if($0 !~ /^#/) print "chr"$0; else print $0}' ${DIR_SCRIPT}/bam-matcher/1kg.exome.highAF.1511.vcf > ${DIR_SCRIPT}/bam-matcher/tmp.vcf
+mv ${DIR_SCRIPT}/bam-matcher/tmp.vcf ${DIR_SCRIPT}/bam-matcher/1kg.exome.highAF.1511.vcf
+
+awk '{if($0 !~ /^#/) print "chr"$0; else print $0}' ${DIR_SCRIPT}/bam-matcher/1kg.exome.highAF.3680.vcf > ${DIR_SCRIPT}/bam-matcher/tmp.vcf
+mv ${DIR_SCRIPT}/bam-matcher/tmp.vcf ${DIR_SCRIPT}/bam-matcher/1kg.exome.highAF.3680.vcf
+
+awk '{if($0 !~ /^#/) print "chr"$0; else print $0}' ${DIR_SCRIPT}/bam-matcher/1kg.exome.highAF.7550.vcf > ${DIR_SCRIPT}/bam-matcher/tmp.vcf
+mv ${DIR_SCRIPT}/bam-matcher/tmp.vcf ${DIR_SCRIPT}/bam-matcher/1kg.exome.highAF.7550.vcf

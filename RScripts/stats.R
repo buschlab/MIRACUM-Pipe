@@ -1,5 +1,12 @@
-stats <- function(path = path2coverage, outfile_pdf = coverage_out, stats_td,
-      stats_gd, path_output){
+stats_func <- function(
+  path = path2coverage,
+  outfile_pdf = coverage_out,
+  stats_td,
+  stats_gd = NULL,
+  path_output,
+  protocol,
+  sureselect_type
+  ) {
   #' Statistics
   #'
   #' @description Information about Coverage and Readdepth
@@ -9,13 +16,37 @@ stats <- function(path = path2coverage, outfile_pdf = coverage_out, stats_td,
   #' @param stats_td numerical. Total reads for tumor
   #' @param stats_gd numerical. Total reads for germline
   #' @param path_output string. Output directory
-  #' 
+  #' @param protocol strin. Protocol of analyses
+  #'
   #' @return list of
   #' @return cover vector. Mean coverage 
   #' @return avreads vector. Total reads for germline and tumor
   #'
   #' @details Statistical numbers are extracted from alignment's statistics.
-  cover <- coverage_plot(path = path, outfilePDF = coverage_out)
-  avreads <- reads(stats_td, stats_gd)
-  return(list(cover = cover, avreads = avreads))
+  cover <- coverage_plot(
+    path = path,
+    outfilePDF = coverage_out,
+    protocol = protocol
+  )
+  cover_exons <- coverage_exon(
+    path = path,
+    protocol = protocol,
+    sureselect_type = sureselect_type
+  )
+  avreads <- reads(
+    stats_td,
+    stats_gd
+  )
+  qc_check <- quality_check(
+    path = path,
+    nsamples = cover$labs,
+    protocol = protocol
+  )
+
+  return(list(
+    cover = cover,
+    cover_exons = cover_exons,
+    avreads = avreads,
+    qc_check = qc_check
+  ))
 }

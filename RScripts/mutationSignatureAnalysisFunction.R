@@ -1,6 +1,6 @@
 mutation_signature_analysis <- function(vcf_file = NULL, cutoff = 0.01,
                                       sample_name = NULL, only_coding = FALSE,
-                                      path_data, path_output){
+                                      path_data, path_output, outfile_cbioportal){
   #' Mutation Signature Analysis
   #'
   #' @description Mutation Signature Analysis adopted from YAPSA package
@@ -25,10 +25,11 @@ mutation_signature_analysis <- function(vcf_file = NULL, cutoff = 0.01,
   require("BSgenome.Hsapiens.UCSC.hg19")
   require("TxDb.Hsapiens.UCSC.hg19.knownGene")
   require("openxlsx")
-  
+
   txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
-  
+
   ## Loading Siganture Info
+  # "old" Alexandrov Signatures
   Alex_signatures_path <- paste(path_data, "signatures.txt", sep = "/")
   AlexInitialArtif_sig_df <- read.csv(Alex_signatures_path, header=TRUE,
                                       sep="\t")
@@ -43,22 +44,6 @@ mutation_signature_analysis <- function(vcf_file = NULL, cutoff = 0.01,
   AlexInitialValid_sig_df <- AlexInitialArtif_sig_df[,grep("^A[0-9]+",
                              names(AlexInitialArtif_sig_df))]
   number_of_Alex_validated_sigs <- dim(AlexInitialValid_sig_df)[2]
-  Alex_COSMIC_signatures_path <- paste(path_data,
-                                       "signatures_probabilities.txt",
-                                       sep = "/")
-  AlexCosmicValid_sig_df <- read.csv(Alex_COSMIC_signatures_path, header=TRUE,
-                                     sep="\t")
-  Alex_COSMIC_rownames <- paste(AlexCosmicValid_sig_df[, 1],
-                                AlexCosmicValid_sig_df[, 2], sep = " ")
-  COSMIC_select_ind <- grep("Signature", names(AlexCosmicValid_sig_df))
-  AlexCosmicValid_sig_df <- AlexCosmicValid_sig_df[, COSMIC_select_ind]
-  number_of_Alex_COSMIC_sigs <- dim(AlexCosmicValid_sig_df)[2]
-  names(AlexCosmicValid_sig_df) <- gsub("Signature\\.","AC",
-                                        names(AlexCosmicValid_sig_df))
-  rownames(AlexCosmicValid_sig_df) <- Alex_COSMIC_rownames
-  COSMIC_order_ind <- match(Alex_rownames,Alex_COSMIC_rownames)
-  AlexCosmicValid_sig_df <- AlexCosmicValid_sig_df[COSMIC_order_ind, ]
-  
   signature_colour_vector <- c("darkgreen", "green", "pink", "goldenrod",
                                "lightblue", "blue", "orangered", "yellow",
                                "orange", "brown", "purple", "red",
@@ -80,6 +65,23 @@ mutation_signature_analysis <- function(vcf_file = NULL, cutoff = 0.01,
   AlexInitialArtif_sigInd_df$index <- seq_len(dim(AlexInitialArtif_sigInd_df)[1])
   AlexInitialArtif_sigInd_df$colour <- signature_colour_vector
   AlexInitialArtif_sigInd_df$process <- bio_process_vector
+
+  # COSMIC Signatures
+  Alex_COSMIC_signatures_path <- paste(path_data,
+                                       "signatures_probabilities.txt",
+                                       sep = "/")
+  AlexCosmicValid_sig_df <- read.csv(Alex_COSMIC_signatures_path, header=TRUE,
+                                     sep="\t")
+  Alex_COSMIC_rownames <- paste(AlexCosmicValid_sig_df[, 1],
+                                AlexCosmicValid_sig_df[, 2], sep = " ")
+  COSMIC_select_ind <- grep("Signature", names(AlexCosmicValid_sig_df))
+  AlexCosmicValid_sig_df <- AlexCosmicValid_sig_df[, COSMIC_select_ind]
+  number_of_Alex_COSMIC_sigs <- dim(AlexCosmicValid_sig_df)[2]
+  names(AlexCosmicValid_sig_df) <- gsub("Signature\\.","AC",
+                                        names(AlexCosmicValid_sig_df))
+  rownames(AlexCosmicValid_sig_df) <- Alex_COSMIC_rownames
+  COSMIC_order_ind <- match(Alex_rownames,Alex_COSMIC_rownames)
+  AlexCosmicValid_sig_df <- AlexCosmicValid_sig_df[COSMIC_order_ind, ]
   
   COSMIC_signature_colour_vector <- c("green", "pink", "goldenrod",
                                       "lightblue", "blue", "orangered",
@@ -106,8 +108,7 @@ mutation_signature_analysis <- function(vcf_file = NULL, cutoff = 0.01,
                                  "aflatoxin", "unknown", "defect DNA MMR",
                                  "unknown", "unknown", "tobacco chewing",
                                  "unknown")
-  AlexCosmicValid_sigInd_df <- data.frame(
-    sig = colnames(AlexCosmicValid_sig_df))
+  AlexCosmicValid_sigInd_df <- data.frame(sig = colnames(AlexCosmicValid_sig_df))
   AlexCosmicValid_sigInd_df$index <- seq_len(dim(AlexCosmicValid_sigInd_df)[1])
   AlexCosmicValid_sigInd_df$colour <- COSMIC_signature_colour_vector
   AlexCosmicValid_sigInd_df$process <- COSMIC_bio_process_vector
@@ -127,34 +128,42 @@ mutation_signature_analysis <- function(vcf_file = NULL, cutoff = 0.01,
     sample_name <- unlist(strsplit(sam_na[length(sam_na)], ".", fixed = T))[1]
   }
   ## load vcf Files
-  sample.vcf <- readVcf(vcf_file,"hg19")
+  sample.vcf <- readVcf(vcf_file, "hg19")
+  sample.vcf.flattend <- VariantAnnotation::expand(sample.vcf)
   ## create data.frame from mutations
-  if(only_coding == TRUE){
-    mutations.coding <- predictCoding(sample.vcf, txdb, seqSource = Hsapiens)
-    mutations <- data.frame(CHROM = as.character(seqnames(mutations.coding)),
-                            POS = start(mutations.coding),
-                            REF = as.character(mutations.coding$REF),
-                            ALT = as.character(unlist(mutations.coding$ALT)),
-                            Type = as.character(mutations.coding$CONSEQUENCE),
-                            FILT = fixed(sample.vcf)[, "FILTER"])
+  if(only_coding == TRUE) {
+    mutations.coding <- predictCoding(
+      sample.vcf.flattend,
+      txdb,
+      seqSource = Hsapiens
+    )
+    mutations <- data.frame(
+      CHROM = as.character(seqnames(mutations.coding)),
+      POS = start(mutations.coding),
+      REF = as.character(mutations.coding$REF),
+      ALT = as.character(mutations.coding$ALT),
+      Type = as.character(mutations.coding$CONSEQUENCE),
+      FILT = as.character(mutations.coding$FILTER)
+    )
     mutations <- mutations[!mutations$Type == "synonymous", ]
     mutations$PID <- sample_name
     mutations$SUBGROUP <- sample_name
-  } else {  
-    mutations <- data.frame(CHROM = as.character(seqnames(sample.vcf)),
-                            POS = start(sample.vcf),
-                            REF = as.character(ref(sample.vcf)),
-                            ALT = as.character(unlist(alt(sample.vcf))),
-                            FILT = fixed(sample.vcf)[, "FILTER"])
+  } else {
+    mutations <- data.frame(
+      CHROM = as.character(seqnames(sample.vcf.flattend)),
+      POS = start(sample.vcf.flattend),
+      REF = as.character(ref(sample.vcf.flattend)),
+      ALT = as.character(alt(sample.vcf.flattend)),
+      FILT = fixed(sample.vcf.flattend)[, "FILTER"]
+    )
     mutations$PID <- sample_name
     mutations$SUBGROUP <- sample_name
   }
-  idx <- which (mutations$CHROM %in% chromosomes)
+  idx <- which(mutations$CHROM %in% chromosomes)
   mutations <- mutations[idx, ]
-  idx <- which (mutations$FILT == "PASS")
+  idx <- which(mutations$FILT == "PASS")
   mutations <- mutations[idx, ]
-  
-  
+
   df <- mutations[(mutations$REF %in% DNA_BASES
                    & mutations$ALT %in% DNA_BASES), ]
 
@@ -184,9 +193,12 @@ mutation_signature_analysis <- function(vcf_file = NULL, cutoff = 0.01,
         "Signatures_Identified" = CosmicValid_cutoffGen_LCDlist$out_sig_ind_df,
         "Normalized_Exposures" = CosmicValid_cutoffGen_LCDlist$norm_exposures,
         Summary = out)
-  write.xlsx(output, paste0(path_output, sample_name, "_Mutation_Signature_cutoff_",
-             cutoffPerc, "Percent.xlsx"), rowNames = T, firstRow = T,
-             headerStyle = createStyle(textDecoration = 'bold'))
+
+  mutsig2cbioportal(signatures = CosmicValid_cutoffGen_LCDlist, id = sample_name, outfile_cbioportal = outfile_cbioportal)
+
+  #write.xlsx(output, paste0(path_output, sample_name, "_Mutation_Signature_cutoff_",
+  #           cutoffPerc, "Percent.xlsx"), rowNames = T, firstRow = T,
+  #           headerStyle = createStyle(textDecoration = 'bold'))
   return(list(CosmicValid_cutoffGen_LCDlist = CosmicValid_cutoffGen_LCDlist,
               mutationCataloge = mutCat_df))
 }

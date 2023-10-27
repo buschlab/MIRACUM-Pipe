@@ -2,6 +2,15 @@
 
 MIRACUM-Pipe incorporates tools for detecting single nucleotide variants (SNVs), insertions and deletions (InDels), loss of heterozygosity (LoH), copy number variations (CNVs) as well as quality statistics including the coverage on WES data. Various functional prediction and annotation databases are integrated to automatically annotate the identi-fied variants. The workflow is designed as a fully automated “one-click” solution from the raw sequencing files to the PDF report containing quality assessments, the identified and annotated variants (SNVs, InDels and LoH), copy number variations as well as a functional enrichment of the SNVs and CNVs respectively.
 
+## Disclaimer
+
+MIRACUM-Pipe is intended for research use only and not for patient treatment, diagnosis and/or medical records!
+
+## Citation
+
+If you use this repository please cite:
+[![DOI](https://zenodo.org/badge/188185624.svg)](https://zenodo.org/badge/latestdoi/188185624)
+
 ## Getting Started
 
 This repo is intended to be run as docker (see [MIRACUM-Pipe-docker](https://github.com/AG-Boerries/MIRACUM-Pipe-docker)). Alternatively, you can pick a [Galaxy version](https://github.com/AG-Boerries/MIRACUM-Pipe-galaxy).
@@ -17,7 +26,7 @@ We offer installation scripts. In order to setup up the main components execute 
 ./debian/setup.sh
 
 # install all R-packages
-Rsctipt RScripts/install_packages.R
+Rscript RScripts/install_packages.R
 
 # install tools
 ./tools/install.sh
@@ -28,7 +37,7 @@ You can also simply apply the [setup.sh](https://github.com/AG-Boerries/MIRACUM-
 
 ## Running MIRACUM-Pipe
 
-Once you installed the system and setup the required tools and databases, you can simply run the pipeline by setting up patients and run `./miracum-pipe.sh`. For more documentation about this, see the documentation of [MIRACUM-Pipe-docker](https://github.com/AG-Boerries/MIRACUM-Pipe-docker).
+Once you installed the system and setup the required tools and databases, you can simply run the pipeline by setting up patients and run `./miracum_pipe.sh`. For more documentation about this, see the documentation of [MIRACUM-Pipe-docker](https://github.com/AG-Boerries/MIRACUM-Pipe-docker).
 
 ### Adding new databases respectively update current databases
 
@@ -46,8 +55,8 @@ For testing MIRACUM-Pipe an example dataset is provided and downloaded via the *
 
 * Patrick Metzger
 * Raphael Scheible
+* Niklas Reimer
 * Maria Hess
-* Victor Jaravine
 * Martin Boeker
 * Geoffroy Andrieux
 * Melanie Börries
@@ -60,7 +69,7 @@ This work is licensed under [GNU Affero General Public License version 3](https:
 
 We thank
 
-* The Molecular Tumor Board Freburg Team
+* The Molecular Tumor Board Freiburg Team
 * The MIRACUM consortium
 * The German Ministry of Education and Research (BMBF) for funding
 * The developers from Control-FREEC for the code on CNV significance
