@@ -59,6 +59,5 @@ apt-get install -y --no-install-recommends build-essential gcc-multilib libc-dev
                     openjdk-11-jre openjdk-11-jre-headless && \
   install_R && \
   install_texlive && \
-  python3 -m pip install wheel && \
-  python3 -m pip install shyaml agfusion sequenza-utils && \
+  python3 -m pip install -r /opt/MIRACUM-Pipe/debian/requirements.txt
   apt-get -y autoremove
