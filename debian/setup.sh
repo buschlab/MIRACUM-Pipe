@@ -17,7 +17,8 @@ function install_java8()
 function install_texlive()
 {
   apt-get install -y --no-install-recommends texlive texlive-lang-german texlive-latex-extra
-  tlmgr option repository http://mirror.ctan.org/systems/texlive/tlnet #ftp://tug.org/historic/systems/texlive/2018/tlnet-final #http://mirror.ctan.org/systems/texlive/tlnet
+  tlmgr option repository http://mirror.ctan.org/systems/texlive/tlnet
+  tlmgr init-usertree
   tlmgr install \
     breakurl \
     multirow \
@@ -25,7 +26,6 @@ function install_texlive()
     varwidth \
     threeparttable \
     preprint
-  tlmgr init-usertree
 }
 
 function install_R()
