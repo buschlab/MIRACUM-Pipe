@@ -51,7 +51,6 @@ apt-get install -y --no-install-recommends build-essential gcc-multilib libc-dev
   ant \
   perl-base \
   python3 python3-pysam python3-pip python3-numpy python3-scipy python3-matplotlib python3-reportlab python3-pandas python3-biopython python3-pyfaidx python3-pyvcf cython python3-setuptools python3-dev libpython3-all-dev python3-future \
-  cnvkit \
   libsnappy-java && \
   install_java8 && \
   apt-get -y purge  default-jre default-jdk-headless \
