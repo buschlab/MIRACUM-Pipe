@@ -496,7 +496,7 @@ if (protocol == "panelTumor" | protocol == "tumorOnly") {
 # Combine MAF files to obtain one complete maf per patient
 if (protocol == "somaticGermline" | protocol == "somatic") {
   if (protocol == "somaticGermline") {
-      maf_comb <- smartbind(
+      maf_comb <- rbind(
         filt_result_td$maf,
         filt_result_gd$maf,
         filt_result_loh$maf
@@ -522,7 +522,7 @@ if (protocol == "somaticGermline" | protocol == "somatic") {
         )
       }
   } else {
-    maf_comb <- smartbind(
+    maf_comb <- rbind(
       filt_result_td$maf,
       filt_result_loh$maf
     )
