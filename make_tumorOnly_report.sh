@@ -71,7 +71,7 @@ fi
 cd "${DIR_ANALYSES}" || exit 1
 
 # execute Main.R, i.e. complete analyses in R
-${BIN_RSCRIPT} "${DIR_RSCRIPT}/Main.R" "${CFG_CASE}"
+${BIN_RSCRIPT} "${DIR_RSCRIPT}/Main.R" "${PARAM_DIR_PATIENT}"
 
 # translate to tex
 ${BIN_RSCRIPT} -e "load('${DIR_ANALYSES}/Report.RData'); library(knitr); knit('${DIR_RSCRIPT}/Report_tumorOnly.Rnw');"
