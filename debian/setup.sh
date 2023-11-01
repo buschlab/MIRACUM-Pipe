@@ -50,13 +50,15 @@ apt-get install -y --no-install-recommends build-essential gcc-multilib libc-dev
   default-jre \
   ant \
   perl-base \
-  python3 python3-pysam python3-pip python3-numpy python3-scipy python3-matplotlib python3-reportlab python3-pandas python3-biopython python3-pyfaidx python3-pyvcf cython python3-setuptools python3-dev libpython3-all-dev python3-future \
+  python3 python3-pysam python3-pip python3-numpy python3-scipy python3-matplotlib python3-reportlab python3-pandas python3-biopython python3-pyfaidx python3-pyvcf cython python3-setuptools python3-dev libpython3-all-dev python3-future python3-wheel \
   libsnappy-java && \
   install_java8 && \
   apt-get -y purge  default-jre default-jdk-headless \
                     openjdk-11-jdk openjdk-11-jdk-headless \
                     openjdk-11-jre openjdk-11-jre-headless && \
   install_R && \
-  install_texlive && \
+  install_texlive
+
   python3 -m pip install -r /opt/MIRACUM-Pipe/debian/requirements.txt
+  
   apt-get -y autoremove
