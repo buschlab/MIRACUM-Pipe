@@ -179,6 +179,6 @@ mutation_analysis <- function(
               som_mut_tab = tbl$sm_table,
               table_loh_mutations = tbl$lm_table,
               all_mutations = all_mut$all_muts,
-              msi = msi),
-              bam_matcher = bam_matcher)
+              msi = msi,
+              bam_matcher = bam_matcher))
 }
