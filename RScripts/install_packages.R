@@ -45,7 +45,8 @@ packages <- c(
     "optparse",
     "bedr",
     "stringr",
-    "plyr"
+    "plyr",
+    "gtools"
 )
 BiocManager::install(pkgs = packages, update  = TRUE, ask = FALSE)
 BiocManager::install(c("YAPSA", "SomaticSignatures"), update  = TRUE, ask = FALSE)

@@ -33,11 +33,26 @@ library(scarHRD)
 args <- commandArgs()
 
 ###############
+# Path config #
+
+id <- args[6]
+
+path_pipeline <- "/opt/MIRACUM-Pipe"
+path_assets <- paste0(path_pipeline, "/assets")
+path_conf <- paste0(path_pipeline, "/conf")
+path_references <- paste0(path_assets, "/references")
+path_sequencing <- paste0(path_references, "/sequencing")
+path_script <- paste0(path_pipeline, "/RScripts")
+path_data <- paste0(path_pipeline, "/databases")
+path_genome <- paste0(path_references, "/genome")
+path_patient <- paste(path_assets, "input", id, sep = "/")
+
+###############
 # Load config #
 
-conf_default <- yaml::read_yaml("default.yaml")
-conf_custom <- yaml::read_yaml("custom.yaml")
-conf_patient <- yaml::read_yaml("custom.yaml")
+conf_default <- yaml::read_yaml(paste0(path_conf, "/default.yaml"))
+conf_custom <- yaml::read_yaml(paste0(path_conf, "/custom.yaml"))
+conf_patient <- yaml::read_yaml(paste0(path_patient, "/patient.yaml"))
 
 conf <- modifyList(conf_default, conf_custom)
 conf <- modifyList(conf, conf_patient)
@@ -46,32 +61,27 @@ conf <- modifyList(conf, conf_patient)
 # Parameter #
 
 protocol <- ifelse(conf$common$protocol == "wes", ifelse(conf$common$germline, "somaticGermline", "somatic"), conf$common$protocol)
-id <- args[6]
-sample <- paste(protocol, id, collapse = "_")
+sample <- paste(protocol, id, sep = "_")
+path_output <- paste(path_assets, "output", sample, "Analyses/", sep = "/")
+path_input <- paste(path_assets, "output", sample, "WES/", sep = "/")
 germline <- conf$common$files$germline_R1
 tumor <- conf$common$files$tumor_R1
-base_path <- args[10]
-path_output <- paste(base_path, "Analyses/", sep = "/")
-path_input <- paste(base_path, "WES/", sep = "/")
-path_script <- args[11]
-path_data <- args[12]
-targets_txt <- args[13]
-#covered_region <- args[14]
+targets_txt <- paste0(path_sequencing, "/", conf$reference$sequencing$captureGenes)
 author <- conf$common$author
 center <- conf$common$center
-bed_file <- args[17] # conf$reference$sequencing$captureRegions
+bed_file <- paste0(path_sequencing, "/", conf$reference$sequencing$captureRegions)
 sureselect_type <- conf$reference$sequencing$captureRegionName
-ref_genome <- args[19] # conf$reference$genome
-target_capture_cor_factors <- # conf$reference$sequencing$captureCorFactors
+ref_genome <- paste0(path_genome, "/", conf$reference$genome)
+target_capture_cor_factors <- paste0(path_data, "/", conf$reference$sequencing$captureCorFactors)
 vaf <- conf$general$minVAF * 100
-min_var_count <- as.numeric(args[22])
+min_var_count <- conf[[conf$common$protocol]]$varscan$fpfilter$minVarCount
 maf_cutoff <- conf$general$maf_cutoff
-actionable_genes <- ifelse(is.null(conf$reference$sequencing$actionableGenes), NA, paste0("/opt/MIRACUM-Pipe/databases/", conf$reference$sequencing$actionableGenes))
-covered_exons <- args[25] # conf$reference$sequencing$coveredExons
+actionable_genes <- ifelse(is.null(conf$reference$sequencing$actionableGenes), NA, paste0(path_data, "/", conf$reference$sequencing$actionableGenes))
+covered_exons <- paste0(path_sequencing, "/", conf$reference$sequencing$coveredExons)
 entity <- conf$common$entity
 gender <- conf$sex
-fusion_genes <- args[28] # conf$panel$fusions$fusionGenes
-ampl_genes_txt <- args[29] # conf$panel$amplification$amplificationGenes
+fusion_genes <- paste0(path_sequencing, "/", conf$panel$fusions$fusionGenes)
+ampl_genes_txt <- paste0(path_sequencing, "/", conf$panel$amplification$amplificationGenes)
 ucsc_server <- conf$common$ucscServer
 cnv_region_annotation <- conf$common$cnvAnnotation
 germlineVaf <- conf$general$minGermlineVAF * 100
@@ -506,7 +516,7 @@ if (protocol == "panelTumor" | protocol == "tumorOnly") {
 # Combine MAF files to obtain one complete maf per patient
 if (protocol == "somaticGermline" | protocol == "somatic") {
   if (protocol == "somaticGermline") {
-      maf_comb <- rbind(
+      maf_comb <- smartbind(
         filt_result_td$maf,
         filt_result_gd$maf,
         filt_result_loh$maf
@@ -532,7 +542,7 @@ if (protocol == "somaticGermline" | protocol == "somatic") {
         )
       }
   } else {
-    maf_comb <- rbind(
+    maf_comb <- smartbind(
       filt_result_td$maf,
       filt_result_loh$maf
     )
