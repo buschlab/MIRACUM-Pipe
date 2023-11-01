@@ -32,14 +32,24 @@ library(scarHRD)
 
 args <- commandArgs()
 
+###############
+# Load config #
+
+conf_default <- yaml::read_yaml("default.yaml")
+conf_custom <- yaml::read_yaml("custom.yaml")
+conf_patient <- yaml::read_yaml("custom.yaml")
+
+conf <- modifyList(conf_default, conf_custom)
+conf <- modifyList(conf, conf_patient)
+
 #############
 # Parameter #
 
-sample <- paste(args[6:7], collapse = "_")
-protocol <- args[6]
-id <- args[7]
-germline <- args[8]
-tumor <- args[9]
+protocol <- ifelse(conf$common$protocol == "wes", ifelse(conf$common$germline, "somaticGermline", "somatic"), conf$common$protocol)
+id <- args[6]
+sample <- paste(protocol, id, collapse = "_")
+germline <- conf$common$files$germline_R1
+tumor <- conf$common$files$tumor_R1
 base_path <- args[10]
 path_output <- paste(base_path, "Analyses/", sep = "/")
 path_input <- paste(base_path, "WES/", sep = "/")
@@ -47,24 +57,24 @@ path_script <- args[11]
 path_data <- args[12]
 targets_txt <- args[13]
 #covered_region <- args[14]
-author <- args[15]
-center <- args[16]
-bed_file <- args[17]
-sureselect_type <- args[18]
-ref_genome <- args[19]
-target_capture_cor_factors <- args[20]
-vaf <- as.numeric(args[21])*100
+author <- conf$common$author
+center <- conf$common$center
+bed_file <- args[17] # conf$reference$sequencing$captureRegions
+sureselect_type <- conf$reference$sequencing$captureRegionName
+ref_genome <- args[19] # conf$reference$genome
+target_capture_cor_factors <- # conf$reference$sequencing$captureCorFactors
+vaf <- conf$general$minVAF * 100
 min_var_count <- as.numeric(args[22])
-maf_cutoff <- as.numeric(args[23])
-actionable_genes <- ifelse(args[24]=="/opt/MIRACUM-Pipe/databases/", NA, args[24])
-covered_exons <- args[25]
-entity <- as.character(args[26])
-gender <- as.character(args[27])
-fusion_genes <- args[28]
-ampl_genes_txt <- args[29]
-ucsc_server <- args[30]
-cnv_region_annotation <- args[31]
-germlineVaf <- as.numeric(args[32])*100
+maf_cutoff <- conf$general$maf_cutoff
+actionable_genes <- ifelse(is.null(conf$reference$sequencing$actionableGenes), NA, paste0("/opt/MIRACUM-Pipe/databases/", conf$reference$sequencing$actionableGenes))
+covered_exons <- args[25] # conf$reference$sequencing$coveredExons
+entity <- conf$common$entity
+gender <- conf$sex
+fusion_genes <- args[28] # conf$panel$fusions$fusionGenes
+ampl_genes_txt <- args[29] # conf$panel$amplification$amplificationGenes
+ucsc_server <- conf$common$ucscServer
+cnv_region_annotation <- conf$common$cnvAnnotation
+germlineVaf <- conf$general$minGermlineVAF * 100
 
 print(ref_genome)
 
@@ -496,7 +506,7 @@ if (protocol == "panelTumor" | protocol == "tumorOnly") {
 # Combine MAF files to obtain one complete maf per patient
 if (protocol == "somaticGermline" | protocol == "somatic") {
   if (protocol == "somaticGermline") {
-      maf_comb <- smartbind(
+      maf_comb <- rbind(
         filt_result_td$maf,
         filt_result_gd$maf,
         filt_result_loh$maf
@@ -522,7 +532,7 @@ if (protocol == "somaticGermline" | protocol == "somatic") {
         )
       }
   } else {
-    maf_comb <- smartbind(
+    maf_comb <- rbind(
       filt_result_td$maf,
       filt_result_loh$maf
     )

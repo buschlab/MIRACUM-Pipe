@@ -37,18 +37,19 @@ keys <- function(
       brca_helper <- "<1%"
     }
 
-    bammatcher_helper <-  paste0("Tumor/Normal passen nicht zusammen (", mutation_analysis_result$bam_matcher$FracCommon, "%).")
+    bammatcher_common <- mutation_analysis_result$bam_matcher$FracCommon * 100
+    bammatcher_helper <-  paste0("Tumor/Normal passen nicht zusammen (", bammatcher_common, "%).")
     bammatcher_count = mutation_analysis_result$bam_matcher$Same + mutation_analysis_result$bam_matcher$Different
     bammatcher_count_plus = bammatcher_count + max(mutation_analysis_result$bam_matcher$X1het.2sub, mutation_analysis_result$bam_matcher$X1sub.2het)
     if (bammatcher_count <= 20) {
       bammatcher_helper <- "Keine Bestimmung möglich."
     } else if (bammatcher_count <= 100) {
       if (bammatcher_count_plus >= 0.8) {
-        bammatcher_helper <- paste0("Tumor/Normal passen zusammen (", mutation_analysis_result$bam_matcher$FracCommon, "%).")
+        bammatcher_helper <- paste0("Tumor/Normal passen zusammen (", bammatcher_common, "%).")
       }
     } else {
       if (mutation_analysis_result$bam_matcher$FracCommon >= 0.8) {
-        bammatcher_helper <- paste0("Tumor/Normal passen zusammen (", mutation_analysis_result$bam_matcher$FracCommon, "%).")
+        bammatcher_helper <- paste0("Tumor/Normal passen zusammen (", bammatcher_common, "%).")
       }
     }
 
