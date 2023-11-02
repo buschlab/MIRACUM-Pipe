@@ -101,7 +101,7 @@ keys <- function(
         "Mikrosatelliten Status (Score)",
         "HRD-Score (HRD-LoH|TAI|LST)",
         "bioinformatischer Tumorzellgehalt (%)",
-        "bioinformatischer Check",
+        "bioinformatischer Abgleich",
         "Ploidie",
         "Anzahl CN- Regionen",
         paste0("Anzahl seltener Keimbahnmutationen (VAF > ", germlineVaf, "%)")
@@ -165,7 +165,7 @@ keys <- function(
         "Mikrosatelliten Status (Score)",
         "HRD-Score (HRD-LoH|TAI|LST)",
         "bioinformatischer Tumorzellgehalt (%)",
-        "bioinformatischer Check",
+        "bioinformatischer Abgleich",
         "Ploidie",
         "Anzahl CN- Regionen"
       ), Wert = c(
