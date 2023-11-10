@@ -161,15 +161,11 @@ for name1 in ${names1}; do
   # keep
   hc_fpf=${DIR_WES}/${NameD}.output.${name1}.Somatic.hc.fpfilter.vcf
   hc_T_avi_multi=${DIR_WES}/${NameD}.output.${name1}.Somatic.hc.TUMOR.avinput.hg19_multianno.csv
-  hc_snpeff="${DIR_WES}/${NameD}.output.${name1}.Somatic.SnpEff.vcf"
   
   # annovar annotation
   ${CONVERT2ANNOVAR} "${hc}" "${hc_fpf}" -allsample
   ${TABLEANNOVAR} "${hc_T_avi}" "${DIR_ANNOVAR_DATA}" -protocol "${CFG_ANNOVAR_PROTOCOL}" -buildver hg19 \
       -operation "${CFG_ANNOVAR_ARGOP}" -csvout -otherinfo -remove -nastring NA
-
-  # snpEff; identify canonical transcript 
-  ${BIN_SNPEFF} "${hc_fpf}" > "${hc_snpeff}"
 
   if [[ "${CFG_CASE}" = somaticGermline ]]; then
     # Annotation snp.Germline.hc $data/NameD.output.snp.Germline.hc.fpfilter.vcf
@@ -181,15 +177,12 @@ for name1 in ${names1}; do
     # keep
     hc_fpf=${DIR_WES}/${NameD}.output.${name1}.Germline.hc.fpfilter.vcf
     hc_N_avi_multi=${DIR_WES}/${NameD}.output.${name1}.Germline.hc.NORMAL.avinput.hg19_multianno.csv
-    hc_N_snpeff=${DIR_WES}/${NameD}.output.${name1}.NORMAL.SnpEff.vcf
 
     # annovar annotation
     ${CONVERT2ANNOVAR} "${hc}" "${hc_fpf}" -allsample
     ${TABLEANNOVAR} "${hc_N_avi}" "${DIR_ANNOVAR_DATA}" -protocol "${CFG_ANNOVAR_PROTOCOL}" -buildver hg19 \
         -operation "${CFG_ANNOVAR_ARGOP}" -csvout -otherinfo -remove -nastring NA
 
-    # snpEff; identify canonical transcripts
-    ${BIN_SNPEFF} "${hc_fpf}" > "${hc_N_snpeff}"
   fi
 
   # Annotation snp.LOH.hc
@@ -200,15 +193,11 @@ for name1 in ${names1}; do
   # keep
   hc_fpf=${DIR_WES}/${NameD}.output.${name1}.LOH.hc.fpfilter.vcf
   hc_avi_multi=${DIR_WES}/${NameD}.output.${name1}.LOH.hc.avinput.hg19_multianno.csv
-  hc_L_snpeff=${DIR_WES}/${NameD}.output.${name1}.LOH.SnpEff.vcf
 
   # annovar annotation
   ${CONVERT2ANNOVAR3} "${hc_avi}" "${hc_fpf}"
   ${TABLEANNOVAR} "${hc_avi}" "${DIR_ANNOVAR_DATA}" -protocol "${CFG_ANNOVAR_PROTOCOL}" -buildver hg19 \
       -operation "${CFG_ANNOVAR_ARGOP}" -csvout -otherinfo -remove -nastring NA
-
-  # snpEff; identify canonical transcript
-  ${BIN_SNPEFF} "${hc_fpf}" > "${hc_L_snpeff}"
 done
 
 # MSI

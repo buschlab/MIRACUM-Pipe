@@ -62,21 +62,6 @@ rm -f bedtools2.tar.gz
 
 cd bedtools2 && make
 
-##########
-# SNPEFF #
-##########
-cd ${DIR_SCRIPT}
-wget http://sourceforge.net/projects/snpeff/files/snpEff_latest_core.zip -O snpEff.zip
-
-unzip -o snpEff.zip
-rm -f snpEff.zip
-
-# download database
-cd ${DIR_SCRIPT}/snpEff
-wget https://downloads.sourceforge.net/project/snpeff/databases/v4_3/snpEff_v4_3_GRCh37.75.zip -O GRCh37.75.zip
-unzip -o GRCh37.75.zip
-rm -f GRCh37.37.zip
-
 ###############
 # Trimmomatic #
 ###############

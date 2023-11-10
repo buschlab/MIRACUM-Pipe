@@ -343,9 +343,6 @@ readonly TABLEANNOVAR="${DIR_ANNOVAR}/table_annovar.pl"
 # COVERAGE
 readonly BIN_COVERAGE="${DIR_TOOLS}/bedtools2/bin/bedtools coverage -hist -g ${FILE_GENOME}.fai -sorted "
 
-# SNPEFF
-readonly BIN_SNPEFF="${BIN_JAVA} -Xmx${CFG_COMMON_MEMORY} -jar ${DIR_TOOLS}/snpEff/snpEff.jar GRCh37.75 -c ${DIR_TOOLS}/snpEff/snpEff.config -canon -v -noLog -noStats"
-
 # FREEC
 readonly BIN_FREEC="${DIR_TOOLS}/FREEC/bin/freec "
 readonly FILE_REFERENCE_MAPPABILITY="${DIR_REF}/mappability/$(get_config_value reference.mappability "${PARAM_DIR_PATIENT}")"
@@ -619,8 +616,6 @@ export CONVERT2ANNOVAR
 export TABLEANNOVAR
 
 export BIN_COVERAGE
-
-export BIN_SNPEFF
 
 export BIN_FREEC
 export FILE_REFERENCE_MAPPABILITY

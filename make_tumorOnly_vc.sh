@@ -134,15 +134,11 @@ for name1 in ${names1}; do
 
   # keep
   hc_fpf=${DIR_WES}/${NameD}.output.${name1}.fpfilter.vcf
-  hc_snpeff="${DIR_WES}/${NameD}.output.${name1}.SnpEff.vcf"
 
   # annovar annotation
   ${CONVERT2ANNOVAR} "${hc}" "${hc_fpf}" -allsample
   ${TABLEANNOVAR} "${hc_T_avi}" "${DIR_ANNOVAR_DATA}" -protocol "${CFG_ANNOVAR_PROTOCOL}" -buildver hg19 \
       -operation "${CFG_ANNOVAR_ARGOP}" -csvout -otherinfo -remove -nastring NA
-
-  # snpEff; identify canonical transcript
-  ${BIN_SNPEFF} "${hc_fpf}" > "${hc_snpeff}"
 done
 
 # GATK4 Mutect2
@@ -165,9 +161,6 @@ ${TABLEANNOVAR} "${OUTPUT}.vcf" "${DIR_ANNOVAR_DATA}" -protocol "${CFG_ANNOVAR_P
  --otherinfo --remove --verbose --polish \
  --convertarg "${CONVERTARG}"
 rm "${OUTPUT}.avinput"
-
-# snpEff
-${BIN_SNPEFF} "${OUTPUT}.vcf" > "${OUTPUT}_SnpEff.vcf"
 
 # MSI
 ${MSISENSOR2} -t "${recalbam}" -o "${MSI_OUTPUT}"
