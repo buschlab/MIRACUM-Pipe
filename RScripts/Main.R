@@ -85,6 +85,7 @@ ampl_genes_txt <- paste0(path_sequencing, "/", conf$panel$amplification$amplific
 ucsc_server <- conf$common$ucscServer
 cnv_region_annotation <- conf$common$cnvAnnotation
 germlineVaf <- conf$general$minGermlineVAF * 100
+maneselectfile <- paste0(path_data, "/", conf$reference$maneselect)
 
 print(ref_genome)
 
@@ -165,14 +166,6 @@ if (protocol == "somatic" | protocol == "somaticGermline") {
       path_output, sample,
       "_vc_Germline_NORMAL.xlsx"
     )
-    snpefffile_snp_gd <- paste0(
-      path_input, sample,
-      "_vc.output.snp.NORMAL.SnpEff.vcf"
-    )
-    snpefffile_indel_gd <- paste0(
-      path_input, sample,
-      "_vc.output.indel.NORMAL.SnpEff.vcf"
-    )
     bammatcherfile <- paste0(
       path_input, sample,
       "_bam-matcher.txt"
@@ -190,14 +183,6 @@ if (protocol == "somatic" | protocol == "somaticGermline") {
   indel_file_td <- paste0(
     path_input, sample,
     "_vc.output.indel.Somatic.hc.TUMOR.avinput.hg19_multianno.csv"
-  )
-  snpefffile_snp <- paste0(
-    path_input, sample,
-    "_vc.output.snp.Somatic.SnpEff.vcf"
-  )
-  snpefffile_indel <- paste0(
-    path_input, sample,
-    "_vc.output.indel.Somatic.SnpEff.vcf"
   )
   filter_out_td <- paste0(
     path_output, sample,
@@ -217,14 +202,6 @@ if (protocol == "somatic" | protocol == "somaticGermline") {
   loh_out <- paste0(
     path_output, sample,
     "_vc_LOH.xlsx"
-  )
-  snpefffile_snp_loh <- paste0(
-    path_input, sample,
-    "_vc.output.snp.LOH.SnpEff.vcf"
-  )
-  snpefffile_indel_loh <- paste0(
-    path_input, sample,
-   "_vc.output.indel.LOH.SnpEff.vcf"
   )
   # Results
   outfile_circos <- paste0(path_output, sample, "_TD_circos.pdf")
@@ -247,14 +224,6 @@ if (protocol == "panelTumor" | protocol == "tumorOnly") {
     path_input, sample,
     "_vc.output.indel.Sample1.avinput.hg19_multianno.csv"
   )
-  snpefffile_snp_td <- paste0(
-    path_input, sample,
-    "_vc.output.snp.SnpEff.vcf"
-  )
-  snpefffile_indel_td <- paste0(
-    path_input, sample,
-    "_vc.output.indel.SnpEff.vcf"
-  )
   filter_out_td <- paste0(
     path_output, sample,
     "_VC_TUMOR.xlsx"
@@ -262,10 +231,6 @@ if (protocol == "panelTumor" | protocol == "tumorOnly") {
   mutect2_vcf <- paste0(
     path_input, "/", sample,
     "_td_gatk4_mutect2_filtered.hg19_multianno.txt"
-  )
-  mutect2_snpEff_vcf <- paste0(
-    path_input, "/", sample,
-    "_td_gatk4_mutect2_filtered_SnpEff.vcf"
   )
   msi_file <- paste0(
     path_input, "/", sample,
@@ -331,8 +296,6 @@ if (protocol == "somatic" | protocol == "somaticGermline") {
   filt_result_td <- filtering(
     snpfile = snp_file_td,
     indelfile = indel_file_td,
-    snpefffile_snp = snpefffile_snp,
-    snpefffile_indel = snpefffile_indel,
     outfile = filter_out_td,
     path_data = path_data,
     path_script = path_script,
@@ -346,7 +309,8 @@ if (protocol == "somatic" | protocol == "somaticGermline") {
     maf = maf_cutoff,
     covered_exons = covered_exons,
     cov_t = stats$cover_exons$perc[[2]][1],
-    sureselect_type = sureselect_type
+    sureselect_type = sureselect_type,
+    maneselectfile = maneselectfile
   )
 
   # LOH
@@ -354,8 +318,6 @@ if (protocol == "somatic" | protocol == "somaticGermline") {
   filt_result_loh <- filtering(
     snpfile = snp_file_loh,
     indelfile = indel_file_loh,
-    snpefffile_snp = snpefffile_snp_loh,
-    snpefffile_indel = snpefffile_indel_loh,
     outfile = loh_out,
     path_data = path_data,
     path_script = path_script,
@@ -369,7 +331,9 @@ if (protocol == "somatic" | protocol == "somaticGermline") {
     maf = maf_cutoff,
     covered_exons = covered_exons,
     cov_t = 1,
-    sureselect_type = sureselect_type
+    sureselect_type = sureselect_type,
+    maneselectfile = maneselectfile
+
   )
 
   if (protocol == "somaticGermline") {
@@ -378,8 +342,6 @@ if (protocol == "somatic" | protocol == "somaticGermline") {
     filt_result_gd <- filtering(
       snpfile = snp_file_gd,
       indelfile = indel_file_gd,
-      snpefffile_snp = snpefffile_snp_gd,
-      snpefffile_indel = snpefffile_indel_gd,
       outfile =  filter_out_gd,
       path_data = path_data,
       path_script = path_script,
@@ -394,7 +356,8 @@ if (protocol == "somatic" | protocol == "somaticGermline") {
       actionable_genes = actionable_genes,
       covered_exons = covered_exons,
       cov_t = stats$cover_exons$perc[[1]][1],
-      sureselect_type = sureselect_type
+      sureselect_type = sureselect_type,
+      maneselectfile = maneselectfile
     )
     loh_correction <- loh_correction(
       filt_loh = filt_result_loh,
@@ -443,8 +406,6 @@ if (protocol == "panelTumor" | protocol == "tumorOnly") {
   filt_result_td <- filtering(
     snpfile = snp_file_td,
     indelfile = indel_file_td,
-    snpefffile_snp = snpefffile_snp_td,
-    snpefffile_indel = snpefffile_indel_td,
     outfile = filter_out_td,
     path_data = path_data,
     path_script = path_script,
@@ -458,12 +419,12 @@ if (protocol == "panelTumor" | protocol == "tumorOnly") {
     maf = maf_cutoff,
     covered_exons = covered_exons,
     cov_t = stats$cover_exons$perc[[1]][1],
-    sureselect_type = sureselect_type
+    sureselect_type = sureselect_type,
+    maneselectfile = maneselectfile
   )
   # GATK4 Mutect2
   filt_result_td_mutect2 <- filtering_mutect2(
     snpfile = mutect2_vcf,
-    snpefffile = mutect2_snpEff_vcf,
     id = id,
     path_data = path_data,
     path_script = path_script,
@@ -476,7 +437,8 @@ if (protocol == "panelTumor" | protocol == "tumorOnly") {
     maf = maf_cutoff,
     covered_exons = covered_exons,
     cov_t = stats$cover_exons$perc[[1]][1],
-    sureselect_type = sureselect_type
+    sureselect_type = sureselect_type,
+    maneselectfile = maneselectfile
   )
 
   filt_result_loh <- list(table = NULL, tmb = NULL)

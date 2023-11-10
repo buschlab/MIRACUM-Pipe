@@ -3,8 +3,6 @@
 filtering <- function(
   snpfile,
   indelfile,
-  snpefffile_snp,
-  snpefffile_indel,
   outfile,
   path_data,
   path_script,
@@ -19,7 +17,8 @@ filtering <- function(
   actionable_genes = NA,
   covered_exons = covered_exons,
   cov_t = 1,
-  sureselect_type
+  sureselect_type,
+  maneselectfile
   ) {
   #' Filter Variants
   #'
@@ -27,8 +26,6 @@ filtering <- function(
   #'
   #' @param snpfile dataframe. Table of SNVs
   #' @param indelfile dataframe. Table of InDels
-  #' @param snpefffile_snp dataframe. Table with Results of SnpEff for SNVs
-  #' @param snpefffile_indel dataframe. Table with Results of SnpEff for indels
   #' @param outfile dataframe. Table with results
   #' @param path_data string. Directory of the databases
   #' @param path_script string. Directory of required scripts
@@ -116,16 +113,6 @@ filtering <- function(
   # Remove Variants with Variant Read Count below 4
   x <- mrc(x = x, min_var_count = min_var_count)
 
-  # snpEff
-  x <- snpeff(x, snpefffile_snp, snpefffile_indel, protocol)
-
-  # replace synonymous entries from refGene with snpEff consequence
-  test <- as.character(x$ExonicFunc.refGene)
-  syn.snv <- which(test == "synonymous SNV")
-  if (length(syn.snv) > 0) {
-    x$ExonicFunc.refGene[syn.snv] <- x[syn.snv, "Consequence_snpEff"]
-  }
-
   # Filter for function
   x <- filt(x, "intergenic")
   x <- filt(x, "intronic")
@@ -148,14 +135,7 @@ filtering <- function(
   
   # Filter for exonic function
   test <- as.character(x$ExonicFunc.refGene)
-  syn.snv <- which(test %in% c("synonymous SNV", "synonymous_variant", "unknown", "synonymous_variant;synonymous_variant", ""))
-  if (length(syn.snv) > 0) {
-    x <- x[- syn.snv,]
-  }
-
-  # Filter for synonymous_variants from snpEff
-  test <- as.character(x$Consequence_snpEff)
-  syn.snv <- which(test == "synonymous_variant")
+  syn.snv <- which(test %in% c("synonymous SNV", "unknown", "", ""))
   if (length(syn.snv) > 0) {
     x <- x[- syn.snv,]
   }
@@ -191,6 +171,9 @@ filtering <- function(
   # }
 
   if (dim(x)[1] != 0) {
+    # mane select
+    x <- maneselect(x, maneselectfile)
+
     # Include GeneName
     x$Start <- as.numeric(as.character(x$Start))
     x$End <- as.numeric(as.character(x$End))
@@ -217,7 +200,7 @@ filtering <- function(
       "Variant_Allele_Frequency", "Variant_Reads",
       "Zygosity", "is_tumorsuppressor", "is_oncogene", "is_hotspot",
       "is_flag", "target", "DGIdb", "condel.label", "cosmic_coding",
-      "CLNSIG", "CLINSIG", "InterVar_automated",
+      "CLNSIG", "InterVar_automated",
       "CADD_phred", "DANN_score", "SIFT_pred",
       "Polyphen2_HDIV_pred", "avsnp150", "rvis")
 
@@ -228,7 +211,7 @@ filtering <- function(
       "AF_popmax", "VAF_Normal", "VAF_Tumor", "Count_Normal",
       "Count_Tumor", "is_tumorsuppressor", "is_oncogene", "is_hotspot",
       "is_flag", "target", "DGIdb", "condel.label", "cosmic_coding",
-      "CLNSIG", "CLINSIG", "InterVar_automated",
+      "CLNSIG", "InterVar_automated",
       "CADD_phred", "DANN_score", "SIFT_pred", "Polyphen2_HDIV_pred",
       "avsnp150", "rvis")
     }
@@ -247,9 +230,7 @@ filtering <- function(
       sep = "\t",
       idCol = NULL,
       Mutation_Status = mode,
-      protocol = protocol,
-      snv_vcf = snpefffile_snp,
-      indel_vcf = snpefffile_indel
+      protocol = protocol
     )
 
     return(
@@ -299,7 +280,6 @@ filtering <- function(
 
 filtering_mutect2 <- function(
   snpfile,
-  snpefffile,
   outfile,
   path_data,
   path_script,
@@ -314,14 +294,14 @@ filtering_mutect2 <- function(
   actionable_genes = NA,
   covered_exons = covered_exons,
   cov_t = 1,
-  sureselect_type
+  sureselect_type,
+  maneselectfile
   ) {
   #' Filter Variants
   #'
   #' @description Filters the somatic SNPs and InDel for analysis
   #'
   #' @param snpfile dataframe. Table of SNVs
-  #' @param snpefffile_snp dataframe. Table with Results of SnpEff for SNVs
   #' @param path_data string. Directory of the databases
   #' @param path_script string. Directory of required scripts
   #' @param sureselect string. Kind of sequencer
@@ -396,19 +376,6 @@ filtering_mutect2 <- function(
   
   # Remove Variants with Variant Read Count below 4/20
   x <- mrc(x = x, min_var_count = min_var_count)
-  # snpEFF Annotation
-  x <- snpeff(
-    x = x,
-    sef_snp = snpefffile,
-    protocol = protocol
-  )
-  
-  # replace synonymous entries from refGene with snpEff consequence
-  test <- as.character(x$ExonicFunc.refGene)
-  syn.snv <- which(test == "synonymous SNV")
-  if (length(syn.snv) > 0) {
-    x$ExonicFunc.refGene[syn.snv] <- x[syn.snv, "Consequence_snpEff"]
-  }
   
   # Filter for exonic function
   x <- filt(x, "intergenic")
@@ -437,13 +404,6 @@ filtering_mutect2 <- function(
     x <- x[- syn.snv,]
   }
   
-  # Filter for synonymous_variants from snpEff
-  test <- as.character(x$Consequence_snpEff)
-  syn.snv <- which(test == "synonymous_variant")
-  if (length(syn.snv) > 0) {
-    x <- x[- syn.snv,]
-  }
-  
   # Filter for rare mutations
   x <- rare(x, maf = maf)
   
@@ -460,6 +420,9 @@ filtering_mutect2 <- function(
   }
   
   if (dim(x)[1] != 0) {
+    # mane select
+    x <- maneselect(x, maneselectfile)
+
     # Include GeneName
     x$Start <- as.numeric(as.character(x$Start))
     x$End <- as.numeric(as.character(x$End))
@@ -487,9 +450,9 @@ filtering_mutect2 <- function(
                "Variant_Allele_Frequency", "Variant_Reads",
                "Zygosity", "is_tumorsuppressor", "is_oncogene", "is_hotspot",
                "is_flag", "target", "DGIdb", "condel.label", "cosmic_coding",
-               "CLNSIG", "CLINSIG", "InterVar_automated",
+               "CLNSIG", "InterVar_automated",
                "CADD_phred", "DANN_score", "SIFT_pred",
-               "Polyphen2_HDIV_pred", "avsnp150", "rvis", "REVEL_score", "Consequence_snpEff")
+               "Polyphen2_HDIV_pred", "avsnp150", "rvis", "REVEL_score")
     } else if (mode == "LOH"){
       ids <- c("Chr", "Start", "End", "Ref", "Alt", "Func.refGene",
                "Gene.refGene", "GeneName", "ExonicFunc.refGene",
@@ -497,9 +460,9 @@ filtering_mutect2 <- function(
                "AF_popmax", "VAF_Normal", "VAF_Tumor", "Count_Normal",
                "Count_Tumor", "is_tumorsuppressor", "is_oncogene",
                "is_hotspot", "is_flag", "target", "DGIdb", "condel.label",
-               "cosmic_coding", "CLNSIG", "CLINSIG",
+               "cosmic_coding", "CLNSIG",
                "InterVar_automated", "CADD_phred", "DANN_score",
-               "SIFT_pred", "Polyphen2_HDIV_pred", "avsnp150", "rvis", "REVEL_score", "Consequence_snpEff")
+               "SIFT_pred", "Polyphen2_HDIV_pred", "avsnp150", "rvis", "REVEL_score")
     }
     idx <- match(ids, colnames(x.condel))
     tot <- seq(1, ncol(x.condel))
@@ -510,7 +473,6 @@ filtering_mutect2 <- function(
     out.maf <- txt2maf_mutect2(
       input = x,
       protocol = protocol,
-      snv_vcf = snpefffile,
       Center = center,
       refBuild = 'GRCh37',
       id = sample,
