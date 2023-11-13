@@ -725,6 +725,9 @@ maneselect <- function(x, maneselectfile) {
   codon_ref_alt <- lapply(str_split(str_remove_all(x$CChange, "(c\\.|_|ins[ACGT]+|del|dup)"), "[0-9]+"), function(y) y[y != ""])
   is_snp <- unlist(lapply(codon_ref_alt, function(y) length(y) == 2))
   x$CChange[is_snp] <- paste0("c.", codon_nr[is_snp], unlist(lapply(codon_ref_alt[is_snp], function(y) y[1])), ">", unlist(lapply(codon_ref_alt[is_snp], function(y) y[2])))
+  if(any(str_detect(x$CChange, "(del|dup)"))) {
+    x[str_detect(x$CChange, "(del|dup)"),]$CChange <- str_remove_all(x[str_detect(x$CChange, "(del|dup)"),]$CChange, "[ACGT]+")
+  }
   
   return(x)
 }
