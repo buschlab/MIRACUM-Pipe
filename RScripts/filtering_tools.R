@@ -718,6 +718,8 @@ maneselect <- function(x, maneselectfile) {
       transplit <- str_split(transcript, ":", 5)[[1]]
       x$AAChange[i] <- transplit[length(transplit)]
       x$CChange[i] <- transplit[length(transplit) - 1]
+      x$Exon[i] <- str_remove(transplit[2], "exon")
+      x$Transcript[i] <- transplit[1]
     }
   }
   
