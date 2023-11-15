@@ -713,7 +713,7 @@ maneselect <- function(x, maneselectfile) {
       if(is.na(ref[i])) {
         next
       }
-      transcript <- apply(str_split(ref, ",", simplify = T), 2, function(y) str_extract(y, paste0(prot[i], ".*")))
+      transcript <- apply(str_split(ref[i], ",", simplify = T), 2, function(y) str_extract(y, paste0(prot[i], ".*")))
       transcript <- transcript[!is.na(transcript)]
       transplit <- str_split(transcript, ":", 5)[[1]]
       x$AAChange[i] <- transplit[length(transplit)]
