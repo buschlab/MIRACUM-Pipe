@@ -710,7 +710,7 @@ maneselect <- function(x, maneselectfile) {
   prot <- str_remove_all(nm, "\\.[0-9]+")
   if(nrow(x) > 0) {
     for(i in 1:nrow(x)) {
-      if(is.na(ref[i])) {
+      if(is.na(ref[i]) || ref[i] == ".") {
         next
       }
       transcript <- apply(str_split(ref[i], ",", simplify = T), 2, function(y) str_extract(y, paste0(prot[i], ".*")))
