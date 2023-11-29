@@ -143,6 +143,7 @@ readonly CFG_VARSCAN_FPFILTER_MAXMAPQUALDIFF=$(get_config_value wes.varscan.fpfi
 # mutect2
 readonly CFG_MUTECT_CALLABLEDEPTH=$(get_config_value wes.mutect.callableDepth "${PARAM_DIR_PATIENT}")
 readonly CFG_MUTECT_PANELOFNORMALS="${DIR_REF}/genome/$(get_config_value wes.mutect.panelOfNormals "${PARAM_DIR_PATIENT}")"
+readonly CFG_MUTECT_GERMLINERESOURCE="${DIR_REF}/genome/$(get_config_value wes.mutect.germlineResource "${PARAM_DIR_PATIENT}")"
 
 
 # Panel Parameter
@@ -212,6 +213,7 @@ readonly CFG_PANEL_VARSCAN_FPFILTER_MAXMAPQUALDIFF=$(get_config_value panel.vars
 # mutect2
 readonly CFG_PANEL_MUTECT_CALLABLEDEPTH=$(get_config_value panel.mutect.callableDepth "${PARAM_DIR_PATIENT}")
 readonly CFG_PANEL_MUTECT_PANELOFNORMALS="${DIR_REF}/genome/$(get_config_value panel.mutect.panelOfNormals "${PARAM_DIR_PATIENT}")"
+readonly CFG_PANEL_MUTECT_GERMLINERESOURCE="${DIR_REF}/genome/$(get_config_value panel.mutect.germlineResource "${PARAM_DIR_PATIENT}")"
 
 
 # Fusions
@@ -287,6 +289,7 @@ readonly CFG_TUMORONLY_VARSCAN_FPFILTER_MAXMAPQUALDIFF=$(get_config_value tumorO
 # mutect2
 readonly CFG_TUMORONLY_MUTECT_CALLABLEDEPTH=$(get_config_value tumorOnly.mutect.callableDepth "${PARAM_DIR_PATIENT}")
 readonly CFG_TUMORONLY_MUTECT_PANELOFNORMALS="${DIR_REF}/genome/$(get_config_value tumorOnly.mutect.panelOfNormals "${PARAM_DIR_PATIENT}")"
+readonly CFG_TUMORONLY_MUTECT_GERMLINERESOURCE="${DIR_REF}/genome/$(get_config_value tumorOnly.mutect.germlineResource "${PARAM_DIR_PATIENT}")"
 
 # ANNOVAR Databases
 readonly CFG_ANNOVAR_PROTOCOL=$(get_config_value annovar.protocol "${PARAM_DIR_PATIENT}")
@@ -571,10 +574,13 @@ export CFG_TUMORONLY_VARSCAN_FPFILTER_MAXMAPQUALDIFF
 
 export CFG_PANEL_MUTECT_CALLABLEDEPTH
 export CFG_PANEL_MUTECT_PANELOFNORMALS
+export CFG_PANEL_MUTECT_GERMLINERESOURCE
 export CFG_TUMORONLY_MUTECT_CALLABLEDEPTH
 export CFG_TUMORONLY_MUTECT_PANELOFNORMALS
+export CFG_TUMORONLY_MUTECT_GERMLINERESOURCE
 export CFG_MUTECT_CALLABLEDEPTH
 export CFG_MUTECT_PANELOFNORMALS
+export CFG_MUTECT_GERMLINERESOURCE
 
 export CFG_FUSION_GENES
 export CFG_AMPLIFICATION_GENES

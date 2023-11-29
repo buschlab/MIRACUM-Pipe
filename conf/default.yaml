@@ -155,6 +155,8 @@ wes:
 
     #--panel-of-normals; VCF file of sites observed in normal.  Default value: null
     panelOfNormals: somatic-b37_Mutect2-exome-panel.vcf
+    #--germline-resource; Population vcf of germline sequencing containing allele fractions.  Default value: null
+    germlineResource: somatic-b37_af-only-gnomad.raw.sites.vcf
 
   filterMutectCalls:
     #--contamination-estimate 0.5?; Estimate of contamination.  Default value: 0.0 (evtl. tumor purity)
@@ -319,6 +321,8 @@ panel:
 
     #--panel-of-normals; VCF file of sites observed in normal.  Default value: null
     panelOfNormals: somatic-b37_Mutect2-exome-panel.vcf
+    #--germline-resource; Population vcf of germline sequencing containing allele fractions.  Default value: null
+    germlineResource: somatic-b37_af-only-gnomad.raw.sites.vcf
 
   filterMutectCalls:
     #--contamination-estimate 0.5?; Estimate of contamination.  Default value: 0.0 (evtl. tumor purity)
@@ -488,6 +492,8 @@ tumorOnly:
 
     #--panel-of-normals; VCF file of sites observed in normal.  Default value: null
     panelOfNormals: somatic-b37_Mutect2-exome-panel.vcf
+    #--germline-resource; Population vcf of germline sequencing containing allele fractions.  Default value: null
+    germlineResource: somatic-b37_af-only-gnomad.raw.sites.vcf
 
   filterMutectCalls:
     #--contamination-estimate 0.5?; Estimate of contamination.  Default value: 0.0 (evtl. tumor purity)
