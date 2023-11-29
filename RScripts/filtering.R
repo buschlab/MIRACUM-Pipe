@@ -348,22 +348,11 @@ filtering_mutect2 <- function(
     x <- x[-id, ]
   }
   # Quality Filter
-  if (protocol ==  "tumorOnly" & sureselect_type == "V5UTR"){
-    x <- x
-  } else if (sureselect_type %in% c("V5UTR", "V6", "V6UTR")) {
-    id.pass <- grep("PASS", x$Otherinfo10)
-    if (length(id.pass) > 0) {
-      x <- x[id.pass, ]
-    } else {
-      stop("No variant passed quality filter!")
-    }
+  id.pass <- grep("PASS", x$Otherinfo10)
+  if (length(id.pass) > 0) {
+    x <- x[id.pass, ]
   } else {
-    id.pass <- grep("PASS", x$Otherinfo10)
-    if (length(id.pass) > 0) {
-      x <- x[id.pass, ]
-    } else {
-      stop("No variant passed quality filter!")
-    }
+    stop("No variant passed quality filter!")
   }
   
   # Extract VAF, Readcounts (and Zygosity)
