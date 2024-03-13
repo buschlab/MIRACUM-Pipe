@@ -969,7 +969,12 @@ txt2maf <- function(input, Center = center, refBuild = 'GRCh37', idCol = NULL, i
   TxChange[TxChange == ""] <- NA
   
   # VAF
-  vaf <- str_split(ifelse("Variant_Reads" %in% colnames(input), input$Variant_Reads, input$Count_Tumor), "\\|")
+  if ("Variant_Reads" %in% colnames(input)) {
+    vafin <- input$Variant_Reads
+  } else {
+    vafin <- input$Count_Tumor
+  }
+  vaf <- str_split(vafin, "\\|")
   t_ref_count <- as.numeric(unlist(lapply(vaf, function(x) x[2]))) - as.numeric(unlist(lapply(vaf, function(x) x[1])))
   t_alt_count <- as.numeric(unlist(lapply(vaf, function(x) x[1])))
   if("Count_Normal" %in% colnames(input)) {
