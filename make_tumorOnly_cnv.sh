@@ -132,7 +132,7 @@ mateOrientation = FR
 
 makePileup = ${CFG_REFERENCE_DBSNP}
 fastaFile = ${FILE_GENOME}
-minimalCoveragePerPosition = ${CFG_TUMORONLY_VARSCAN_MPILEUP2SNP_MINCOVERAGE}
+minimalCoveragePerPosition = ${CFG_TUMORONLY_MUTECT_CALLABLEDEPTH}
 minimalQualityPerPosition = ${CFG_GENERAL_MINBASEQUAL}
 SNPfile = ${CFG_REFERENCE_DBSNP}
 

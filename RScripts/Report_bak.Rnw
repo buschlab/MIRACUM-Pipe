@@ -557,7 +557,6 @@ if(is.null(germ_all$muts_tab) || dim(germ_all$muts_tab)[1] == 0){
 \item samtools 1.10
 \item GATK: 3.8-1-0-gf15c1c3ef
 \item picard-tools: 2.20.6
-\item VarScan: 2.4.4
 \item annovar: 2020Jun08
 \item bedtools: 2.28.0
 \item Control-FREEC: 11.6

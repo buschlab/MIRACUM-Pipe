@@ -139,7 +139,7 @@ mateOrientation = FR
 
 makePileup = ${CFG_REFERENCE_DBSNP}
 fastaFile = ${FILE_GENOME}
-minimalCoveragePerPosition = ${CFG_PANEL_VARSCAN_MPILEUP2SNP_MINCOVERAGE}
+minimalCoveragePerPosition = ${CFG_PANEL_MUTECT_CALLABLEDEPTH}
 minimalQualityPerPosition = ${CFG_GENERAL_MINBASEQUAL}
 SNPfile = ${CFG_REFERENCE_DBSNP}
 

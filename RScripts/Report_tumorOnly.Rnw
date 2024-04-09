@@ -62,7 +62,7 @@ tmp1 <- key_results
 kable(tmp1, booktabs = T, row.names = F, caption = "\\footnotesize{Schl\"usselergebnisse der Analyse}") %>% kable_styling(latex_options = c( "hold_position"), font_size = 9) %>% column_spec(1, width = "16em") %>% column_spec(c(2:3), width = "12em") %>% column_spec(4, width = "5em")
 @
 
-\ifx{\Sexpr{length(which(mutation_analysis_result_mutect2$som_mut_tab$is_oncogene == 1 | mutation_analysis_result_mutect2$som_mut_tab$is_tumorsuppressor == 1 | mutation_analysis_result_mutect2$som_mut_tab$InterVar_automated %in% c("Pathogenic", "Likely pathogenic") | mutation_analysis_result_mutect2$som_mut_tab$CLNSIG %in% c("Pathogenic", "Likely_pathogenic", "Conflicting_interpretations_of_pathogenicity")))}}0
+\ifx{\Sexpr{length(which(mutation_analysis_result$som_mut_tab$is_oncogene == 1 | mutation_analysis_result$som_mut_tab$is_tumorsuppressor == 1 | mutation_analysis_result$som_mut_tab$InterVar_automated %in% c("Pathogenic", "Likely pathogenic") | mutation_analysis_result$som_mut_tab$CLNSIG %in% c("Pathogenic", "Likely_pathogenic", "Conflicting_interpretations_of_pathogenicity")))}}0
 {\textbf{Keine Mutationen in Cancergenen und keine Mutationen mit hoher ACMG-Klassifikation identifiziert.}}
 \else
 {
@@ -106,7 +106,7 @@ kable(som_muts, booktabs = T, row.names = F, caption = paste("Zusammenfassung de
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.53\textwidth]{\Sexpr{outfile_circos_mutect2}}
+\includegraphics[width=0.53\textwidth]{\Sexpr{outfile_circos}}
 \caption{Circos Plot mit allen Mutationen \"uber VAF \Sexpr{vaf}.}
 \label{cir_plot}
 \end{figure}
@@ -418,7 +418,6 @@ if(is.null(som_all$muts_tab) || dim(som_all$muts_tab)[1] == 0) {
 \item samtools 1.10
 \item GATK: 3.8-1-0-gf15c1c3ef
 \item picard-tools: 2.20.6
-\item VarScan: 2.4.4
 \item annovar: 2020Jun08
 \item bedtools: 2.28.0
 \item Control-FREEC: 11.6
