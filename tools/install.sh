@@ -86,13 +86,6 @@ mkdir -p bin
 chmod +x src/freec
 mv src/freec bin
 
-# add module
-cd ${DIR_SCRIPT}/FREEC/mappability
-wget https://xfer.curie.fr/get/nil/7hZIk1C63h0/hg19_len100bp.tar.gz
-tar -xzf hg19_len100bp.tar.gz
-rm -f hg19_len100bp.tar.gz
-
-
 #################
 # bam-readcount #
 #################
