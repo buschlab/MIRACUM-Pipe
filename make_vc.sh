@@ -113,7 +113,7 @@ ${TABLEANNOVAR} "${TD_OUTPUT}.vcf" "${DIR_ANNOVAR_DATA}" -protocol "${CFG_ANNOVA
 rm "${TD_OUTPUT}.avinput"
 
 # Haplotype Caller
-if [[ $CFG_CASE = "somatic" ]]; then
+if [[ $CFG_CASE = "somaticGermline" ]]; then
   ${BIN_GATK4} HaplotypeCaller -R ${FILE_GENOME} -I ${recalbamTD} -I ${recalbamGD} -O ${GD_OUTPUT_GZ} \
   --intervals "${CFG_REFERENCE_CAPTUREREGIONS}" --min-base-quality-score "${CFG_GENERAL_MINBASEQUAL}" --base-quality-score-threshold "${CFG_GENERAL_MINBASEQUAL}"
   gunzip "${GD_OUTPUT_GZ}"
