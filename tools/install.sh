@@ -2,9 +2,7 @@
 
 # variables
 readonly VERSION_TRIMMOMATIC="0.39"
-# 2.20.6
 readonly VERSION_PICARD="2.27.1"
-# 2.28.0
 readonly VERSION_BEDTOOLS="2.30.0"
 
 ########
@@ -189,6 +187,7 @@ gatk3:     /opt/MIRACUM-Pipe/tools/gatk/GenomeAnalysisTK.jar
 gatk4:     /opt/MIRACUM-Pipe/tools/gatk4/gatk
 freebayes: freebayes
 samtools:  samtools
+varscan:   /opt/MIRACUM-Pipe/tools/bam-matcher/VarScan.jar
 java:      java
 
 [ScriptOptions]
@@ -201,6 +200,7 @@ VCF_file: /opt/MIRACUM-Pipe/tools/bam-matcher/1kg.exome.highAF.1511.vcf
 [VariantCallerParameters]
 GATK_MEM:    4
 GATK_nt:     1
+VARSCAN_MEM: 4
 
 [GenomeReference]
 REFERENCE: /opt/MIRACUM-Pipe/assets/references/genome/genome.fa
