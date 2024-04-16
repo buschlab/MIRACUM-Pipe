@@ -156,7 +156,7 @@ if (protocol == "somatic" | protocol == "somaticGermline") {
     # GERMLINE NORMAL
     snp_file_gd <- paste0(
       path_input, sample,
-      "_vc.output.snp.Germline.hc.NORMAL.avinput.hg19_multianno.csv"
+      "_gd_gatk4_haplotype.hg19_multianno.txt"
     )
     bammatcherfile <- paste0(
       path_input, sample,
@@ -183,7 +183,7 @@ if (protocol == "somatic" | protocol == "somaticGermline") {
   # LOH
   snp_file_loh <- paste0(
     path_input, sample,
-    "_vc.output.snp.LOH.hc.avinput.hg19_multianno.csv"
+    "_gd_gatk4_haplotype.hg19_multianno.txt"
   )
   # Results
   outfile_circos <- paste0(path_output, sample, "_TD_circos.pdf")
@@ -593,7 +593,7 @@ print("Mutation Signature Analysis.")
 if (protocol == "somaticGermline" | protocol == "somatic") {
   somatic_vcf <- paste0(
     path_input, sample,
-    "_vc.output.snp.Somatic.hc.fpfilter.vcf"
+    "_td_gatk4_mutect2_filtered.vcf"
   )
   outfile_mutsig_cbioportal <- paste0(path_output, sample, "_mutsig_cbioportal")
   mut_sig_ana <- mut_sig_wCI(

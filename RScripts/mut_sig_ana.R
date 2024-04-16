@@ -77,6 +77,9 @@ mut_sig_wCI <- function(
   if(length(id) > 0) {
     vcf_like_df <- vcf_like_df[id, ]
   }
+  
+  vcf_like_df <- vcf_like_df[nchar(vcf_like_df$REF) == 1 & nchar(vcf_like_df$ALT) == 1, ]
+  
   number_of_SNVs <- nrow(vcf_like_df)
 
   # load data for signatures and cutoffs from the package

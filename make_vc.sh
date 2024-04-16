@@ -87,7 +87,7 @@ readonly TD_OUTPUT_GZ=${DIR_WES}/${NameTD}_gatk4_mutect2.vcf.gz
 readonly GD_OUTPUT_GZ=${DIR_WES}/${NameTD}_gatk4_haplotype.vcf.gz
 readonly TD_OUTPUT_FILTERED_GZ=${DIR_WES}/${NameTD}_gatk4_mutect2_filtered.vcf.gz
 readonly TD_OUTPUT=${DIR_WES}/${NameTD}_gatk4_mutect2_filtered
-readonly GD_OUTPUT=${DIR_WES}/${NameTD}_gatk4_haplotype
+readonly GD_OUTPUT=${DIR_WES}/${NameGD}_gatk4_haplotype
 readonly MSI_OUTPUT=${DIR_WES}/${NameD}_MSI
 readonly BAMMATCHER_OUTPUT=${DIR_WES}/${CFG_CASE}_${PARAM_DIR_PATIENT}_bam-matcher.txt
 

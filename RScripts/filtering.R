@@ -58,35 +58,47 @@ filtering <- function(
   # Read Data
   x <- read.delim(file = snpfile, header = T, stringsAsFactors = F, comment.char = "#")
   
+  # Filter for LoHs based on VarScan algorithm
+  if (mode == "LOH") {
+    x <- extract_lohs(x) 
+  }
+  
+  # Filter for actionable genes in Germline
+  if (protocol == "somaticGermline" & mode == "N") {
+    x <- actionable(x, "Gene.refGene", actionable_genes)
+  }
+  
   # Filter for targeted region in tNGS
   x <- target_check(x, sureselect)
 
   # Calcualte covered region from bed file
   cov_region <- covered_region(sureselect = sureselect, mode = mode)
-    
+  
   id <- grep(pattern = "CHROM", x = x$Chr)
   if (length(id) > 0) {
     x <- x[-id, ]
   }
   # Quality Filter
-  id.pass <- grep("PASS", x$Otherinfo10)
-  if (length(id.pass) > 0) {
-    x <- x[id.pass, ]
-  } else {
-    stop("No variant passed quality filter!")
+  if (mode == "T") {
+    id.pass <- grep("PASS", x$Otherinfo10)
+    if (length(id.pass) > 0) {
+      x <- x[id.pass, ]
+    } else {
+      stop("No variant passed quality filter!")
+    }
   }
   
   # Extract VAF, Readcounts (and Zygosity)
-  x <- vrz_gatk(x = x, mode = mode, protocol = protocol)
+  x <- vrz(x = x, mode = mode, protocol = protocol)
   
-  x <- normalize_vaf_gatk(x = x)
-
+  x <- normalize_vaf(x = x, mode = mode)
+    
   # VAF Filter
   x <- exclude(x, vaf = vaf)
-  
+    
   # Remove Variants with Variant Read Count below 4/20
   x <- mrc(x = x, min_var_count = min_var_count)
-  
+    
   # Filter for exonic function
   x <- filt(x, "intergenic")
   x <- filt(x, "intronic")

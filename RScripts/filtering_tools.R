@@ -80,75 +80,7 @@ filt <- function(x, func) {
   return(x)
 }
 
-vrz <- function(x, mode, protocol){
-  #' Extract VAF, Readcounts and Zygosity
-  #'
-  #' @description Extracts VAF, Readcounts (and Zygosity)
-  #'
-  #' @param x dataframe. Table of Mutations
-  #' @param mode string. "N" for SNPs and Indels, "LOH" for LoH
-  #'
-  #' @return returns x, dataframe. Table of Mutations with extra columns
-  #'
-  #' @details Mode: "N"
-  #' @details We extract VAF, Readcounts and Zygosity out of the column
-  #' @details "Otherinfo".
-  #' @details Mode: "LOH"
-  #' @details We extract VAF and Readcounts both for Tumor and Normal
-  #' @details out of the column "Otherinfo". The dataframe x should contain
-  #' @details only mutations calls with a lack of heterozygosity.
-  if (mode == "N" | mode == "T"){
-    variant_frequency <- c()
-    variant_count <- c()
-    zygosity <- c()
-    for (j in 1:dim(x)[1]) {
-      other <- as.character(x[j, "Otherinfo"])
-      if (protocol == "somaticGermline" | protocol == "somatic"){
-          zygosity <- c(zygosity, substr(other, 1, 3))
-          split <- strsplit(other, split = ":", fixed = TRUE)
-          variant_frequency <- c(variant_frequency, split[[1]][12])
-          variant_count <- c(variant_count, paste(as.numeric(split[[1]][11]),
-                                                  as.numeric(split[[1]][9]),
-                                                  sep = "|"))
-        } else {
-          zyg <- NA
-          zyg = ifelse(test = grepl("HET=1", other), yes = "het", no = zyg)
-          zyg = ifelse(test = grepl("HOM=1", other), yes = "hom", no = zyg)
-          zygosity <- c(zygosity, zyg)
-          split <- strsplit(other, split = ":", fixed = TRUE)
-          variant_frequency <- c(variant_frequency, split[[1]][20])
-          variant_count <- c(variant_count, paste(as.numeric(split[[1]][19]),
-                                                  as.numeric(split[[1]][17]),
-                                                  sep = "|"))
-        }
-    }
-    x <- cbind(x, Variant_Allele_Frequency = variant_frequency,
-               Zygosity = zygosity, Variant_Reads = variant_count)
-    rownames(x) <- NULL
-  } else if (mode == "LOH"){
-    vaf.normal <- c()
-    vaf.tumor <- c()
-    count.normal <- c()
-    count.tumor <- c()
-    for (j in 1:dim(x)[1]) {
-      other <- as.character(x[j, "Otherinfo"])
-      split <- strsplit(other, split = ":", fixed = TRUE)
-      vaf.normal <- c(vaf.normal, split[[1]][12])
-      vaf.tumor <- c(vaf.tumor, split[[1]][18])
-      count.normal <- c(count.normal, paste(split[[1]][11], split[[1]][9],
-                                            sep = "|"))
-      count.tumor <- c(count.tumor, paste(split[[1]][17], split[[1]][15],
-                                          sep = "|"))
-    } 
-    x <- cbind(x, VAF_Normal = vaf.normal, VAF_Tumor = vaf.tumor,
-               Count_Normal = count.normal, Count_Tumor = count.tumor)
-    vaf.tumor <- as.character(vaf.tumor)
-    vaf.tumor2 <- as.numeric(gsub("%", "", vaf.tumor))
-  }
-  return(x)
-}
-
-vrz_gatk <- function(x, mode, protocol = "Tumor_Normal", manifest){
+vrz <- function(x, mode, protocol = "Tumor_Normal", manifest){
   #' Extract VAF, Readcounts and Zygosity
   #'
   #' @description Extracts VAF, Readcounts (and Zygosity)
@@ -168,8 +100,12 @@ vrz_gatk <- function(x, mode, protocol = "Tumor_Normal", manifest){
   if(dim(x)[1] == 0){
     return(x)
   }
-  if (mode == "N" | mode == "T"){
-    split_other <- strsplit(x$Otherinfo13, split = ":", fixed = TRUE)
+  if (mode == "T"){
+    otherInfo <- x$Otherinfo13
+    if (protocol == "somatic" || protocol == "somaticGermline") {
+      otherInfo <- x$Otherinfo14
+    }
+    split_other <- strsplit(otherInfo, split = ":", fixed = TRUE)
     x$Variant_Allele_Frequency <- unlist(lapply(split_other, function(f) f[3]))
     count_alt <- unlist(lapply(split_other, function(f) f[2]))
     x$Variant_Reads <- paste(unlist(lapply(strsplit(count_alt, split = ",", fixed = TRUE), function(f) f[2])),
@@ -178,28 +114,29 @@ vrz_gatk <- function(x, mode, protocol = "Tumor_Normal", manifest){
     x$Zygosity[as.numeric(x$Variant_Allele_Frequency) > 0.75] <- "hom"
     return(x)
   }
+  if (mode == "N") {
+    freq_g <- str_split_fixed(str_split_fixed(x$Otherinfo13, ":", 3)[,2], ",", 2)
+    x$Variant_Allele_Frequency <- format(round(as.numeric(freq_g[,2]) / (as.numeric(freq_g[,1]) + as.numeric(freq_g[,2])), 4), nsmall = 4)
+    x$Variant_Allele_Frequency[is.na(x$Variant_Allele_Frequency)] <- 0
+    x$Variant_Reads <- paste0(as.numeric(freq_g[,2]), "|", (as.numeric(freq_g[,1]) + as.numeric(freq_g[,2])))
+    
+    x$Zygosity <- "het"
+    x$Zygosity[as.numeric(x$Variant_Allele_Frequency) > 0.75] <- "hom"
+    return(x)
+  }
   if (mode == "LOH"){
-    vaf.normal <- c()
-    vaf.tumor <- c()
-    count.normal <- c()
-    count.tumor <- c()
-    for (j in 1:dim(x)[1]) {
-      other <- as.character(x[j, "Otherinfo"])
-      split <- strsplit(other, split = ":", fixed = TRUE)
-      vaf.normal <- c(vaf.normal, split[[1]][12])
-      vaf.tumor <- c(vaf.tumor, split[[1]][18])
-      count.normal <- c(count.normal, paste(split[[1]][11], split[[1]][9],
-                                            sep = "|"))
-      count.tumor <- c(count.tumor, paste(split[[1]][17],
-                                          (as.numeric(split[[1]][16]) 
-                                           + as.numeric(split[[1]][17])),
-                                          sep = "|"))
-    }
+    freq_g <- str_split_fixed(str_split_fixed(x$Otherinfo13, ":", 3)[,2], ",", 2)
+    vaf.normal <- format(round(as.numeric(freq_g[,2]) / (as.numeric(freq_g[,1]) + as.numeric(freq_g[,2])), 4), nsmall = 4)
+    vaf.normal[is.na(vaf.normal)] <- 0
+    count.normal <- paste0(as.numeric(freq_g[,2]), "|", (as.numeric(freq_g[,1]) + as.numeric(freq_g[,2])))
+    
+    freq_t <- str_split_fixed(str_split_fixed(x$Otherinfo14, ":", 3)[,2], ",", 2)
+    vaf.tumor <- format(round(as.numeric(freq_t[,2]) / (as.numeric(freq_t[,1]) + as.numeric(freq_t[,2])), 4), nsmall = 4)
+    vaf.tumor[is.na(vaf.tumor)] <- 0
+    count.tumor <- paste0(as.numeric(freq_t[,2]), "|", (as.numeric(freq_t[,1]) + as.numeric(freq_t[,2])))
     
     x <- cbind(x, VAF_Normal = vaf.normal, VAF_Tumor = vaf.tumor,
                Count_Normal = count.normal, Count_Tumor = count.tumor)
-    vaf.tumor <- as.character(vaf.tumor)
-    vaf.tumor2 <- as.numeric(gsub("%", "", vaf.tumor))
   }
   return(x)
 }
@@ -969,7 +906,12 @@ txt2maf <- function(input, snv_vcf, protocol, Center = center, refBuild = 'GRCh3
   TxChange[TxChange == ""] <- NA  
   
   # VAF
-  vaf <- str_split(ifelse("Variant_Reads" %in% colnames(input), input$Variant_Reads, input$Count_Tumor), "\\|")
+  if ("Variant_Reads" %in% colnames(input)) {
+    vafin <- input$Variant_Reads
+  } else {
+    vafin <- input$Count_Tumor
+  }
+  vaf <- str_split(vafin, "\\|")
   t_ref_count <- as.numeric(unlist(lapply(vaf, function(x) x[2]))) - as.numeric(unlist(lapply(vaf, function(x) x[1])))
   t_alt_count <- as.numeric(unlist(lapply(vaf, function(x) x[1])))
   if("Count_Normal" %in% colnames(input)) {
@@ -1035,10 +977,23 @@ exclude <- function(x, vaf = 5){
   return(x)
 }
 
-normalize_vaf_gatk <- function(x){
-  x$Variant_Allele_Frequency <- as.numeric(x$Variant_Allele_Frequency) * 100
-  x$Variant_Allele_Frequency <- paste0(x$Variant_Allele_Frequency, "%")
+normalize_vaf <- function(x, mode = "T"){
+  if (mode == "LOH") {
+    x$VAF_Tumor <- as.numeric(x$VAF_Tumor) * 100
+    x$VAF_Tumor <- paste0(x$VAF_Tumor, "%") 
+    x$VAF_Normal <- as.numeric(x$VAF_Normal) * 100
+    x$VAF_Normal <- paste0(x$VAF_Normal, "%") 
+  } else {
+    x$Variant_Allele_Frequency <- as.numeric(x$Variant_Allele_Frequency) * 100
+    x$Variant_Allele_Frequency <- paste0(x$Variant_Allele_Frequency, "%") 
+  }
   return(x)
+}
+
+extract_lohs <- function(x) {
+  x <- x[str_starts(x$Otherinfo13, "0/1") & !str_starts(x$Otherinfo14, "0/1"), ]
+  return(x)
+  
 }
 
 loh_correction <- function(filt_loh, filt_gd = NULL, protocol = "somaticGermline", vaf = 10, actionable_genes = NA){
@@ -1059,13 +1014,8 @@ loh_correction <- function(filt_loh, filt_gd = NULL, protocol = "somaticGermline
     filt_loh_loss$Variant_Reads <- filt_loh_loss$Count_Normal
     filt_loh_loss$Variant_Allele_Frequency <- filt_loh_loss$VAF_Normal
     filt_loh_loss$Zygosity <- rep(x = "het", times = dim(filt_loh_loss)[1])
-    id_hom <- which(as.numeric(substr(filt_loh_loss$VAF_Normal, start = 1,
-                                      stop = nchar(filt_loh_loss$VAF_Normal) - 1)) > 75)
     id_exclude <- which(as.numeric(substr(filt_loh_loss$VAF_Normal, start = 1,
                                           stop = nchar(filt_loh_loss$VAF_Normal) - 1)) < 10)
-    if (length(id_hom) > 0){
-      filt_loh_loss$Zygosity[id_hom] <- "hom"
-    }
     if (length(id_exclude) > 0){
       filt_loh_loss <- filt_loh_loss[-id_exclude, ]
     }
@@ -1095,5 +1045,8 @@ loh_correction <- function(filt_loh, filt_gd = NULL, protocol = "somaticGermline
   } else {
     filt_gd = filt_gd
   }
+  filt_gd$table <- filt_gd$table[!duplicated(filt_gd$table), ]
+  filt_gd$maf <- filt_gd$maf[!duplicated(filt_gd$maf), ]
+  
   return(list(loh = filt_loh, gd = filt_gd))
 }
