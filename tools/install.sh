@@ -4,6 +4,7 @@
 readonly VERSION_TRIMMOMATIC="0.39"
 readonly VERSION_PICARD="2.27.1"
 readonly VERSION_BEDTOOLS="2.30.0"
+readonly VERSION_VEP="111.0"
 
 ########
 readonly DIR_SCRIPT=$(
@@ -66,6 +67,19 @@ rm -f trimmomatic.zip
 mv Trimmomatic* Trimmomatic
 mv Trimmomatic/trimmomatic-${VERSION_TRIMMOMATIC}.jar Trimmomatic/trimmomatic.jar
 
+#######
+# VEP #
+#######
+cd ${DIR_SCRIPT}
+
+wget https://github.com/Ensembl/ensembl-vep/archive/refs/tags/release/${VERSION_VEP}.tar.gz \
+    -O vep.tar.gz
+tar -xzf vep.tar.gz
+rm -f vep.tar.gz
+mv ensembl-vep-release-${VERSION_VEP} vep
+
+cd vep
+perl INSTALL.pl -n -a cf -s homo_sapiens -y GRCh37 -g Condel,CADD,REVEL
 
 ###### COMPILE SUBMODULES #######
 
