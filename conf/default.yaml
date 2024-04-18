@@ -236,11 +236,6 @@ tumorOnly:
     # set TRUE to correct for contamination by normal cells.
     # If "contamination" is not provided, it will automatically evaluate the level of contamination
     contaminationAdjustment: TRUE
-    
-annovar:
-  # define annotation databases, together with their type, used. The databases have to be installed with annovar
-  protocol: 'refGene,gnomad211_genome,avsnp150,clinvar_20210501,intervar_20180118,dbnsfp42a,cosmic_coding,cosmic_noncoding'
-  argop: 'g,f,f,f,f,f,f,f'
 
 sequenza:
   # define sequenza-utils parameter

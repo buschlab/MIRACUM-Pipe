@@ -99,10 +99,6 @@ readonly CFG_TUMORONLY_MUTECT_CALLABLEDEPTH=$(get_config_value tumorOnly.mutect.
 readonly CFG_TUMORONLY_MUTECT_PANELOFNORMALS="${DIR_REF}/genome/$(get_config_value tumorOnly.mutect.panelOfNormals "${PARAM_DIR_PATIENT}")"
 readonly CFG_TUMORONLY_MUTECT_GERMLINERESOURCE="${DIR_REF}/genome/$(get_config_value tumorOnly.mutect.germlineResource "${PARAM_DIR_PATIENT}")"
 
-# ANNOVAR Databases
-readonly CFG_ANNOVAR_PROTOCOL=$(get_config_value annovar.protocol "${PARAM_DIR_PATIENT}")
-readonly CFG_ANNOVAR_ARGOP=$(get_config_value annovar.argop "${PARAM_DIR_PATIENT}")
-
 ## Tools and paths
 # Paths
 readonly BIN_JAVA="java -Djava.io.tmpdir=${DIR_TMP} " # path to java
@@ -142,13 +138,9 @@ readonly BIN_GATK4="${DIR_TOOLS}/gatk4/gatk" # --java-options '-Xmx${CFG_COMMON_
 # PICARD
 readonly BIN_FIX_MATE="${BIN_JAVA} -Xmx${CFG_COMMON_MEMORY} -Dpicard.useLegacyParser=false -jar ${DIR_TOOLS}/picard/picard.jar FixMateInformation "
 
-# ANNOVAR
-readonly DIR_ANNOVAR="${DIR_TOOLS}/annovar/"
-readonly DIR_ANNOVAR_DATA="${DIR_ANNOVAR}/humandb"
-readonly CONVERT2ANNOVAR2="${DIR_ANNOVAR}/convert2annovar.pl --format vcf4old --outfile "
-readonly CONVERT2ANNOVAR3="${DIR_ANNOVAR}/convert2annovar.pl --format vcf4old --includeinfo --comment --outfile "
-readonly CONVERT2ANNOVAR="${DIR_ANNOVAR}/convert2annovar.pl --format vcf4 --includeinfo --comment --withzyg --outfile "
-readonly TABLEANNOVAR="${DIR_ANNOVAR}/table_annovar.pl"
+# VEP
+readonly BIN_VEP="${DIR_TOOLS}/vep/vep"
+readonly BIN_VCF2MAF="perl ${DIR_TOOLS}/vcf2maf/vcf2maf.pl "
 
 # COVERAGE
 readonly BIN_COVERAGE="${DIR_TOOLS}/bedtools2/bin/bedtools coverage -hist -g ${FILE_GENOME}.fai -sorted "
@@ -244,9 +236,6 @@ export CFG_MUTECT_GERMLINERESOURCE
 export CFG_FUSION_GENES
 export CFG_AMPLIFICATION_GENES
 
-export CFG_ANNOVAR_PROTOCOL
-export CFG_ANNOVAR_ARGOP
-
 export BIN_JAVA
 
 export BIN_FASTQC
@@ -281,12 +270,8 @@ export BIN_VAR_SCAN
 export BIN_SOMATIC
 export BIN_PROCESSSOMATIC
 
-export DIR_ANNOVAR
-export DIR_ANNOVAR_DATA
-export CONVERT2ANNOVAR2
-export CONVERT2ANNOVAR3
-export CONVERT2ANNOVAR
-export TABLEANNOVAR
+export BIN_VEP
+export BIN_VCF2MAF
 
 export BIN_COVERAGE
 

@@ -35,7 +35,8 @@ stats_func <- function(
   )
   avreads <- reads(
     stats_td,
-    stats_gd
+    stats_gd,
+    protocol
   )
   qc_check <- quality_check(
     path = path,

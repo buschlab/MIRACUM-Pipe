@@ -142,7 +142,7 @@ mutation_signature_analysis <- function(vcf_file = NULL, cutoff = 0.01,
       POS = start(mutations.coding),
       REF = as.character(mutations.coding$REF),
       ALT = as.character(mutations.coding$ALT),
-      Type = as.character(mutations.coding$CONSEQUENCE),
+      Type = as.character(mutations.coding$Variant_Classification),
       FILT = as.character(mutations.coding$FILTER)
     )
     mutations <- mutations[!mutations$Type == "synonymous", ]

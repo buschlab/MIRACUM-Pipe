@@ -124,7 +124,7 @@ if (protocol != "panelTumor"){
   return(list(cov = cov, perc = perc, labs = labs, files = files))
 }
 
-reads <- function(tfile, gfile = NULL) {
+reads <- function(tfile, gfile = NULL, protocol) {
   #' Reads
   #'
   #' @description Extract the mean readcount
@@ -160,7 +160,7 @@ reads <- function(tfile, gfile = NULL) {
   ngreads <- NULL
   gin_size <- NULL
   gin_sd <- NULL
-  if (!is.null(gfile)) {
+  if (str_starts(protocol, "somatic")) {
       greads_tab <- readSamtoolsStats(gfile, "SN")$SN
       ngreads <- round(
         as.numeric(

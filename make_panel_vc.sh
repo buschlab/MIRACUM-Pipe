@@ -85,26 +85,48 @@ readonly OUTPUT_FILTERED_GZ=${DIR_WES}/${NameTD}_gatk4_mutect2_filtered.vcf.gz
 readonly OUTPUT=${DIR_WES}/${NameTD}_gatk4_mutect2_filtered
 readonly MSI_OUTPUT=${DIR_WES}/${NameTD}_MSI
 
-# GATK4 Mutect2
-# ANNOVAR settings
-CODINGARG="--includesnp --onlyAltering --mrnaseq --tolerate"
-CONVERTARG="--includeinfo"
-
 # Mutect2
 ${BIN_GATK4} Mutect2 -R ${FILE_GENOME} -I ${recalbam} -O ${OUTPUT_GZ} \
  --callable-depth "${CFG_PANEL_MUTECT_CALLABLEDEPTH}" --intervals "${CFG_REFERENCE_CAPTUREREGIONS}" --min-base-quality-score "${CFG_GENERAL_MINBASEQUAL}" --base-quality-score-threshold "${CFG_GENERAL_MINBASEQUAL}" --panel-of-normals "${CFG_PANEL_MUTECT_PANELOFNORMALS}" --genotype-pon-sites --germline-resource ${CFG_PANEL_MUTECT_GERMLINERESOURCE} --genotype-germline-sites 
 
 # Filter
 ${BIN_GATK4} FilterMutectCalls -V ${OUTPUT_GZ} -R ${FILE_GENOME} -O ${OUTPUT_FILTERED_GZ} --intervals "${CFG_REFERENCE_CAPTUREREGIONS}" --min-median-base-quality "${CFG_GENERAL_MINBASEQUAL}" --min-allele-fraction "${CFG_GENERAL_MINVAF}"
-gunzip "${OUTPUT_FILTERED_GZ}"
 
-# Annovar
-${TABLEANNOVAR} "${OUTPUT}.vcf" "${DIR_ANNOVAR_DATA}" -protocol "${CFG_ANNOVAR_PROTOCOL}" \
- --buildver hg19 --outfile "${OUTPUT}" --operation "${CFG_ANNOVAR_ARGOP}" \
- --nastring . --vcfinput --thread "${CFG_COMMON_CPUCORES}" --maxgenethread "${CFG_COMMON_CPUCORES}" \
- --otherinfo --remove --verbose --polish \
- --convertarg "${CONVERTARG}"
-rm "${OUTPUT}.avinput"
+${BIN_VEP} \
+  --dir /vepcache \
+  --offline --cache \
+  --assembly GRCh37 \
+  --fork ${CFG_COMMON_CPUCORES} \
+  --input_file  ${OUTPUT_FILTERED_GZ} \
+  --output_file ${OUTPUT}_vep.vcf \
+  --vcf \
+  --species homo_sapiens \
+  --force_overwrite \
+  --symbol \
+  --numbers \
+  --regulatory \
+  --canonical \
+  --gene_phenotype \
+  --af \
+  --max_af \
+  --af_gnomad \
+  --pubmed \
+  --allele_number \
+  --mane \
+  --hgvs \
+  --plugin CADD,${DIR_DATABASE}/vep/CADD_GRCh37/whole_genome_SNVs.tsv.gz,${DIR_DATABASE}/vep/CADD_GRCh37/gnomad.genomes-exomes.r4.0.indel.tsv.gz \
+  --plugin REVEL,${DIR_DATABASE}/vep/REVEL/new_tabbed_revel.tsv.gz \
+  --no_stats --quiet
+
+${BIN_VCF2MAF} \
+  --inhibit-vep \
+  --input-vcf ${OUTPUT}_vep.vcf \
+  --output-maf ${OUTPUT}_vep.maf \
+  --verbose --ref-fasta ${FILE_GENOME} \
+  --maf-center ${CFG_CENTER} --ncbi-build GRCh37 \
+  --tumor-id ${NameTD} \
+  --retain-fmt GT,AF \
+  --retain-ann am_class,am_pathogenicity,CADD_PHRED,MAX_AF,gnomADe_AFR,gnomADe_AMR,gnomADe_ASJ,gnomADe_EAS,gnomADe_FIN,gnomADe_OTH,gnomADe_SAS,REVEL
 
 # MSI
 ${MSISENSOR2} -t "${recalbam}" -o "${MSI_OUTPUT}"

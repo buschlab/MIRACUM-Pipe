@@ -78,8 +78,36 @@ tar -xzf vep.tar.gz
 rm -f vep.tar.gz
 mv ensembl-vep-release-${VERSION_VEP} vep
 
-cd vep
-perl INSTALL.pl -n -a cf -s homo_sapiens -y GRCh37 -g Condel,CADD,REVEL
+# #  CADD
+
+# mkdir -p ${DIR_SCRIPT}/../databases/vep/CADD_GRCh37
+# wget https://kircherlab.bihealth.org/download/CADD/v1.7/GRCh37/whole_genome_SNVs.tsv.gz -O ${DIR_SCRIPT}/../databases/vep/CADD_GRCh37/whole_genome_SNVs.tsv.gz
+# wget https://kircherlab.bihealth.org/download/CADD/v1.7/GRCh37/whole_genome_SNVs.tsv.gz.tbi -O ${DIR_SCRIPT}/../databases/vep/CADD_GRCh37/whole_genome_SNVs.tsv.gz.tbi
+# wget https://kircherlab.bihealth.org/download/CADD/v1.7/GRCh37/gnomad.genomes-exomes.r4.0.indel.tsv.gz -O ${DIR_SCRIPT}/../databases/vep/CADD_GRCh37/gnomad.genomes-exomes.r4.0.indel.tsv.gz
+# wget https://kircherlab.bihealth.org/download/CADD/v1.7/GRCh37/gnomad.genomes-exomes.r4.0.indel.tsv.gz.tbi -O ${DIR_SCRIPT}/../databases/vep/CADD_GRCh37/gnomad.genomes-exomes.r4.0.indel.tsv.gz.tbi
+
+# # REVEL
+
+# mkdir -p ${DIR_SCRIPT}/../databases/vep/REVEL
+# wget https://rothsj06.dmz.hpc.mssm.edu/revel-v1.3_all_chromosomes.zip -O ${DIR_SCRIPT}/../databases/vep/REVEL/revel-v1.3_all_chromosomes.zip
+# cd ${DIR_SCRIPT}/../databases/vep/REVEL
+# unzip revel-v1.3_all_chromosomes.zip
+# rm revel-v1.3_all_chromosomes.zip
+# cat revel_with_transcript_ids | tr "," "\t" > tabbed_revel.tsv
+# sed '1s/.*/#&/' tabbed_revel.tsv > new_tabbed_revel.tsv
+# bgzip new_tabbed_revel.tsv
+# tabix -f -s 1 -b 2 -e 2 new_tabbed_revel.tsv.gz
+
+# VEP INSTALL
+
+cd ${DIR_SCRIPT}/vep
+perl INSTALL.pl -n -a alcfp -s homo_sapiens -y GRCh37 -g CADD,REVEL
+
+# VCF2MAF
+cd ${DIR_SCRIPT}
+wget https://github.com/mskcc/vcf2maf/archive/refs/tags/v1.6.21.tar.gz -O vcf2maf.tar.gz
+rm vcf2maf.tar.gz
+mv vcf2maf-* vcf2maf
 
 ###### COMPILE SUBMODULES #######
 

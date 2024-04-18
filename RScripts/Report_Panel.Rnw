@@ -62,7 +62,7 @@ tmp1 <- key_results
 kable(tmp1, booktabs = T, row.names = F, caption = "\\footnotesize{Schl\"usselergebnisse der Analyse}") %>% kable_styling(latex_options = c( "hold_position"), font_size = 9) %>% column_spec(1, width = "16em") %>% column_spec(c(2:3), width = "12em") %>% column_spec(4, width = "5em")
 @
 
-\ifx{\Sexpr{length(which(mutation_analysis_result$som_mut_tab$is_oncogene == 1 | mutation_analysis_result$som_mut_tab$is_tumorsuppressor == 1 | mutation_analysis_result$som_mut_tab$InterVar_automated %in% c("Pathogenic", "Likely pathogenic") | mutation_analysis_result$som_mut_tab$CLNSIG %in% c("Pathogenic", "Likely_pathogenic", "Conflicting_interpretations_of_pathogenicity")))}}0
+\ifx{\Sexpr{nrow(highlight_table$highlight)}}0
 {\textbf{Keine Mutationen in Cancergenen und keine Mutationen mit hoher ACMG-Klassifikation identifiziert.}}
 \else
 {
@@ -122,7 +122,7 @@ Die \ac{VAF} wird gelistet, zusammen mit den zu Grunde liegenden Readcounts. Zun
 Außerdem werden nur seltene Mutationen gelistet. Selten bedeutet dabei, dass die \ac{MAF} unter \Sexpr{maf_cutoff} (\Sexpr{maf_cutoff*100}\%) liegen muss, basierend auf der Datenbank gnomAD exome.
 Desweiteren wurden Strukturanalysen via REVEL zu den entsprechend mutierten Proteinen durchgef\"uhrt.
 
-Die Varianten werden nach den ACMG Kriterien basierend auf den Datenbanken \ac{InterVar} und \ac{ClinVar} klassifiziert, siehe Anhang \ref{ACMG_class}. \acp{InDels} und \acp{DNV} werden dabei allerdings nicht ber\"ucksichtigt. Wird bei ClinVar die Klasse \textit{Conflicting Interpretations of Pathogenicity} berichtet, werden die Varianten in die Klasse \textbf{4*} eingeteilt.
+Die Varianten werden nach den ACMG Kriterien basierend auf der \ac{ClinVar} Datenbank klassifiziert, siehe Anhang \ref{ACMG_class}. \acp{InDels} und \acp{DNV} werden dabei allerdings nicht ber\"ucksichtigt. Wird bei ClinVar die Klasse \textit{Conflicting Interpretations of Pathogenicity} berichtet, werden die Varianten in die Klasse \textbf{4*} eingeteilt.
 
 Der Wertebereich von REVEL liegt im Intervall [0,1], wobei die H\"ohe des Wertes die Pathogenit\"at der Mutation angibt, d.h. 1 entspricht der h\"ochsten Pathogenit\"at. Alle Varianten mit einem REVEL Wert >0.5 tragen zus\"atzlich den Buchstaben \ac{REVEL-D} andernfalls ein \ac{REVEL-N}. \textbf{Generell gilt eine Mutation mit einem REVEL Wert > 0.5 als deletär.}
 
@@ -408,7 +408,6 @@ if(is.null(som_all$muts_tab || )dim(som_all$muts_tab)[1] == 0) {
   
   \acro{VarSome}[VarSome]{VarSome - The Human Genomic Variant Search Engine}
   \acro{VICC}[VICC MetaKB]{The Variant Interpretation for Cancer Consortium Meta Knowledgebase}
-  \acro{InterVar}[InterVar]{Clinical Interpretation of genetic variants by ACMG/AMP 2015 guideline}
   \acro{ClinVar}[ClinVar]{Clinically Relevant Sequence Variations}
 
   \acro{nsSNV}[nsSNV]{nonysnonymous SNV / missense mutation}
@@ -447,21 +446,16 @@ if(is.null(som_all$muts_tab || )dim(som_all$muts_tab)[1] == 0) {
 \item samtools 1.10
 \item GATK: 3.8-1-0-gf15c1c3ef
 \item picard-tools: 2.20.6
-\item annovar: 2020Jun08
+\item VEP: 111.0
 \item bedtools: 2.28.0
 \item Control-FREEC: 11.6
 \item Java: openjdk-8-hotspot
 \end{itemize}
 
-\subsection{Annovar Datenbanken}
+\subsection{VEP Datenbanken}
 \begin{itemize}
-\item refGene GRCh37
-\item dbnsfp41a
-\item avsnp150 (dbSNP)
-\item clinvar\_20210223
-\item intervar\_20180118
-\item cosmic91
-\item gnomad\_genome Version 2.1.1
+\item CADD v1.7
+\item REVEL v1.3
 \end{itemize}
 
 \end{document}

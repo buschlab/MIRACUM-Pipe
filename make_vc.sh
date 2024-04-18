@@ -91,41 +91,90 @@ readonly GD_OUTPUT=${DIR_WES}/${NameGD}_gatk4_haplotype
 readonly MSI_OUTPUT=${DIR_WES}/${NameD}_MSI
 readonly BAMMATCHER_OUTPUT=${DIR_WES}/${CFG_CASE}_${PARAM_DIR_PATIENT}_bam-matcher.txt
 
-# GATK4 Mutect2
-# ANNOVAR settings
-CODINGARG="--includesnp --onlyAltering --mrnaseq --tolerate"
-CONVERTARG="--includeinfo"
-
 # Mutect2
 ${BIN_GATK4} Mutect2 -R ${FILE_GENOME} -I ${recalbamTD} -I ${recalbamGD} --normal ${NameGD} -O ${TD_OUTPUT_GZ} \
  --callable-depth "${CFG_MUTECT_CALLABLEDEPTH}" --intervals "${CFG_REFERENCE_CAPTUREREGIONS}" --min-base-quality-score "${CFG_GENERAL_MINBASEQUAL}" --base-quality-score-threshold "${CFG_GENERAL_MINBASEQUAL}" --panel-of-normals "${CFG_MUTECT_PANELOFNORMALS}" --genotype-pon-sites --germline-resource ${CFG_MUTECT_GERMLINERESOURCE} --genotype-germline-sites 
 
 # Filter
 ${BIN_GATK4} FilterMutectCalls -V ${TD_OUTPUT_GZ} -R ${FILE_GENOME} -O ${TD_OUTPUT_FILTERED_GZ} --intervals "${CFG_REFERENCE_CAPTUREREGIONS}" --min-median-base-quality "${CFG_GENERAL_MINBASEQUAL}" --min-allele-fraction "${CFG_GENERAL_MINVAF}"
-gunzip "${TD_OUTPUT_FILTERED_GZ}"
 
-# Annovar
-${TABLEANNOVAR} "${TD_OUTPUT}.vcf" "${DIR_ANNOVAR_DATA}" -protocol "${CFG_ANNOVAR_PROTOCOL}" \
- --buildver hg19 --outfile "${TD_OUTPUT}" --operation "${CFG_ANNOVAR_ARGOP}" \
- --nastring . --vcfinput --thread "${CFG_COMMON_CPUCORES}" --maxgenethread "${CFG_COMMON_CPUCORES}" \
- --otherinfo --remove --verbose --polish \
- --convertarg "${CONVERTARG}"
-rm "${TD_OUTPUT}.avinput"
+${BIN_VEP} \
+  --dir /vepcache \
+  --offline --cache \
+  --assembly GRCh37 \
+  --fork ${CFG_COMMON_CPUCORES} \
+  --input_file  ${TD_OUTPUT_FILTERED_GZ} \
+  --output_file ${TD_OUTPUT}_vep.vcf \
+  --vcf \
+  --species homo_sapiens \
+  --force_overwrite \
+  --symbol \
+  --numbers \
+  --regulatory \
+  --canonical \
+  --gene_phenotype \
+  --af \
+  --max_af \
+  --af_gnomad \
+  --pubmed \
+  --allele_number \
+  --mane \
+  --hgvs \
+  --plugin CADD,${DIR_DATABASE}/vep/CADD_GRCh37/whole_genome_SNVs.tsv.gz,${DIR_DATABASE}/vep/CADD_GRCh37/gnomad.genomes-exomes.r4.0.indel.tsv.gz \
+  --plugin REVEL,${DIR_DATABASE}/vep/REVEL/new_tabbed_revel.tsv.gz \
+  --no_stats --quiet
+
+${BIN_VCF2MAF} \
+  --inhibit-vep \
+  --input-vcf ${TD_OUTPUT}_vep.vcf \
+  --output-maf ${TD_OUTPUT}_vep.maf \
+  --verbose --ref-fasta ${FILE_GENOME} \
+  --maf-center ${CFG_CENTER} --ncbi-build GRCh37 \
+  --tumor-id ${NameTD} \
+  --normal-id ${NameGD} \
+  --retain-fmt GT,AF \
+  --retain-ann am_class,am_pathogenicity,CADD_PHRED,MAX_AF,gnomADe_AFR,gnomADe_AMR,gnomADe_ASJ,gnomADe_EAS,gnomADe_FIN,gnomADe_OTH,gnomADe_SAS,REVEL
 
 # Haplotype Caller
-if [[ $CFG_CASE = "somaticGermline" ]]; then
-  ${BIN_GATK4} HaplotypeCaller -R ${FILE_GENOME} -I ${recalbamTD} -I ${recalbamGD} -O ${GD_OUTPUT_GZ} \
-  --intervals "${CFG_REFERENCE_CAPTUREREGIONS}" --min-base-quality-score "${CFG_GENERAL_MINBASEQUAL}" --base-quality-score-threshold "${CFG_GENERAL_MINBASEQUAL}"
-  gunzip "${GD_OUTPUT_GZ}"
+${BIN_GATK4} HaplotypeCaller -R ${FILE_GENOME} -I ${recalbamTD} -I ${recalbamGD} -O ${GD_OUTPUT_GZ} \
+--intervals "${CFG_REFERENCE_CAPTUREREGIONS}" --min-base-quality-score "${CFG_GENERAL_MINBASEQUAL}" --base-quality-score-threshold "${CFG_GENERAL_MINBASEQUAL}"
 
-  # Annovar
-  ${TABLEANNOVAR} "${GD_OUTPUT}.vcf" "${DIR_ANNOVAR_DATA}" -protocol "${CFG_ANNOVAR_PROTOCOL}" \
-  --buildver hg19 --outfile "${GD_OUTPUT}" --operation "${CFG_ANNOVAR_ARGOP}" \
-  --nastring . --vcfinput --thread "${CFG_COMMON_CPUCORES}" --maxgenethread "${CFG_COMMON_CPUCORES}" \
-  --otherinfo --remove --verbose --polish \
-  --convertarg "${CONVERTARG}"
-  rm "${GD_OUTPUT}.avinput"
-fi
+${BIN_VEP} \
+  --dir /vepcache \
+  --offline --cache \
+  --assembly GRCh37 \
+  --fork ${CFG_COMMON_CPUCORES} \
+  --input_file  ${GD_OUTPUT_FILTERED_GZ} \
+  --output_file ${GD_OUTPUT}_vep.vcf \
+  --vcf \
+  --species homo_sapiens \
+  --force_overwrite \
+  --symbol \
+  --numbers \
+  --regulatory \
+  --canonical \
+  --gene_phenotype \
+  --af \
+  --max_af \
+  --af_gnomad \
+  --pubmed \
+  --allele_number \
+  --mane \
+  --hgvs \
+  --plugin CADD,${DIR_DATABASE}/vep/CADD_GRCh37/whole_genome_SNVs.tsv.gz,${DIR_DATABASE}/vep/CADD_GRCh37/gnomad.genomes-exomes.r4.0.indel.tsv.gz \
+  --plugin REVEL,${DIR_DATABASE}/vep/REVEL/new_tabbed_revel.tsv.gz \
+  --no_stats --quiet
+
+${BIN_VCF2MAF} \
+  --inhibit-vep \
+  --input-vcf ${GD_OUTPUT}_vep.vcf \
+  --output-maf ${GD_OUTPUT}_vep.maf \
+  --verbose --ref-fasta ${FILE_GENOME} \
+  --maf-center ${CFG_CENTER} --ncbi-build GRCh37 \
+  --tumor-id ${NameTD} \
+  --normal-id ${NameGD} \
+  --retain-fmt GT,AF \
+  --retain-ann am_class,am_pathogenicity,CADD_PHRED,MAX_AF,gnomADe_AFR,gnomADe_AMR,gnomADe_ASJ,gnomADe_EAS,gnomADe_FIN,gnomADe_OTH,gnomADe_SAS,REVEL
 
 # MSI
 if [ ! -f "${MICROSATELLITE_SITES}" ]; then

@@ -89,16 +89,15 @@ mutation_analysis <- function(
   }
   x_somatic <- somatic
 # Take only exonic mutations
-  x_somatic$Func.refGene <- as.character(x_somatic$Func.refGene)
-  id_ex <- which(x_somatic$Func.refGene == "exonic")
+  id_ex <- which(x_somatic$BIOTYPE == "protein_coding")
   x_s <- x_somatic[id_ex, ]
+  print(x_somatic)
   no_loh <- FALSE
   if (is.null(x_loh) | protocol == "panelTumor" | protocol == "tumorOnly"){
     no_loh <- TRUE
   }
   if (!no_loh){
-    x_loh$Func.refGene <- as.character(x_loh$Func.refGene)
-    id_ex <- which(x_loh$Func.refGene == "exonic")
+    id_ex <- which(x_loh$BIOTYPE == "protein_coding")
     if (length(id_ex) == 0) {
       x_l <- NULL
       no_loh <- TRUE

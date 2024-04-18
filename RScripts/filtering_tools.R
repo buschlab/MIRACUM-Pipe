@@ -73,7 +73,7 @@ filt <- function(x, func) {
   #' @details The mutations can be filtered by the functionality of the part of
   #' @details gene where it is located. Functionalities like intronic or
   #' @details intergenic can be filtered out.
-  idx <- grep(func, x$Func.refGene)
+  idx <- grep(func, x$Variant_Classification)
   if (length(idx) > 0) {
     x <- x[-idx, ]
   }
@@ -97,47 +97,35 @@ vrz <- function(x, mode, protocol = "Tumor_Normal", manifest){
   #' @details We extract VAF and Readcounts both for Tumor and Normal
   #' @details out of the column "Otherinfo". The dataframe x should contain
   #' @details only mutations calls with a lack of heterozygosity.
-  if(dim(x)[1] == 0){
+  if (dim(x)[1] == 0) {
     return(x)
   }
-  if (mode == "T"){
-    otherInfo <- x$Otherinfo13
-    if (protocol == "somatic" || protocol == "somaticGermline") {
-      otherInfo <- x$Otherinfo14
-    }
-    split_other <- strsplit(otherInfo, split = ":", fixed = TRUE)
-    x$Variant_Allele_Frequency <- unlist(lapply(split_other, function(f) f[3]))
-    count_alt <- unlist(lapply(split_other, function(f) f[2]))
-    x$Variant_Reads <- paste(unlist(lapply(strsplit(count_alt, split = ",", fixed = TRUE), function(f) f[2])),
-                             unlist(lapply(split_other, function(f) f[4])), sep = "|")
-    x$Zygosity <- "het"
-    x$Zygosity[as.numeric(x$Variant_Allele_Frequency) > 0.75] <- "hom"
-    return(x)
+  if (mode == "T") {
+    x$Variant_Reads <- paste(x$t_alt_count, x$t_depth, sep = "|")
+    x$Zygosity <- "hom"
+    x$Zygosity[x$t_GT == "0/1"] <- "het"
+    x$Type <- "Somatic"
+    x$n_AF <- as.numeric(x$n_AF)
+    x$t_AF <- as.numeric(x$t_AF)
+  } else {
+    x$n_AF <- as.numeric(x$n_alt_count) / as.numeric(x$n_depth)
+    x$t_AF <- as.numeric(x$t_alt_count) / as.numeric(x$t_depth)
   }
   if (mode == "N") {
-    freq_g <- str_split_fixed(str_split_fixed(x$Otherinfo13, ":", 3)[,2], ",", 2)
-    x$Variant_Allele_Frequency <- format(round(as.numeric(freq_g[,2]) / (as.numeric(freq_g[,1]) + as.numeric(freq_g[,2])), 4), nsmall = 4)
-    x$Variant_Allele_Frequency[is.na(x$Variant_Allele_Frequency)] <- 0
-    x$Variant_Reads <- paste0(as.numeric(freq_g[,2]), "|", (as.numeric(freq_g[,1]) + as.numeric(freq_g[,2])))
-    
-    x$Zygosity <- "het"
-    x$Zygosity[as.numeric(x$Variant_Allele_Frequency) > 0.75] <- "hom"
-    return(x)
+    x$Variant_Reads <- paste(x$n_alt_count, x$n_depth, sep = "|")
+    x$Zygosity <- "hom"
+    x$Zygosity[x$n_GT == "0/1"] <- "het"
+    x$Type <- "Germline"
   }
-  if (mode == "LOH"){
-    freq_g <- str_split_fixed(str_split_fixed(x$Otherinfo13, ":", 3)[,2], ",", 2)
-    vaf.normal <- format(round(as.numeric(freq_g[,2]) / (as.numeric(freq_g[,1]) + as.numeric(freq_g[,2])), 4), nsmall = 4)
-    vaf.normal[is.na(vaf.normal)] <- 0
-    count.normal <- paste0(as.numeric(freq_g[,2]), "|", (as.numeric(freq_g[,1]) + as.numeric(freq_g[,2])))
-    
-    freq_t <- str_split_fixed(str_split_fixed(x$Otherinfo14, ":", 3)[,2], ",", 2)
-    vaf.tumor <- format(round(as.numeric(freq_t[,2]) / (as.numeric(freq_t[,1]) + as.numeric(freq_t[,2])), 4), nsmall = 4)
-    vaf.tumor[is.na(vaf.tumor)] <- 0
-    count.tumor <- paste0(as.numeric(freq_t[,2]), "|", (as.numeric(freq_t[,1]) + as.numeric(freq_t[,2])))
-    
-    x <- cbind(x, VAF_Normal = vaf.normal, VAF_Tumor = vaf.tumor,
-               Count_Normal = count.normal, Count_Tumor = count.tumor)
+  if (mode == "LOH") {
+    x$Count_Normal <- paste(x$n_alt_count, x$n_depth, sep = "|")
+    x$Count_Tumor <- paste(x$t_alt_count, x$t_depth, sep = "|")
+    x$Type <- "LoH"
   }
+  
+  x$n_AF <- format(round(x$n_AF * 100), nsmall = 2)
+  x$t_AF <- format(round(x$t_AF * 100), nsmall = 2)
+  
   return(x)
 }
 
@@ -181,7 +169,7 @@ isflag <- function(x, dbfile){
   db <- read.delim(dbfile, header = T, sep = "\t", colClasses = "character")
   myhit <- db[nchar(db[, "FLAGS"]) > 0, "FLAGS"]
   x["is_flag"] <- 0
-  idx <- which(x$Gene.refGene %in% myhit)
+  idx <- which(x$Hugo_Symbol %in% myhit)
   x$is_flag[idx] <- 1
   return(x)
 }
@@ -204,12 +192,12 @@ isogtsg <- function(x, dbfile){
   db <- read.delim(dbfile, header = T, sep = "\t", colClasses = "character")
   x$is_tumorsuppressor <- 0
   ts <- which(db$Is.Tumor.Suppressor.Gene == "Yes")
-  idx <- which (x$Gene.refGene %in% db$Hugo.Symbol[ts])
+  idx <- which (x$Hugo_Symbol %in% db$Hugo.Symbol[ts])
   x$is_tumorsuppressor[idx] <- 1
 
   x$is_oncogene <- 0
   og <- which(db$Is.Oncogene == "Yes")
-  idx <- which (x$Gene.refGene %in% db$Hugo.Symbol[og])
+  idx <- which (x$Hugo_Symbol %in% db$Hugo.Symbol[og])
   x$is_oncogene[idx] <- 1
   return(x)
 }
@@ -233,23 +221,23 @@ ishs <- function(x, dbfile){
   #' @note Please make sure that the columns of the input have the right names:
   #' @note required in db: Hugo_Symbol, Genomic_Position,
   #' @note -Reference_Amino_Acid, Variant_Amino_Acid, Amino_Acid_Position
-  #' @note required in x: Gene.refGene, Start, AAChange.refGene
+  #' @note required in x: Hugo_Symbol, Start, HGVSp_Short
   # lisths <- read.delim(dbfile, header = T,
   #                      sep = "\t", colClasses = "character")
   lisths <- read_xls(path = dbfile, sheet = 1)
   x$is_hotspot <- 0
-  idh <- which (x$Gene.refGene %in% lisths$Hugo_Symbol)
-  phs <- which (lisths$Hugo_Symbol %in% x$Gene.refGene)
+  idh <- which (x$Hugo_Symbol %in% lisths$Hugo_Symbol)
+  phs <- which (lisths$Hugo_Symbol %in% x$Hugo_Symbol)
 
   if (length(idh) > 0){
     hotspot <- rep(FALSE, times = length(idh))
-    # Check for matching Gene Locations and then for matching AAChange
+    # Check for matching Gene Locations and then for matching HGVSp_Short
     for (i in 1:length(idh)){
       for (j in 1:length(phs)){
         gp <- as.character(x$Start[idh][i])
         if (grepl(gp, as.character(lisths$Genomic_Position[phs][j]))){
-          if (!is.na(x$AAChange.refGene[idh][i])){
-            aac <- as.character(x$AAChange.refGene[idh][i])
+          if (!is.na(x$HGVSp_Short[idh][i])){
+            aac <- as.character(x$HGVSp_Short[idh][i])
             l <- nchar(aac)
             aac <- substr(aac, l, l)
             if (grepl(aac, lisths$Variant_Amino_Acid[phs][j])){
@@ -295,24 +283,25 @@ isihs <- function(x, dbfile){
   #' @note Please make sure that the columns of the input have the right names:
   #' @note required in db: Hugo_Symbol, Genomic_Position,
   #' @note -Reference_Amino_Acid, Variant_Amino_Acid, Amino_Acid_Position
-  #' @note required in x: Gene.refGene, Start, AAChange.refGene
+  #' @note required in x: Hugo_Symbol, Start, HGVSp_Short
   # lisths <- read.delim(dbfile, header = T,
   #                      sep = "\t", colClasses = "character")
+  library(readxl)
   lisths <- read_xls(path = dbfile, sheet = 2)
 
   # list should already habe a hotspot column for snps
-  fs <- which(x$ExonicFunc.refGene != "frameshift deletion")
-  fs2 <- which(x$ExonicFunc.refGene[fs] != "frameshift insertion")
+  fs <- which(x$Variant_Classification != "Frame_Shift_Del")
+  fs2 <- which(x$Variant_Classification[fs] != "fFrame_Shift_Ins")
   fs <- fs[fs2]
 
   # Check Genes
-  idh <- which(x$Gene.refGene %in% lisths$Hugo_Symbol)
-  phs <- which(lisths$Hugo_Symbol %in% x$Gene.refGene)
+  idh <- which(x$Hugo_Symbol %in% lisths$Hugo_Symbol)
+  phs <- which(lisths$Hugo_Symbol %in% x$Hugo_Symbol)
   idh <- intersect(idh, fs)
 
   if (length(idh) > 0){
     hotspot <- rep(FALSE, times = length(idh))
-    # Check for matching Gene Locations and then for matching AAChange
+    # Check for matching Gene Locations and then for matching HGVSp_Short
     for (i in 1: length(idh)){
       for (j in 1:length(phs)){
 
@@ -330,15 +319,15 @@ isihs <- function(x, dbfile){
             type <- substr(vaa, 2 * (l + 2), nchar(vaa))
             pos <- paste(start, end, sep = "_")
 
-            aac <- as.character(x$AAChange.refGene[idh[i]])
+            aac <- as.character(x$HGVSp_Short[idh[i]])
             a <- unlist(strsplit(aac, ","))
             id <- 5 * c(1:length(a))
             b <- unlist(strsplit(a, ":"))
             ast <- paste(b[id], collapse = ",")
 
             if (grepl(pos, as.character(ast))
-                && (x$Gene.refGene[idh][i] == lisths$Hugo_Symbol[phs][j])
-                && (grepl(type, as.character(x$AAChange.refGene[idh][i])))
+                && (x$Hugo_Symbol[idh][i] == lisths$Hugo_Symbol[phs][j])
+                && (grepl(type, as.character(x$HGVSp_Short[idh][i])))
                 ){
               hotspot[i] <- paste0("p.", vaa)
               if (hotspot[i] != FALSE){
@@ -348,7 +337,7 @@ isihs <- function(x, dbfile){
           } else{
             pos <- substr(vaa, 2, l + 1)
             type <- substr(vaa, l + 2, nchar(vaa))
-            aac <- as.character(x$AAChange.refGene[idh][i])
+            aac <- as.character(x$HGVSp_Short[idh][i])
 
             a <- unlist(strsplit(aac, ","))
             id <- 5 * c(1:length(a))
@@ -356,7 +345,7 @@ isihs <- function(x, dbfile){
             ast <- paste(b[id], sep = ",", collapse = "")
 
             if (grepl(pos, as.character(ast))
-               && (x$Gene.refGene[idh][i] == lisths$Hugo_Symbol[phs][j])
+               && (x$Hugo_Symbol[idh][i] == lisths$Hugo_Symbol[phs][j])
                && grepl(type, as.character(ast))){
               hotspot[i] <- paste0("p.", vaa)
               if (hotspot[i] != FALSE){
@@ -393,7 +382,7 @@ rvis <- function(x, dbfile){
   db <- read.delim(dbfile, header = T, sep = "\t", colClasses = "character",
                    row.names = 1)
   x$rvis <- 0.0
-  x$rvis <- as.numeric(db[x$Gene.refGene, 1])
+  x$rvis <- as.numeric(db[x$Hugo_Symbol, 1])
   return(x)
 }
 
@@ -413,7 +402,7 @@ trgt <- function(x, dbfile){
                    row.names = NULL)
   x$target <- "."
   for (i in 1:nrow(x)){
-    idx <- which(db$Gene == x[i, "Gene.refGene"])
+    idx <- which(db$Gene == x[i, "Hugo_Symbol"])
     if (length(idx)) { 
     x$target[i] <- db$Examples.of.Therapeutic.Agents[idx]
     }
@@ -438,7 +427,7 @@ dgidb <- function(x, dbfile){
                    row.names = NULL)
   x$DGIdb <- NA
   for (i in 1:nrow(x)) {
-    idx <- which(db$gene_name  == x[i, "Gene.refGene"])
+    idx <- which(db$gene_name  == x[i, "Hugo_Symbol"])
     if (length(idx)){
       x$DGIdb[i] <- paste(db$drug_claim_primary_name[idx], collapse = "; ")
     }
@@ -461,12 +450,12 @@ oncokb <- function(x, dbfile){
   #' @details column.
   db <- read.delim(dbfile, header = T, colClasses = "character")
   x$oncokb <- NA
-  idh <- which(x$Gene.refGene %in% db$Gene)
-  pta <- which(db$Gene %in% x$Gene.refGene[idh])
+  idh <- which(x$Hugo_Symbol %in% db$Gene)
+  pta <- which(db$Gene %in% x$Hugo_Symbol[idh])
   onkb <- rep(FALSE, times = length(idh))
   if (length(pta)){
     for (j in 1:length(pta)){
-      id <- which(x$Gene.refGene[idh] == db$Gene[pta[j]])
+      id <- which(x$Hugo_Symbol[idh] == db$Gene[pta[j]])
       if (db$Alteration[pta[j]] == "Oncogenic Mutations"){
         for (i in 1:length(id)){
           out <- ""
@@ -484,8 +473,8 @@ oncokb <- function(x, dbfile){
         ex <- paste0("exon", ZAHL)
 
         for (i in 1:length(id)){
-          if (grepl(ex, x$AAChange.refGene[idh[i]])
-              && x$Gene.refGene[idh] == db$Gene[pta[j]]){
+          if (grepl(ex, x$HGVSp_Short[idh[i]])
+              && x$Hugo_Symbol[idh] == db$Gene[pta[j]]){
             out <- ""
             out <- paste0(db$Tumor.Type[pta[j]], ",EL:", db$Level[pta[j]],
                           ":", db$Drugs[pta[j]])
@@ -501,9 +490,9 @@ oncokb <- function(x, dbfile){
         ZAHL <- substr(as.character(db$Alteration[pta[j]]), 6, 7)
         ex <- paste0("exon", ZAHL)
         for (i in 1:length(id)){
-          if (grepl(ex, x$AAChange.refGene[i])
-              && grepl("del", x$AAChange.refGene[i])
-              && x$Gene.refGene[idh] == db$Gene[pta[j]]){
+          if (grepl(ex, x$HGVSp_Short[i])
+              && grepl("del", x$HGVSp_Short[i])
+              && x$Hugo_Symbol[idh] == db$Gene[pta[j]]){
             out <- ""
             out <- paste0(db$Tumor.Type[pta[j]], ",EL:", db$Level[pta[j]],
                           ":", db$Drugs[pta[j]])
@@ -519,9 +508,9 @@ oncokb <- function(x, dbfile){
         ZAHL <- substr(as.character(db$Alteration[pta[j]]), 6, 7)
         ex <- paste0("exon", ZAHL)
         for (i in 1:length(id)){
-          if (grepl(ex, x$AAChange.refGene[i])
-              && grepl("ins", x$AAChange.refGene[i])
-              && x$Gene.refGene[idh] == db$Gene[pta[j]]){
+          if (grepl(ex, x$HGVSp_Short[i])
+              && grepl("ins", x$HGVSp_Short[i])
+              && x$Hugo_Symbol[idh] == db$Gene[pta[j]]){
             out <- ""
             out <- paste0(db$Tumor.Type[pta[j]], ",EL:", db$Level[pta[j]],
                           ":", db$Drugs[pta[j]])
@@ -534,8 +523,8 @@ oncokb <- function(x, dbfile){
         }
       } else {
         for (i in 1:length(id)){
-          if (db$Gene[pta[j]] == x$Gene.refGene[i]
-              && grepl(db$Alteration[pta[j]], x$AAChange.refGene[i])){
+          if (db$Gene[pta[j]] == x$Hugo_Symbol[i]
+              && grepl(db$Alteration[pta[j]], x$HGVSp_Short[i])){
             out <- ""
             out <- paste0(db$Tumor.Type[pta[j]], ",EL:", db$Level[pta[j]],
                           ":", db$Drugs[pta[j]])
@@ -558,49 +547,6 @@ oncokb <- function(x, dbfile){
   return(x)
 }
 
-gene_name <- function(x){
-  #' GeneName
-  #'
-  #' @description Finds GeneName for genes
-  #'
-  #' @param x dataframe. Table of Mutations
-  #'
-  #' @return returns x, dataframe. Table of Mutations with one extra column
-  #'
-  #' @details Find the whole genename for all the genes with a mutation and
-  #' @details add it to an extra column.
-  require(org.Hs.eg.db)
-  x$GeneName <- rep(NA, times = dim(x)[1])
-
-  sym <- org.Hs.egSYMBOL
-  mapped_genes <- mappedkeys(sym)
-  y <- unlist(as.list(sym[mapped_genes]))
-  doubled1 <- grep(",", x$Gene.refGene)
-  doubled2 <- grep(";", x$Gene.refGene)
-  doubled <- c(doubled1, doubled2)
-
-  for (i in 1:nrow(x)) {
-    if (i %in% doubled) {
-      if (i %in% doubled1) {
-        gene.symbol <- strsplit(x$Gene.refGene[i], ",")[[1]]
-      }
-      if (i %in% doubled2) {
-        gene.symbol <- strsplit(x$Gene.refGene[i], ";")[[1]]
-      }
-      entrez.id <- c()
-      for (k in gene.symbol) {
-        entrez.id <- c(entrez.id, names(y[which(y == k)]))
-      }
-    } else {
-      gene.symbol <- x$Gene.refGene[i]
-      entrez.id <- names(y[which(y == gene.symbol)])
-    }
-    x$GeneName[i] <- paste(unlist(mget(entrez.id, org.Hs.egGENENAME)),
-                            collapse = ",")
-  }
-  return(x)
-}
-
 rare <- function(x, maf = 0.001){
   #' rare
   #'
@@ -614,7 +560,8 @@ rare <- function(x, maf = 0.001){
   #' @details has to be lower than 0.001.
   #' @details Only the rare mutations are kept. 
   keep <- c()
-  gnomad <- as.numeric(x$AF_popmax)
+  gnomad <- as.numeric(x$MAX_AF)
+  print(colnames(x))
   for (n in 1:length(gnomad)){
     if (is.na(gnomad[n]) | gnomad[n] <= maf){
       keep <- c(keep, n)
@@ -622,55 +569,6 @@ rare <- function(x, maf = 0.001){
     }
   }
   x <- x[keep, ]
-  return(x)
-}
-
-maneselect <- function(x, maneselectfile) {
-  #' maneselect
-  #'
-  #' @description Selects the MANE Select preferred transcript if annovar did output multiple
-  #'
-  #' @param x dataframe. Table of Mutations
-  #' @param maneselect file. File containing maneselect database
-  #'
-  #' @return returns x, dataframe. Table of Mutations
-  mane <- read.table(maneselectfile, comment.char = "", sep = '\t', quote = "", header = T)
-  mane <- mane[mane$MANE_status == "MANE Select", ]
-  ref <- x$AAChange.refGene
-  nms<-lapply(str_split(ref, ",", simplify = F), function(y) str_remove(str_remove(y, ":exon.*"), ".*:"))
-  nm <- lapply(nms, function(y) unlist(lapply(y, function(z) mane[z == str_remove(mane$RefSeq_nuc, "\\.[0-9]+"), ]$RefSeq_nuc)))
-  nm2<-data.frame(apply(str_split(ref, ",", simplify = T), 2, function(y) str_remove(str_remove(y, ":exon.*"), ".*:")))$X1
-  if(!is.null(nm2)) {
-    nm[sapply(nm, function(y) length(y) != 1)] <- nm2[sapply(nm, function(y) length(y) != 1)]
-  }
-  x$CChange <- "."
-  prot <- str_remove_all(nm, "\\.[0-9]+")
-  if(nrow(x) > 0) {
-    for(i in 1:nrow(x)) {
-      if(is.na(ref[i]) || ref[i] == ".") {
-        next
-      }
-      transcript <- apply(str_split(ref[i], ",", simplify = T), 2, function(y) str_extract(y, paste0(prot[i], ".*")))
-      transcript <- transcript[!is.na(transcript)]
-      if(length(transcript) == 0) {
-        transcript <- str_split(ref[i], ",", simplify = F)[[1]][1]
-      }
-      transplit <- str_split(transcript, ":", 5)[[1]]
-      x$AAChange[i] <- transplit[length(transplit)]
-      x$CChange[i] <- transplit[length(transplit) - 1]
-      x$Exon[i] <- str_remove(transplit[2], "exon")
-      x$Transcript[i] <- transplit[1]
-    }
-  }
-  
-  codon_nr <- str_extract(x$CChange, "[0-9]+")
-  codon_ref_alt <- lapply(str_split(str_remove_all(x$CChange, "(c\\.|_|ins[ACGT]+|del|dup)"), "[0-9]+"), function(y) y[y != ""])
-  is_snp <- unlist(lapply(codon_ref_alt, function(y) length(y) == 2))
-  x$CChange[is_snp] <- paste0("c.", codon_nr[is_snp], unlist(lapply(codon_ref_alt[is_snp], function(y) y[1])), ">", unlist(lapply(codon_ref_alt[is_snp], function(y) y[2])))
-  if(any(str_detect(x$CChange, "(del|dup)"))) {
-    x[str_detect(x$CChange, "(del|dup)"),]$CChange <- str_remove_all(x[str_detect(x$CChange, "(del|dup)"),]$CChange, "[ACGT]+")
-  }
-  
   return(x)
 }
 
@@ -722,8 +620,8 @@ addCondel <- function(x, dbfile){
   #' @details To get the Condel prediction of a mutation's effect on the
   #' @details protein structur, the position of the mutation is needed
   #' @details and then compared to its score in the database.
-  chr_name <- gsub("chr", "", x$Chr)
-  start_loc <- x$Start
+  chr_name <- gsub("chr", "", x$Chromosome)
+  start_loc <- x$Start_Position
   if (class(start_loc) == "factor"){
     start_loc <- as.numeric(levels(start_loc))[start_loc]
   } else if (class(start_loc) == "character"){
@@ -732,8 +630,8 @@ addCondel <- function(x, dbfile){
   condelscore <- lapply(1:nrow(x), function(i)
     return(condelQuery(chr_name[i],
                        start_loc[i],
-                       as.character(x$Ref[i]),
-                       as.character(x$Alt[i]), dbfile)))
+                       as.character(x$Reference_Allele[i]),
+                       as.character(x$Allele[i]), dbfile)))
 
   condelscore <- unlist(condelscore)
   condellabel <- rep(NA, length(condelscore))
@@ -756,8 +654,8 @@ target_check <- function(input, sureselect) {
                                     start.field = "V2", end.field = "V3", starts.in.df.are.0based = FALSE)
 
   gr_x <- makeGRangesFromDataFrame(input, keep.extra.columns = FALSE, ignore.strand = TRUE,
-                                seqinfo = NULL, seqnames.field = "Chr", start.field = "Start",
-                                end.field = "End", starts.in.df.are.0based = FALSE)
+                                seqinfo = NULL, seqnames.field = "Chromosome", start.field = "Start_Position",
+                                end.field = "End_Position", starts.in.df.are.0based = FALSE)
 
   index <- findOverlaps(query = gr_man, subject = gr_x)
   index <- as.data.frame(index)
@@ -765,261 +663,41 @@ target_check <- function(input, sureselect) {
   return(output)
 }
 
-txt2maf <- function(input, snv_vcf, protocol, Center = center, refBuild = 'GRCh37', idCol = NULL, id = NULL, sep = "\t", Mutation_Status = c("T", "N","LOH")[1]){
-  
-  #' Text to MAF Converter (cBioPortal Import)
-  #' 
-  #' @param input data.frame. Input data,frame from the pipeline. Output from the filtering scripts.
-  #' @param Center string. Name of the processing Center.
-  #' @param refBuild string. Reference genome version, e.g. GRCh37, GRCh38.
-  #' @param idCol string. Column name in the input file containing the Patient_ID.
-  #' @param id string. Patient_ID.
-  #' @param sep string. Separator for the outputfile. Should be "\t" for cBioPortal import.
-  #' @param Mutation_Status string. Kind of mutations about to process. Could either be T(umor), N(ormal) or LOH.
-  #' @param protocol string. Used protocol either panel/tumor only (panelTumor) or WES / tumor and normal (somaticGerlmine or somatic)
-  
-  if (protocol == "somaticGermline" | protocol == "somatic"){
-    if (Mutation_Status == "T") {
-      Mutation_Status <- "Somatic"
-    } else if (Mutation_Status == "N") {
-      Mutation_Status <- "Germline"
-    } else if (Mutation_Status == "LOH") {
-      Mutation_Status <- "LoH"
-    }
-  }
-  if (protocol == "panelTumor" | protocol == "tumorOnly" | protocol == "Tumor_only"){
-    Mutation_Status = "Tumor"
-  }
-  
-  ann <- input
-  
-  essential.col <- c("Chr", "Start", "End", "Ref", "Alt", "Func.refGene", "Gene.refGene", "ExonicFunc.refGene",
-                     "AAChange", "CChange", "avsnp150")
-  
-  for(i in 1:length(essential.col)){
-    colId = suppressWarnings(grep(pattern = paste0("^",essential.col[i], "$"),
-                                  x <- colnames(ann), ignore.case = TRUE))
-    if (length(colId) == 1) {
-      colnames(ann)[colId] <- essential.col[i]
-    }
-  }
-  
-  if(length(essential.col[!essential.col %in% colnames(ann)]) > 0){
-    message("Available fields:")
-    print(colnames(ann))
-    message(paste0("Missing required field in input file: "))
-    print(essential.col[!essential.col %in% colnames(ann)])
-    stop()
-  }
-  
-  if(is.null(idCol) & is.null(id)) {
-    error('Provide either the column containing the Tumor Sample Barcode or the Tumor Sample Barcode as string!')
-    stop()
-  }
-  
-  if(is.null(idCol) & !is.null(id)) {
-    ann$Tumor_Sample_Barcode <- paste(as.character(id),"TD",sep = "_")
-    ann$Matched_Norm_Sample_Barcode <- paste(as.character(id),"GD",sep = "_")
-  }
-  
-  if(!is.null(idCol)) {
-    colnames(ann)[which(colnames(ann) == idCol)] <- "Tumor_Sample_Barcode"
-  }
-  
-  if(is.null(Center)) {
-    Center <- NA
-  }
-  
-  ann.mand <- c("Chr", "Start", "End", "Ref", "Alt", "Func.refGene", "Gene.refGene", "ExonicFunc.refGene",
-                "AAChange", "CChange", "Tumor_Sample_Barcode", "Matched_Norm_Sample_Barcode", "avsnp150")
-  
-  ann <- ann[, ann.mand]
-  ann$ExonicFunc.refGene <- gsub(pattern = " SNV", replacement = "", x = ann$ExonicFunc.refGene)
-  funcSpl <- strsplit(x = as.character(ann$ExonicFunc.refGene), split = ";", fixed = TRUE)
-  funcSpl <- sapply(funcSpl, function(l) {l[length(l)]})
-  ann$ExonicFunc.refGene <- funcSpl
-  
-  funcRef <- strsplit(x = as.character(ann$Func.refGene), split = ";", fixed = TRUE)
-  funcRef <- sapply(funcRef, function(l) {l[length(l)]})
-  ann$Func.refGene <- funcRef
-  
-  ann$ExonicFunc.refGene <- ifelse(test = ann$Func.refGene == "intronic", yes = "Intron", no = ann$ExonicFunc.refGene)
-  ann$ExonicFunc.refGene <- ifelse(test = ann$Func.refGene == "intergenic", yes = "IGR", no = ann$ExonicFunc.refGene)
-  ann$ExonicFunc.refGene <- ifelse(test = ann$Func.refGene == "downstream", yes = "3'Flank", no = ann$ExonicFunc.refGene)
-  ann$ExonicFunc.refGene <- ifelse(test = ann$Func.refGene == "upstream", yes = "5'Flank", no = ann$ExonicFunc.refGene)
-  ann$ExonicFunc.refGene <- ifelse(test = ann$Func.refGene == "splicing", yes = "Splice_Site", no = ann$ExonicFunc.refGene)
-  ann$ExonicFunc.refGene <- ifelse(test = ann$Func.refGene == "UTR3", yes = "3'UTR", no = ann$ExonicFunc.refGene)
-  ann$ExonicFunc.refGene <- ifelse(test = ann$Func.refGene == "UTR5", yes = "5'UTR", no = ann$ExonicFunc.refGene)
-  ann$ExonicFunc.refGene <- ifelse(test = ann$Func.refGene == "splice_region_variant&synonymous_variant", yes = "Splice_Site", no = ann$ExonicFunc.refGene)
-  ann$ExonicFunc.refGene <- ifelse(test = ann$Func.refGene %in% c("ncRNA_exonic", "ncRNA_intronic", "ncRNA_UTR3", "ncRNA_UTR5", "ncRNA"), yes = "RNA", no = ann$ExonicFunc.refGene)
-  ann.lvls <- c("synonymous", "nonsynonymous", "stopgain", "stoploss", "frameshift insertion", "frameshift deletion", "nonframeshift insertion", "nonframeshift deletion",
-                "Intron", "IGR", "Splice_Site", "3'UTR", "3'Flank", "5'UTR", "5'Flank", "unknown", "UNKNOWN", "RNA", "nonframeshift substitution")
-  ann.lbls <- c("Silent", "Missense_Mutation", "Nonsense_Mutation", "Nonstop_Mutation", "Frame_Shift_Ins", "Frame_Shift_Del", "In_Frame_Ins", "In_Frame_Del",
-                "Intron", "IGR", "Splice_Site", "3'UTR", "3'Flank", "5'UTR", "5'Flank", "Unknown", "Unknown", "RNA", "Missense_Mutation")
-  names(ann.lbls) <- ann.lvls
-  ann$ExonicFunc.refGene <- as.character(ann.lbls[as.character(ann$ExonicFunc.refGene)])
-  
-  ann.del <- ann[ann$Alt %in% "-",]
-  ann <- ann[!ann$Alt %in% "-",]
-  
-  if(nrow(ann.del) > 0){
-    ann.del$var.type <- "DEL"
-  } else {
-    ann.del$var.type <- rep(NA, times = dim(ann.del)[1])
-  }
-  
-  ann.ins <- ann[ann$Ref %in% "-",]
-  ann <- ann[!ann$Ref %in% "-",]
-  if(nrow(ann.ins) > 0){
-    ann.ins$var.type <- "INS"
-  } else {
-    ann.ins$var.type <- rep(NA, times = dim(ann.ins)[1])
-  }
-  
-  if(nrow(ann) > 0){
-    ann$var.type <- "SNP"
-  } else {
-    ann$var.type <-  rep(NA, times = dim(ann)[1])
-  }
-  
-  ann <- rbind(ann, ann.del, ann.ins)
-  
-  # Hugo Gene Symbol
-  symbol <- unlist(lapply(strsplit(ann$Gene.refGene, split = ";"), function(x) {x[1]}))
-  idx <- which(!is.na(symbol))
-  
-  # ENTREZ Gene ID
-  entrez <- rep(NA, times = length(symbol))
-  entrez[idx] <- unlist(lapply(mget(as.character(symbol[idx]), org.Hs.egSYMBOL2EG, ifnotfound = NA), function(x){x[1]}))
-  
-  # ENSEMBL Gene ID
-  ensembl <- rep(NA, times = length(symbol))
-  idx <- which(!is.na(entrez))
-  ensembl[idx] <- unlist(lapply(mget(as.character(entrez[idx]), org.Hs.egENSEMBL, ifnotfound = NA), function(x){x[1]}))
-  
-  # Protein Change
-  proteinChange <- as.character(ann$AAChange)
-  
-  # TxChange
-  TxChange <- unlist(lapply(strsplit(x = as.character(ann$CChange), split = ";", fixed = T), function(x) x[1]))
-  TxChange <- gsub(TxChange, pattern = " ", replacement = "")
-  TxChange[TxChange == ""] <- NA  
-  
-  # VAF
-  if ("Variant_Reads" %in% colnames(input)) {
-    vafin <- input$Variant_Reads
-  } else {
-    vafin <- input$Count_Tumor
-  }
-  vaf <- str_split(vafin, "\\|")
-  t_ref_count <- as.numeric(unlist(lapply(vaf, function(x) x[2]))) - as.numeric(unlist(lapply(vaf, function(x) x[1])))
-  t_alt_count <- as.numeric(unlist(lapply(vaf, function(x) x[1])))
-  if("Count_Normal" %in% colnames(input)) {
-    vaf <- str_split(input$Count_Normal, "\\|")
-    n_ref_count <- as.numeric(unlist(lapply(vaf, function(x) x[2]))) - as.numeric(unlist(lapply(vaf, function(x) x[1])))
-    n_alt_count <- as.numeric(unlist(lapply(vaf, function(x) x[1])))
-  } else {
-    n_ref_count <- vector(mode = "character", length = nrow(input))
-    n_alt_count <- vector(mode = "character", length = nrow(input))
-  }
-
-  ann.maf <- data.table::data.table(Hugo_Symbol = as.character(symbol),
-                                    Entrez_Gene_Id = as.character(entrez),
-                                    Center = Center,
-                                    NCBI_Build = refBuild,
-                                    Chromosome = ann$Chr,
-                                    Start_Position = ann$Start,
-                                    End_Position = ann$End,
-                                    Strand = "+",
-                                    Variant_Classification = ann$ExonicFunc.refGene,
-                                    Variant_Type = ann$var.type,
-                                    Reference_Allele = ann$Ref,
-                                    Tumor_Seq_Allele1 = ann$Ref,
-                                    Tumor_Seq_Allele2 = ann$Alt,
-                                    dbSNP_RS = ann$avsnp150,
-                                    dbSNP_Val_Status = "",
-                                    Tumor_Sample_Barcode = ann$Tumor_Sample_Barcode,
-                                    Matched_Norm_Sample_Barcode = ann$Matched_Norm_Sample_Barcode,
-                                    Match_Norm_Seq_Allele1 = ann$Ref,
-                                    Match_Norm_Seq_Allele2 = ann$Alt,
-                                    Tumor_Validation_Allele1 = "",
-                                    Tumor_Validation_Allele2 = "",
-                                    Match_Norm_Validation_Allele1 = "",
-                                    Match_Norm_Validation_Allele2 = "",
-                                    Verification_Status = "",
-                                    Validation_Status = NA,
-                                    Mutation_Status = Mutation_Status,
-                                    Sequencing_Phase = "",
-                                    Sequencing_Source = "",
-                                    Validation_Method = "",
-                                    Score = "",
-                                    BAM_File = "",
-                                    Sequencer = "",
-                                    HGVSp_Short = proteinChange,
-                                    Amino_Acid_Change = proteinChange,
-                                    TxChange = TxChange,
-                                    ENSEMBL_Gene_Id = ensembl,
-                                    t_ref_count,
-                                    t_alt_count,
-                                    n_ref_count,
-                                    n_alt_count)
-  
-  return(ann.maf)
+txt2maf <- function(x){
+  return(x[, c("Hugo_Symbol", "Entrez_Gene_Id", "Center", "NCBI_Build", "Chromosome", "Start_Position", "End_Position", "Strand", "Variant_Classification", "Variant_Type", "Reference_Allele", "Tumor_Seq_Allele1", "Tumor_Seq_Allele2", "dbSNP_RS", "Tumor_Sample_Barcode", "Matched_Norm_Sample_Barcode", "Match_Norm_Seq_Allele1", "Match_Norm_Seq_Allele2", "Mutation_Status", "HGVSp_Short", "t_ref_count", "t_alt_count", "n_ref_count", "n_alt_count")])
 }
 
 exclude <- function(x, vaf = 5){
-  variant_freq <- substr(as.character(x$Variant_Allele_Frequency), start = 1,
-                         stop = nchar(as.character(x$Variant_Allele_Frequency))-1)
-  id <- which(as.numeric(variant_freq) >= vaf)
+  id <- which(as.numeric(x$t_AF) >= vaf)
   if(length(id) > 0) {
     x <- x[id, ]
   }
   return(x)
 }
 
-normalize_vaf <- function(x, mode = "T"){
-  if (mode == "LOH") {
-    x$VAF_Tumor <- as.numeric(x$VAF_Tumor) * 100
-    x$VAF_Tumor <- paste0(x$VAF_Tumor, "%") 
-    x$VAF_Normal <- as.numeric(x$VAF_Normal) * 100
-    x$VAF_Normal <- paste0(x$VAF_Normal, "%") 
-  } else {
-    x$Variant_Allele_Frequency <- as.numeric(x$Variant_Allele_Frequency) * 100
-    x$Variant_Allele_Frequency <- paste0(x$Variant_Allele_Frequency, "%") 
-  }
-  return(x)
-}
-
 extract_lohs <- function(x) {
-  x <- x[str_starts(x$Otherinfo13, "0/1") & !str_starts(x$Otherinfo14, "0/1"), ]
-  return(x)
-  
+  return(x[x$n_GT == "0/1" & x$t_GT != "0/1", ])
 }
 
-loh_correction <- function(filt_loh, filt_gd = NULL, protocol = "somaticGermline", vaf = 10, actionable_genes = NA){
-  filt_loh$table$VAF_Tumor <- as.character(filt_loh$table$VAF_Tumor)
-  filt_loh$table$VAF_Normal <- as.character(filt_loh$table$VAF_Normal)
-  table_id_loss <- which(as.numeric(substr(filt_loh$table$VAF_Tumor, start = 1,
-                                           stop = nchar(filt_loh$table$VAF_Tumor) - 1)) < 20)
+loh_correction <- function(filt_loh, filt_gd = NULL, protocol = "somaticGermline", vaf = 5, actionable_genes = NA){
+  table_id_loss <- which(as.numeric(filt_loh$table$t_AF) < 25 | is.na(as.numeric(filt_loh$table$t_AF)))
   filt_loh_loss <- filt_loh$table[table_id_loss, ]
-  filt_loh$table <- filt_loh$table[-table_id_loss, ]
   
-  maf_vaf_tumor <-100*as.numeric(filt_loh$maf$t_alt_count) / (as.numeric(filt_loh$maf$t_alt_count) + as.numeric(filt_loh$maf$t_ref_count))
-  maf_vaf_normal <- 100*as.numeric(filt_loh$maf$n_alt_count) / (as.numeric(filt_loh$maf$n_alt_count) + as.numeric(filt_loh$maf$n_ref_count))
-  maf_id_loss <- which(maf_vaf_tumor < 20)
-  maf_filt_loh_loss <- filt_loh$maf[maf_id_loss, ]
-  filt_loh$maf <- filt_loh$maf[-maf_id_loss, ]
+  maf_filt_loh_loss <- filt_loh$maf[table_id_loss, ]
+  if (length(table_id_loss) > 0) {
+    filt_loh$table <- filt_loh$table[-table_id_loss, ]
+    filt_loh$maf <- filt_loh$maf[-table_id_loss, ]
+  }
   
   if (protocol == "somaticGermline"){
     filt_loh_loss$Variant_Reads <- filt_loh_loss$Count_Normal
-    filt_loh_loss$Variant_Allele_Frequency <- filt_loh_loss$VAF_Normal
     filt_loh_loss$Zygosity <- rep(x = "het", times = dim(filt_loh_loss)[1])
-    id_exclude <- which(as.numeric(substr(filt_loh_loss$VAF_Normal, start = 1,
-                                          stop = nchar(filt_loh_loss$VAF_Normal) - 1)) < 10)
+    id_exclude <- which(filt_loh_loss$n_AF < vaf)
     if (length(id_exclude) > 0){
       filt_loh_loss <- filt_loh_loss[-id_exclude, ]
+      maf_filt_loh_loss <- maf_filt_loh_loss[-id_exclude, ]
     }
-    id_ex2 <- which(colnames(filt_loh_loss) %in% c("VAF_Normal", "VAF_Tumor", "Count_Normal", "Count_Tumor"))
+    id_ex2 <- which(colnames(filt_loh_loss) %in% c("Count_Normal", "Count_Tumor"))
     filt_loh_loss <- filt_loh_loss[, -id_ex2]
     filt_gd$table$Type <- rep("Germline", times = dim(filt_gd$table)[1])
     filt_loh_loss$Type <- rep("LoH", times = dim(filt_loh_loss)[1])
@@ -1027,11 +705,6 @@ loh_correction <- function(filt_loh, filt_gd = NULL, protocol = "somaticGermline
       filt_gd$table <- rbind(filt_gd$table, filt_loh_loss)
     }
     
-    normal_vaf <- 100*as.numeric(maf_filt_loh_loss$n_alt_count) / (as.numeric(maf_filt_loh_loss$n_alt_count) + as.numeric(maf_filt_loh_loss$n_ref_count))
-    maf_id_exclude <- which(normal_vaf < 10)
-    if (length(maf_id_exclude) > 0){
-      maf_filt_loh_loss <- maf_filt_loh_loss[-maf_id_exclude, ]
-    }
     filt_gd$maf$Mutation_Status <- rep("Germline", times = dim(filt_gd$maf)[1])
     maf_filt_loh_loss$Mutation_Status <- rep("LoH", times = dim(maf_filt_loh_loss)[1])
     if(dim(maf_filt_loh_loss)[1] > 0) {
@@ -1040,13 +713,10 @@ loh_correction <- function(filt_loh, filt_gd = NULL, protocol = "somaticGermline
 
     if (!is.na(actionable_genes) & nrow(filt_gd$maf) > 0 & nrow(filt_gd$table) > 0) {
       filt_gd$maf <- actionable(filt_gd$maf, "Hugo_Symbol", actionable_genes)
-      filt_gd$table <- actionable(filt_gd$table, "Gene.refGene", actionable_genes)
+      filt_gd$table <- actionable(filt_gd$table, "Hugo_Symbol", actionable_genes)
     }
-  } else {
-    filt_gd = filt_gd
+    filt_gd$table <- filt_gd$table[!duplicated(filt_gd$table), ]
+    filt_gd$maf <- filt_gd$maf[!duplicated(filt_gd$maf), ]
   }
-  filt_gd$table <- filt_gd$table[!duplicated(filt_gd$table), ]
-  filt_gd$maf <- filt_gd$maf[!duplicated(filt_gd$maf), ]
-  
   return(list(loh = filt_loh, gd = filt_gd))
 }

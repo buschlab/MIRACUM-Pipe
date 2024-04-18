@@ -11,8 +11,8 @@ find_indel <- function(list){
   #'
   #' @details Given a list of mutations find the indels by checking the
   #' @details reference and alternative bases. 
-  id.ref <- grep("-", list$Ref)
-  id.alt <- grep("-", list$Alt)
+  id.ref <- grep("-", list$Reference_Allele)
+  id.alt <- grep("-", list$Allele)
   id <- unique( c(id.ref, id.alt) )
   return(id)
 }
@@ -28,86 +28,11 @@ find_indel_2 <- function(list){
   #'
   #' @details Given a list of mutations find the indels by checking the
   #' @details reference and alternative bases. 
-  id.ref <- which(nchar(as.character(list$Ref)) > 1)
-  id.alt <- which(nchar(as.character(list$Alt)) > 1)
+  id.ref <- which(nchar(as.character(list$Reference_Allele)) > 1)
+  id.alt <- which(nchar(as.character(list$Allele)) > 1)
   id <- unique( c(id.ref, id.alt) )
   return(id)
 }
-
-# div <- function(x_s, x_l, no_loh) {
-#   #' Mutation separation
-#   #'
-#   #' @description Separate mutions
-#   #'
-#   #' @param x_s dataframe. List of somatic mutations
-#   #' @param x_l dataframe. List of LoH mutations
-#   #' @param no_loh logical. Logical describing existence of LoH mutations
-#   #'
-#   #' @return list of
-#   #' @return x_s_snp dataframe. List of somatic SNVs
-#   #' @return x_s_indel dataframe. List of somatic InDels
-#   #' @return x_l_snp dataframe. List of LoH SNVs
-#   #' @return x_l_indel dataframe. List of LoH InDels
-#   #' @return no_loh logical. Describing existence of LoH mutations
-#   #' @return no_indel_somatic logical. Describing existence of somatic Indels
-#   #' @return no_snp logical. Describing existence of SNVs
-#   #' @return no_indel_loh logical. Describing existence of LoH Indels
-#   #'
-#   #' @details Build separate dataframes for different type of mutations.
-#   #' @details Split somatic and LoH mutations in SNVs and InDels. Return also
-#   #' @details some logicals for existence of mutations at all.
-
-#   no_indel_somatic <- FALSE
-#   # if (protocol == "Tumor_Only" & manifest == "V5UTR") {
-#   #  indel_s <- find_indel_2(x_s)
-#   # } else {
-#   #  indel_s <- find_indel(x_s)
-#   # }
-#   indel_s <- find_indel(x_s)
-#   if (length(indel_s) > 0) {
-#     x_s_snp <- x_s[-indel_s, ]
-#     x_s_indel <- x_s[indel_s, ]
-#   } else {
-#     x_s_snp <- x_s
-#     x_s_indel <- data.frame()
-#     cat("No Indels in Somatic!\n")
-#     no_indel_somatic <- TRUE
-#   }
-
-#   if (dim(x_s_snp)[1] > 0) {
-#     no_snp <- FALSE
-#   } else {
-#     no_snp <- TRUE
-#   }
-
-#   no_indel_loh <- FALSE
-#   no_snp_loh <- FALSE
-#   if (!no_loh) {
-#     indel_l <- find_indel(x_l)
-#     if (length(indel_l) == 0) {
-#       no_indel_loh <- TRUE
-#       x_l_snp <- x_l
-#       x_l_indel <- data.frame()
-#       cat("No Indels in LOH!\n")
-#     } else if (length(indel_l) == dim(x_l)[1]) {
-#       no_snp_loh <- TRUE
-#       x_l_snp <- data.frame()
-#       x_l_indel <- x_l
-#     } else {
-#       x_l_snp <- x_l[-indel_l, ]
-#       x_l_indel <- x_l[indel_l, ]
-#     }
-#   } else {
-#     x_l_snp <- data.frame()
-#     x_l_indel <- data.frame()
-#   }
-#   return(list(
-#     x_s_snp = x_s_snp, x_s_indel = x_s_indel, x_l_snp = x_l_snp,
-#     x_l_indel = x_l_indel, no_loh = no_loh,
-#     no_indel_somatic = no_indel_somatic, no_snp = no_snp,
-#     no_indel_loh = no_indel_loh, no_snp_loh = no_snp_loh
-#   ))
-# }
 
 div <- function(x_s, x_l, no_loh, protocol, sureselect_type) {
   #' Mutation separation
@@ -341,13 +266,13 @@ tables <- function(x_s, x_l = NULL, protocol) {
   #' @details somaticMutations and lohMutations are generated and
   #' @details stored.
 
-  col_names <- c("Gene.refGene", "GeneName", "ExonicFunc.refGene",
-                 "AAChange", "Variant_Allele_Frequency", "Zygosity",
+  col_names <- c("Hugo_Symbol", "Variant_Classification",
+                 "HGVSp_Short", "t_AF", "Zygosity",
                  "Variant_Reads", "is_tumorsuppressor", "is_oncogene",
-                 "is_hotspot", "target", "AF_popmax",
-                 "CADD_phred", "condel.label", "REVEL_score", "CLNSIG", "InterVar_automated",
-                 "cosmic_coding", "Chr", "Start", "Ref",
-                 "Alt")
+                 "is_hotspot", "target", "MAX_AF",
+                 "CADD_PHRED", "condel.label", "REVEL", "CLIN_SIG", 
+                 "Existing_variation", "Chromosome", "Start_Position", "Reference_Allele",
+                 "Allele")
 
   ts_og_table <- data.frame(matrix(ncol = length(col_names), nrow = 0))
   colnames(ts_og_table) <- col_names
@@ -366,13 +291,13 @@ tables <- function(x_s, x_l = NULL, protocol) {
   }
 
   if (!is.null(x_l)){
-    lm_table <- x_l[, c("Gene.refGene", "GeneName", "ExonicFunc.refGene",
-                       "AAChange", "VAF_Normal", "VAF_Tumor",
+    lm_table <- x_l[, c("Hugo_Symbol", "Variant_Classification",
+                       "HGVSp_Short", "n_AF", "t_AF",
                        "Count_Normal", "Count_Tumor", "is_tumorsuppressor",
                        "is_oncogene", "is_hotspot", "target",
-                       "AF_popmax", "CADD_phred", "condel.label", "REVEL_score",
-                       "CLNSIG", "InterVar_automated", "cosmic_coding", "Chr", "Start", "Ref",
-                       "Alt"), drop = FALSE]
+                       "MAX_AF", "CADD_PHRED", "condel.label", "REVEL", "CLIN_SIG",
+                       "Existing_variation", "Chromosome", "Start_Position", "Reference_Allele",
+                       "Allele"), drop = FALSE]
 
   } else {
     lm_table <- data.frame()
@@ -382,10 +307,10 @@ tables <- function(x_s, x_l = NULL, protocol) {
               lm_table = lm_table))
 }
 
-get_mapping_matrix <- function(annovar_table, row_index) {
+get_mapping_matrix <- function(vep_table, row_index) {
   if (length(row_index) == 0) return(NULL)
-  col_index <- match(c("Chr", "Start", "Gene.refGene"), colnames(annovar_table))
-  new_table <- annovar_table[row_index, col_index]
+  col_index <- match(c("Chromosome", "Start_Position", "Hugo_Symbol"), colnames(vep_table))
+  new_table <- vep_table[row_index, col_index]
   new_table[] <- lapply(new_table, as.character)
   new_table$Start <- as.numeric(new_table$Start)
   return(new_table)
@@ -897,23 +822,22 @@ write_all_mut <- function(x_s, x_l = NULL){
   #' @return mut vector of strings. List of mutated genes
   #' 
   #' @details A table with all mutations (somatic and LoH) is saved.
-  col_names <- c("Symbol", "GeneName", "ExonicFunc", "VAF", "Reads",
-                 "AAChange", "TSG", "OG", "HS", "target", "MAF", "CADD",
-                 "Condel", "REVEL_score", "CLNSIG", "InterVar_automated", "COSMIC")
+  col_names <- c("Symbol", "Variant_Classification", "VAF", "Reads",
+                 "HGVSp_Short", "TSG", "OG", "HS", "target", "MAF", "CADD",
+                 "Condel", "REVEL_score", "CLIN_SIG", "Existing_variation")
   all_mutations <- data.frame(matrix(ncol = length(col_names), nrow = 0))
 
   if (!is.null(x_s) && dim(x_s)[1]) {
-    mutations_somatic <- as.character(x_s$Gene.refGene)
+    mutations_somatic <- as.character(x_s$Hugo_Symbol)
     mutations_somatic <- unique(mutations_somatic)
 
-    somatic <- x_s[, c("Gene.refGene", "GeneName", "ExonicFunc.refGene",
-                       "Variant_Allele_Frequency", "Variant_Reads",
-                       "AAChange", "is_tumorsuppressor",
-                       "is_oncogene", "is_hotspot", "target", "AF_popmax",
-                       "CADD_phred", "condel.label", "REVEL_score", "CLNSIG", "InterVar_automated",
-                       "cosmic_coding"),
+    somatic <- x_s[, c("Hugo_Symbol", "Variant_Classification",
+                       "t_AF", "Variant_Reads",
+                       "HGVSp_Short", "is_tumorsuppressor",
+                       "is_oncogene", "is_hotspot", "target", "MAX_AF",
+                       "CADD_PHRED", "condel.label", "REVEL", "CLIN_SIG", "Existing_variation"),
                   drop = FALSE]
-
+    
       colnames(somatic) <- col_names
       all_mutations <- rbind(all_mutations, somatic)
   } else {
@@ -921,14 +845,14 @@ write_all_mut <- function(x_s, x_l = NULL){
   }
 
   if (!is.null(x_l)){
-    mutations_loh <- as.character(x_l$Gene.refGene)
+    mutations_loh <- as.character(x_l$Hugo_Symbol)
     mutations_loh <- unique(mutations_loh)
 
-    loh <- x_l[, c("Gene.refGene", "GeneName", "ExonicFunc.refGene",
-                    "VAF_Tumor", "Count_Tumor", "AAChange",
+    loh <- x_l[, c("Hugo_Symbol", "Variant_Classification",
+                    "t_AF", "Count_Tumor", "HGVSp_Short",
                     "is_tumorsuppressor", "is_oncogene",
-                    "is_hotspot", "target", "AF_popmax", "CADD_phred",
-                    "condel.label", "REVEL_score", "CLNSIG", "InterVar_automated", "cosmic_coding"),
+                    "is_hotspot", "target", "MAX_AF", "CADD_PHRED",
+                    "condel.label", "REVEL", "CLIN_SIG", "Existing_variation"),
                 drop = FALSE]
 
     colnames(loh) <- col_names
@@ -1207,74 +1131,6 @@ imp_pws <- function(ch_mat, all_muts){
   important_pathways <- rbind(pi3k_genes, raf_genes, dna_damage_genes,
                               cell_cycle_genes, tyrosine_genes, topart_genes)
   return(important_pws = important_pathways)
-}
-
-get_status <- function(table, inf_tab_snv, inf_tab_indel) {
-  require(limma)
-  
-  if(dim(table)[1] > 0) {
-    aa <- table$AAChange
-    aa <- strsplit(x = aa, split = ";", fixed = TRUE)
-    aa <- unlist(lapply(aa, function(x){return(x[1])}))
-    id <- grep(pattern = "delins", x = aa)
-    
-    aa_short = c("H", "Q", "P", "R", "L", "D", "E", "A", "G", "V", "Y", "S", "C", "W", "F", "N", "K", "T", "I", "M", "fs", "X")
-    aa_long = c("His", "Gln", "Pro", "Arg", "Leu", "Asp", "Glu", "Ala", "Gly", "Val", "Tyr", "Ser", "Cys", "Trp", "Phe", "Asn", "Lys", "Thr", "Ile", "Met", "fs", "X")
-    names(aa_short) <- aa_long
-    aa = gsub(aa, pattern = '*',replacement = 'X',fixed = T)
-    aa.num = as.numeric(gsub("[^\\d]+", "", aa, perl=TRUE))
-    aa = unlist(lapply(strsplit(aa , split = '.', fixed = T), function(s) s[2]))
-    aa.split = strsplit(aa, split = "(?=[A-Za-z])(?<=[0-9])|(?=[0-9])(?<=[A-Za-z])", perl=T)
-    if (length(id) > 0) {
-      for (i in 1:length(id)) {
-        coord <- paste0(substr(x = aa.split[id][[i]][2], start = 1,
-                               stop = nchar(aa.split[id][[i]][2]) - 3),
-                        aa.split[id][[i]][3])
-        delins <- substr(x = aa.split[id][[i]][4], start = 1, stop = 3)
-        aa.split[id[i]] <- paste0(coord, delins)
-      }
-      ref <- unlist(lapply(aa.split[-id], function(x) {return(x[1])}))
-      pos <- unlist(lapply(aa.split[-id], function(x) {return(x[2])}))
-      alt <- unlist(lapply(aa.split[-id], function(x) {return(x[3])}))
-      ref <- aa_short[ref]
-      alt <- aa_short[alt]
-      aa.short <- rep(NA, times = length(aa.split))
-      aa.short[-id] = paste0(ref, pos, alt)
-      aa.short[id] <- aa.split[id]
-      aa.short <- unlist(aa.short)
-    } else {
-      ref <- aa_short[unlist(lapply(aa.split, function(x) {return(x[1])}))]
-      pos <- unlist(lapply(aa.split, function(x) {return(x[2])}))
-      alt <- aa_short[unlist(lapply(aa.split, function(x) {return(x[3])}))]
-      aa.short = unlist(paste0(ref, pos, alt))
-    }
-    proteinChange = paste0("p.", aa.short)
-    
-    identifier <- table$Gene.refGene
-    inf_tab_indel$ANNOTATION_control <- inf_tab_indel$CLASSIFICATION
-    reference <- rbind(inf_tab_snv[, c("GENE", "AA_CHANGE", "ANNOTATION_control")],
-                       inf_tab_indel[, c("GENE", "AA_CHANGE", "ANNOTATION_control")])
-    id <- grep(pattern = ",", x = reference$GENE, ignore.case = FALSE)
-    # Get up to date Symbols instead of Aliases
-    reference$GENE_new <- alias2SymbolTable(alias = reference$GENE, species = "Hs")
-    if (length(id) > 1) {
-      newgenes <- strsplit(x = reference$GENE[id], split = ",", fixed = TRUE)
-      newgenes <- lapply(newgenes, function(x){
-        return(alias2SymbolTable(alias = x,species = "Hs"))
-        })
-      reference$GENE_new[id] <- lapply(newgenes, function(x){return(paste0(x, collapse = ";"))})
-    }
-    identifier_ref <- reference$GENE_new
-    
-    ids <- list()
-    for (i in 1:length(identifier)) {
-      ids[i] <- grep(pattern = identifier[i], x = identifier_ref)[1]
-    }
-    ids <- unlist(ids)
-    table$Classification <- NA
-    table$Classification <- reference$ANNOTATION_control[ids]
-  }
-  return(table)
 }
 
 msi <- function(msi_file) {

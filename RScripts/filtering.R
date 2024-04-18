@@ -57,6 +57,7 @@ filtering <- function(
 
   # Read Data
   x <- read.delim(file = snpfile, header = T, stringsAsFactors = F, comment.char = "#")
+  x$HGVSp_Short <- str_replace_all(x$HGVSp_Short, "%3D", "=")
   
   # Filter for LoHs based on VarScan algorithm
   if (mode == "LOH") {
@@ -64,23 +65,20 @@ filtering <- function(
   }
   
   # Filter for actionable genes in Germline
-  if (protocol == "somaticGermline" & mode == "N") {
-    x <- actionable(x, "Gene.refGene", actionable_genes)
+  if (protocol == "somaticGermline" && mode == "N") {
+    x <- actionable(x, "Hugo_Symbol", actionable_genes)
   }
   
   # Filter for targeted region in tNGS
   x <- target_check(x, sureselect)
 
-  # Calcualte covered region from bed file
+  # Calculate covered region from bed file
   cov_region <- covered_region(sureselect = sureselect, mode = mode)
   
-  id <- grep(pattern = "CHROM", x = x$Chr)
-  if (length(id) > 0) {
-    x <- x[-id, ]
-  }
+
   # Quality Filter
   if (mode == "T") {
-    id.pass <- grep("PASS", x$Otherinfo10)
+    id.pass <- grep("PASS", x$FILTER)
     if (length(id.pass) > 0) {
       x <- x[id.pass, ]
     } else {
@@ -90,9 +88,7 @@ filtering <- function(
   
   # Extract VAF, Readcounts (and Zygosity)
   x <- vrz(x = x, mode = mode, protocol = protocol)
-  
-  x <- normalize_vaf(x = x, mode = mode)
-    
+      
   # VAF Filter
   x <- exclude(x, vaf = vaf)
     
@@ -100,17 +96,18 @@ filtering <- function(
   x <- mrc(x = x, min_var_count = min_var_count)
     
   # Filter for exonic function
-  x <- filt(x, "intergenic")
-  x <- filt(x, "intronic")
-  x <- filt(x, "ncRNA_exonic")
-  x <- filt(x, "UTR")
-  x <- filt(x, "upstream")
-  x <- filt(x, "downstream")
+  x <- filt(x, "Intron")
+  x <- filt(x, "3'UTR")
+  x <- filt(x, "5'UTR")
+  x <- filt(x, "RNA")
+  x <- filt(x, "IGR")
+  x <- filt(x, "3'Flank")
+  x <- filt(x, "5'Flank")
   
   # TMB calculation for WES
   if (protocol == "somaticGermline" | protocol == "somatic"){
     if (mode == "T") {
-      id_ex <- which(x$Func.refGene == "exonic")
+      id_ex <- which(x$BIOTYPE == "protein_coding")
       x_coding <- x[id_ex, ]
       tmb <- tmb_ex(x_coding, covered_exons, mode = "T", cov_t)
     } else {
@@ -120,8 +117,8 @@ filtering <- function(
   }
   
   # Filter for exonic function
-  test <- as.character(x$ExonicFunc.refGene)
-  syn.snv <- which(test %in% c("synonymous SNV", "synonymous_variant", "unknown", "synonymous_variant;synonymous_variant", ""))
+  test <- as.character(x$Variant_Classification)
+  syn.snv <- which(test %in% c("Silent", "Splice_Region"))
   if (length(syn.snv) > 0) {
     x <- x[- syn.snv,]
   }
@@ -132,7 +129,7 @@ filtering <- function(
   # TMB calculation for panel (TSO500) and tumorOnly WES; only rare mutations; assumption: rare mutations are "somatic"
   if (protocol == "panelTumor" | protocol == "tumorOnly") {
     if (mode == "T") {
-      id_ex <- which(x$Func.refGene == "exonic")
+      id_ex <- which(x$BIOTYPE == "protein_coding")
       x_coding <- x[id_ex, ]
       tmb <- tmb_ex(x_coding, covered_exons, mode = "T", cov_t)
     } else {
@@ -140,16 +137,15 @@ filtering <- function(
                   number_used_mutations_tmb = NULL)
     }
   }
-  
+
   if (dim(x)[1] != 0) {
     # mane select
-    x <- maneselect(x, maneselectfile)
+    #x <- maneselect(x, maneselectfile)
 
     # Include GeneName
-    x$Start <- as.numeric(as.character(x$Start))
-    x$End <- as.numeric(as.character(x$End))
-    x$Gene.refGene <- as.character(x$Gene.refGene)
-    x <- gene_name(x)
+    x$Start_Position <- as.numeric(as.character(x$Start_Position))
+    x$End_Position <- as.numeric(as.character(x$End_Position))
+    x$Hugo_Symbol <- as.character(x$Hugo_Symbol)
     
     # Further Annotation
     # Database Queries
@@ -161,47 +157,10 @@ filtering <- function(
     x <- trgt(x, paste(path_data, "TARGET_db.txt", sep = "/"))
     x <- dgidb(x, paste(path_data, "DGIdb_interactions.tsv", sep = "/"))
     x <- oncokb(x, paste(path_data, "oncokb_biomarker_drug_associations.tsv", sep = "/"))
-    
-    x.condel <- addCondel(x, paste(path_data, "fannsdb.tsv.gz", sep = "/"))
-    
-    if (mode == "N" | mode == "T"){
-      ids <- c("Chr", "Start", "End", "Ref", "Alt", "Func.refGene",
-               "Gene.refGene", "GeneName", "ExonicFunc.refGene",
-               "AAChange.refGene", "AAChange", "CChange",
-               "AF_popmax", 
-               "Variant_Allele_Frequency", "Variant_Reads",
-               "Zygosity", "is_tumorsuppressor", "is_oncogene", "is_hotspot",
-               "is_flag", "target", "DGIdb", "condel.label", "cosmic_coding",
-               "CLNSIG", "InterVar_automated",
-               "CADD_phred", "DANN_score", "SIFT_pred",
-               "Polyphen2_HDIV_pred", "avsnp150", "rvis", "REVEL_score")
-    } else if (mode == "LOH"){
-      ids <- c("Chr", "Start", "End", "Ref", "Alt", "Func.refGene",
-               "Gene.refGene", "GeneName", "ExonicFunc.refGene",
-               "AAChange.refGene", "AAChange", "CChange",
-               "AF_popmax", "VAF_Normal", "VAF_Tumor", "Count_Normal",
-               "Count_Tumor", "is_tumorsuppressor", "is_oncogene",
-               "is_hotspot", "is_flag", "target", "DGIdb", "condel.label",
-               "cosmic_coding", "CLNSIG",
-               "InterVar_automated", "CADD_phred", "DANN_score",
-               "SIFT_pred", "Polyphen2_HDIV_pred", "avsnp150", "rvis", "REVEL_score")
-    }
-    idx <- match(ids, colnames(x.condel))
-    tot <- seq(1, ncol(x.condel))
-    idx2 <- setdiff(tot, idx)
-    x <- x.condel[, c(idx, idx2)]    
+    x <- addCondel(x, paste(path_data, "fannsdb.tsv.gz", sep = "/"))   
     
     # MAF
-    out.maf <- txt2maf(
-      input = x,
-      protocol = protocol,
-      Center = center,
-      refBuild = 'GRCh37',
-      id = sample,
-      sep = "\t",
-      idCol = NULL,
-      Mutation_Status = mode
-    )
+    out.maf <- txt2maf(x)
     
     return(
       list(

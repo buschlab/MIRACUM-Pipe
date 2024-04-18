@@ -333,8 +333,8 @@ keys <- function(
 }
 
 l_gen_nex <- function(df, type = "SNV") {
-  if ("Gene.refGene" %in% colnames(df)) {
-    df$Symbol <- df$Gene.refGene
+  if ("Hugo_Symbol" %in% colnames(df)) {
+    df$Symbol <- df$Hugo_Symbol
   }
   if ( type == "SNV") {
     vec_gen_nex <- paste0(
@@ -361,13 +361,13 @@ l_gen_nex <- function(df, type = "SNV") {
 }
 
 meta <- function(df) {
-  df$AAChange <- substr(x = df$AAChange, start = 3, stop = nchar(df$AAChange))
+  df$HGVSp_Short <- substr(x = df$HGVSp_Short, start = 3, stop = nchar(df$HGVSp_Short))
   hyper_refs <- paste0(
     "https://search.cancervariants.org/\\#", df$Symbol, "\\%20",
-    df$AAChange
+    df$HGVSp_Short
   )
   vec_meta <- paste0(
-    "{\\href{", hyper_refs, "}{", df$AAChange, "}}"
+    "{\\href{", hyper_refs, "}{", df$HGVSp_Short, "}}"
   )
   vec_meta <- gsub(
     pattern = "_", replacement = "\\_",
@@ -380,13 +380,13 @@ varsome <- function(df, mode) {
   baseURL <- "https://varsome.com/variant/hg19/"
   if (mode == "1") {
     completeVarsomeLink <- paste0(
-      "{\\href{", baseURL, df$Chr, "\\%3A",df$Start,
-      "\\%3A", df$Ref, "\\%3A", df$Alt, "}{Link}}"
+      "{\\href{", baseURL, df$Chromosome, "\\%3A",df$Start_Position,
+      "\\%3A", df$Reference_Allele, "\\%3A", df$Allele, "}{Link}}"
     )
   } else if (mode == "2"){
     completeVarsomeLink <- paste0(
-      "{\\href{", baseURL, df$Chr, "\\%3A",df$Start,
-      "\\%3A", df$Ref, "\\%3A", df$Alt, "}{", df$ExonicFunc.refGene, "}}"
+      "{\\href{", baseURL, df$Chromosome, "\\%3A",df$Start_Position,
+      "\\%3A", df$Reference_Allele, "\\%3A", df$Allele, "}{", df$Variant_Classification, "}}"
     )
   }
     completeVarsomeLink <- gsub(
@@ -397,142 +397,37 @@ varsome <- function(df, mode) {
 }
 
 acmg <- function(df) {
-  df$InterVar <- gsub(
-    pattern = "Pathogenic", replacement = 5,
-    x = df$InterVar
-  )
-  df$InterVar <- gsub(
-    pattern = "Likely pathogenic", replacement = 4,
-    x = df$InterVar
-  )
-  df$InterVar <- gsub(
-    pattern = "Uncertain significance", replacement = 3,
-    x = df$InterVar
-  )
-  df$InterVar <- gsub(
-    pattern = "Likely benign", replacement = 2,
-    x = df$InterVar
-  )
-  df$InterVar <- gsub(
-    pattern = "Benign", replacement = 1,
-    x = df$InterVar
-  )
-  df$InterVar[is.na(df$InterVar)] <- "0"
-  df$InterVar <- gsub(
-    pattern = ".", replacement = 0,
-    x = df$InterVar, fixed = TRUE
-  )
-  # ClinVar \\x2c
-  if ("CLNSIG" %in% colnames(df)) {
-    df$CLNSIG_new <- df$CLNSIG
-  } else {
-    df$CLNSIG_new <- df$ClinVar
-  }
-  df$CLNSIG_new <- gsub(
-    pattern = ",_other", fixed = TRUE,
-    replacement = "", x = df$CLNSIG_new
-  )
-  df$CLNSIG_new <- gsub(
-    pattern = "other", fixed = TRUE,
-    replacement = "", x = df$CLNSIG_new
-  )
-  df$CLNSIG_new <- gsub(
-    pattern = ",_drug_response", fixed = TRUE,
-    replacement = "", x = df$CLNSIG_new
-  )
-  df$CLNSIG_new <- gsub(
-    pattern = "risk_factor", fixed = TRUE,
-    replacement = "", x = df$CLNSIG_new
-  )
-  df$CLNSIG_new <- gsub(
-    pattern = "Pathogenic",
-    replacement = 5, x = df$CLNSIG_new
-  )
-  df$CLNSIG_new <- gsub(
-    pattern = "Likely_pathogenic",
-    replacement = 4, x = df$CLNSIG_new
-  )
-  df$CLNSIG_new <- gsub(
-    pattern = "Uncertain_significance",
-    replacement = 3, x = df$CLNSIG_new
-  )
-  df$CLNSIG_new <- gsub(
-    pattern = "Likely_benign",
-    replacement = 2, x = df$CLNSIG_new
-  )
-  df$CLNSIG_new <- gsub(
-    pattern = "Benign",
-    replacement = 1, x = df$CLNSIG_new
-  )
-  df$CLNSIG_new <- gsub(
-    pattern = "Conflicting_interpretations_of_pathogenicity",
-    replacement = 4, x = df$CLNSIG_new
-  )
-  df$CLNSIG_new <- gsub(
-    pattern = "not_provided", fixed = TRUE,
-    replacement = ".", x = df$CLNSIG_new
-  )
-  df$CLNSIG_new <- gsub(
-    pattern = ".",
-    replacement = 0, x = df$CLNSIG_new, fixed = TRUE)
-  df$CLNSIG_new[is.na(df$CLNSIG_new)] <- 0
+  
+  # Split by ,
+  df$CLIN_SIG <- str_split(df$CLIN_SIG, ",")
+  
+  # Remove multi annotations
+  df$CLIN_SIG <- lapply(df$CLIN_SIG, function(x) str_replace_all(x, "[a-z_]+/[a-z_]+", ""))
+  
+  df$CLIN_SIG <- lapply(df$CLIN_SIG, function(x) str_replace_all(x, "^pathogenic$", "5"))
+  
+  df$CLIN_SIG <- lapply(df$CLIN_SIG, function(x) str_replace_all(x, "^likely_pathogenic$", "4"))
+  
+  df$CLIN_SIG <- lapply(df$CLIN_SIG, function(x) str_replace_all(x, "^conflicting_interpretations_of_pathogenicity$", "4*"))
 
-  df$CLNSIG <- gsub(
-    pattern = ",_other", fixed = TRUE,
-    replacement = "", x = df$CLNSIG
-  )
-  df$CLNSIG <- gsub(
-    pattern = "other", fixed = TRUE,
-    replacement = "", x = df$CLNSIG
-  )
-  df$CLNSIG <- gsub(
-    pattern = ",_drug_response", fixed = TRUE,
-    replacement = "", x = df$CLNSIG
-  )
-  df$CLNSIG <- gsub(
-    pattern = "risk_factor", fixed = TRUE,
-    replacement = "", x = df$CLNSIG
-  )
-  df$CLNSIG <- gsub(
-    pattern = "Pathogenic",
-    replacement = 5, x = df$CLNSIG
-  )
-  df$CLNSIG <- gsub(
-    pattern = "Likely_pathogenic",
-    replacement = 4, x = df$CLNSIG
-  )
-  df$CLNSIG <- gsub(
-    pattern = "Uncertain_significance",
-    replacement = 3, x = df$CLNSIG
-  )
-  df$CLNSIG <- gsub(
-    pattern = "Likely_benign",
-    replacement = 2, x = df$CLNSIG
-  )
-  df$CLNSIG <- gsub(
-    pattern = "Benign",
-    replacement = 1, x = df$CLNSIG
-  )
-  df$CLNSIG <- gsub(
-    pattern = "Conflicting_interpretations_of_pathogenicity",
-    replacement = "4*", x = df$CLNSIG
-  )
-  df$CLNSIG <- gsub(
-    pattern = "not_provided", fixed = TRUE,
-    replacement = ".", x = df$CLNSIG
-  )
-  df$CLNSIG[is.na(df$CLNSIG)] <- "."
-  # combined classification; use most severe
-  df$Classification <- unlist(lapply(
-    strsplit(x = pmax(df$InterVar,
-    df$CLNSIG_new),
-    split = "/"), function(x) max(x)
-  ))
-  df$InterVar <- gsub(
-    pattern = 0, replacement = ".",
-    x = df$InterVar, fixed = TRUE)
-  vec_acmg <- paste0(df$InterVar, " | ", df$CLNSIG)
-  return(cbind(vec_acmg, df$Classification))
+  df$CLIN_SIG <- lapply(df$CLIN_SIG, function(x) str_replace_all(x, "^uncertain_significance$", "3"))
+  
+  df$CLIN_SIG <- lapply(df$CLIN_SIG, function(x) str_replace_all(x, "^likely_benign$", "2"))
+  
+  df$CLIN_SIG <- lapply(df$CLIN_SIG, function(x) str_replace_all(x, "^benign$", "1"))
+
+  # Remove annotations without acmg relevance
+  df$CLIN_SIG <- lapply(df$CLIN_SIG, function(x) str_remove(x, "^other$"))
+  df$CLIN_SIG <- lapply(df$CLIN_SIG, function(x) str_remove(x, "^drug_response$"))
+  df$CLIN_SIG <- lapply(df$CLIN_SIG, function(x) str_remove(x, "^risk_factor$"))
+  df$CLIN_SIG <- lapply(df$CLIN_SIG, function(x) str_remove(x, "^not_provided$"))
+  
+  df$CLIN_SIG <- lapply(df$CLIN_SIG, function(x) str_replace(x, "^$", "0"))
+  prio <- lapply(df$CLIN_SIG, function(x) str_replace(x, "4\\*", "4"))
+  argmax <- unlist(lapply(prio, function(x) which.max(as.numeric(x))))
+  df$CLIN_SIG <- lapply(df$CLIN_SIG, function(x) str_replace(x, "0", "."))
+  
+  return(mapply(function(x,y) x[y], df$CLIN_SIG, argmax))
 }
 
 revel <- function(df) {
@@ -550,111 +445,88 @@ revel <- function(df) {
 }
 
 cosmic <- function(df) {
-  if ("COSMIC" %in% colnames(df)) {
-    vec_cos <- lapply(
-      strsplit(x = as.character(df$COSMIC), split = "="),
-      function(x) { return(unlist(x)[2]) }
-    )
-  } else {
-    vec_cos <- lapply(
-      strsplit(x = as.character(df$cosmic_coding), split = "="),
-      function(x) { return(unlist(x)[2]) }
-    )
-  }
-  vec_cos <- lapply(
-    strsplit(x = as.character(vec_cos), split = ";"),
-    function(x){return(unlist(x)[1])}
-  )
-  vec_cos <- gsub(pattern = ",", replacement = ", ", x = vec_cos)
-  vec_cos <- gsub(pattern = "COSV", replacement = "", x = vec_cos)
-  vec_cos[which(is.na(vec_cos))] <- "."
+  vec_cos <- str_match_all(df$Existing_variation, "COSV[0-9]+")
+  vec_cos <- unlist(lapply(vec_cos, function(x) paste(unlist(x), collapse=', ')))
+  vec_cos <- str_remove_all(vec_cos, "COSV")
+  vec_cos[nchar(vec_cos) == 0] <- "."
   return(vec_cos)
 }
 
 ex_func <- function(df) {
-  if ("ExonicFunction" %in% colnames(df)) {
-    vec_exf <- df$ExonicFunction
-  } else {
-    vec_exf <- df$ExonicFunc.refGene
-  }
+  vec_exf <- df$Variant_Classification
+
   vec_exf <- gsub(
-    pattern = "nonsynonymous SNV",
-    replacement = "nsSNV", x = vec_exf
+    pattern = "Nonsense_Mutation",
+    replacement = "stopG", x = vec_exf
   )
   vec_exf <- gsub(
-    pattern = "stopgain",
-    replacement = "SG", x = vec_exf
+    pattern = "Nonstop_Mutation",
+    replacement = "stopL", x = vec_exf
   )
   vec_exf <- gsub(
-    pattern = "nonframeshift deletion",
-    replacement = "nfsDel", x = vec_exf
+    pattern = "Translation_Start_Site",
+    replacement = "startL", x = vec_exf
   )
   vec_exf <- gsub(
-    pattern = "frameshift deletion",
+    pattern = "Frame_Shift_Del",
     replacement = "fsDel", x = vec_exf
   )
   vec_exf <- gsub(
-    pattern = "nonframeshift insertion",
-    replacement = "nfsIns", x = vec_exf
-  )
-  vec_exf <- gsub(
-    pattern = "frameshift insertion",
+    pattern = "Frame_Shift_Ins",
     replacement = "fsIns", x = vec_exf
   )
   vec_exf <- gsub(
-    pattern = "startloss",
-    replacement = "SL", x = vec_exf
+    pattern = "In_Frame_Del",
+    replacement = "nfsDel", x = vec_exf
   )
   vec_exf <- gsub(
-    pattern = "splice_region_variant&synonymous_variant",
+    pattern = "In_Frame_Ins",
+    replacement = "nfsIns", x = vec_exf
+  )
+  vec_exf <- gsub(
+    pattern = "Splice_Site",
     replacement = "splice", x = vec_exf
   )
   vec_exf <- gsub(
-    pattern = "nonframeshift substitution",
-    replacement = "nfsSub", x = vec_exf
-  )
-  vec_exf <- gsub(
-    pattern = "missense_variant",
+    pattern = "Missense_Mutation",
     replacement = "nsSNV", x = vec_exf
   )
+  
   return(vec_exf)
 }
 
-highlight <- function(muts_tab, protocol) {
+highlight_table <- function(muts_tab, protocol) {
   # Select mutations in tumorsuppressors and oncogenes as well as potentially deleterious
   highlight <- muts_tab[which(
     muts_tab$is_oncogene == 1 | muts_tab$is_tumorsuppressor == 1 |
-    muts_tab$InterVar_automated %in% c("Pathogenic", "Likely pathogenic") |
-    muts_tab$CLNSIG %in% c(
-      "Pathogenic",
-      "Likely_pathogenic",
-      "Conflicting_interpretations_of_pathogenicity"
+    muts_tab$CLIN_SIG %in% c(
+      "pathogenic",
+      "likely_pathogenic",
+      "conflicting_interpretations_of_pathogenicity"
     )
   ),
   c(
-    "Gene.refGene",
-    "AAChange",
-    "Variant_Allele_Frequency",
-    "InterVar_automated",
+    "Hugo_Symbol",
+    "HGVSp_Short",
+    "t_AF",
     "is_tumorsuppressor",
     "is_oncogene",
     "is_hotspot",
-    "CLNSIG",
-    "REVEL_score",
-    "Chr",
-    "Start",
-    "Ref",
-    "Alt"
+    "CLIN_SIG",
+    "REVEL",
+    "Chromosome",
+    "Start_Position",
+    "Reference_Allele",
+    "Allele"
   )]
   colnames(highlight) <- c(
     "Symbol",
-    "AAChange",
+    "HGVSp_Short",
     "VAF",
-    "InterVar",
     "TSG",
     "OG",
     "HS",
-    "CLNSIG",
+    "CLIN_SIG",
     "REVEL",
     "Chr",
     "Start",
@@ -664,33 +536,33 @@ highlight <- function(muts_tab, protocol) {
    if (dim(highlight)[1] != 0) {
     ### Interactive links ###
     # Genome Nexus
-    highlight$Gene.refGene_new <- highlight$Symbol
-    if (length(which(highlight$Alt == "-" | highlight$Ref == "-")) > 0) {
-      highlight$Gene.refGene_new[- which(
-        highlight$Alt == "-" | highlight$Ref == "-"
+    highlight$Hugo_Symbol_new <- highlight$Symbol
+    if (length(which(highlight$Allele == "-" | highlight$Reference_Allele == "-")) > 0) {
+      highlight$Hugo_Symbol_new[- which(
+        highlight$Allele == "-" | highlight$Reference_Allele == "-"
       )] <- l_gen_nex(df = highlight[-which(
-        highlight$Alt == "-" | highlight$Ref == "-"
+        highlight$Allele == "-" | highlight$Reference_Allele == "-"
       ), ], type = "SNV") 
       if (length(which(highlight$Alt == "-")) > 0){
-        highlight$Gene.refGene_new[which(
-          highlight$Alt == "-"
+        highlight$Hugo_Symbol_new[which(
+          highlight$Allele == "-"
         )] <- l_gen_nex(df = highlight[which(
-          highlight$Alt == "-"
+          highlight$Allele == "-"
         ), ], type = "DEL")
       }
       if (length(which(highlight$Ref == "-")) > 0) {
-      highlight$Gene.refGene_new[which(
-        highlight$Ref == "-"
+      highlight$Hugo_Symbol_new[which(
+        highlight$Reference_Allele == "-"
       )] <- l_gen_nex(df = highlight[which(
-        highlight$Ref == "-"
+        highlight$Reference_Allele == "-"
       ), ], type = "INS")
       }
     } else {
-      highlight$Gene.refGene_new <- l_gen_nex(df = highlight, type = "SNV")
+      highlight$Hugo_Symbol_new <- l_gen_nex(df = highlight, type = "SNV")
 
     }
     # Cancer Consortium Meta-Knowledgebase
-    highlight$AAChange <- meta(df = highlight)
+    highlight$HGVSp_Short <- meta(df = highlight)
 
     # VarSome links
     highlight$Varsome <- varsome(df = highlight, mode = "1")
@@ -698,9 +570,8 @@ highlight <- function(muts_tab, protocol) {
     # VAF
     highlight$VAF <- gsub(pattern = "%", replacement = "", x = highlight$VAF)
 
-    # InterVar (ACMG)
-    highlight$Classification <- acmg(df = highlight)[, 2]
-    highlight$combineInterVarClinVar <- acmg(df = highlight)[, 1]
+    # ClinVar (ACMG)
+    highlight$Classification <- acmg(df = highlight)
 
     # REVEL
     res_revel <- revel(df = highlight)
@@ -718,6 +589,7 @@ highlight <- function(muts_tab, protocol) {
 
     # combined ACMG classification
     highlight$Cat <- highlight$Classification
+    highlight$Cat[highlight$Cat == "."] <- "0"
     highlight$Cat[duplicated(highlight$Classification)] <- "."
     highlight$Cat <- gsub(
       pattern = 5, replacement = "Pathogen", x = highlight$Cat
@@ -754,17 +626,17 @@ highlight <- function(muts_tab, protocol) {
     # output
     highlight <- highlight[, c(
       "Cat",
-      "combineInterVarClinVar",
+      "Classification",
       "REVEL_cat",
-      "Gene.refGene_new",
-      "AAChange",
+      "Hugo_Symbol_new",
+      "HGVSp_Short",
       "VAF",
       "Cancergene",
       "Varsome"
     )]
     colnames(highlight) <- c(
       "Kategorie",
-      "InterVar | ClinVar",
+      "ClinVar",
       "REVEL",
       "Gen",
       "AA-Austausch",
@@ -787,44 +659,44 @@ highlight_detail <- function(muts_tab, Mode = "Tumor", protocol) {
     id_hs <- NULL
   } else {
     # Genome Nexus
-    highlight$Gene.refGene <- unlist(
+    highlight$Hugo_Symbol <- unlist(
       lapply(
         strsplit(
-          x = as.character(highlight$Gene.refGene), split = ";", fixed = TRUE
+          x = as.character(highlight$Hugo_Symbol), split = ";", fixed = TRUE
         ), function(x) {
           return(x[[1]])
         }
       )
     )
-    highlight$Gene.refGene_new <- highlight$Gene.refGene
-    if (length(which(highlight$Alt == "-" | highlight$Ref == "-")) > 0) {
-      highlight$Gene.refGene_new[-which(
-        highlight$Alt == "-" | highlight$Ref == "-"
+    highlight$Hugo_Symbol_new <- highlight$Hugo_Symbol
+    if (length(which(highlight$Allele == "-" | highlight$Reference_Allele == "-")) > 0) {
+      highlight$Hugo_Symbol_new[-which(
+        highlight$Allele == "-" | highlight$Reference_Allele == "-"
       )] <- l_gen_nex(df = highlight[-which(
-        highlight$Alt == "-" | highlight$Ref == "-"
+        highlight$Allele == "-" | highlight$Reference_Allele == "-"
       ), ], type = "SNV") 
-      if (length(which(highlight$Alt == "-")) > 0) {
-        highlight$Gene.refGene_new[which(
-          highlight$Alt == "-"
+      if (length(which(highlight$Allele == "-")) > 0) {
+        highlight$Hugo_Symbol_new[which(
+          highlight$Allele == "-"
         )] <- l_gen_nex(df = highlight[which(
-          highlight$Alt == "-"
+          highlight$Allele == "-"
         ), ], type = "DEL") 
       }
-      if (length(which(highlight$Ref == "-")) > 0) {
-        highlight$Gene.refGene_new[which(
-          highlight$Ref == "-"
+      if (length(which(highlight$Reference_Allele == "-")) > 0) {
+        highlight$Hugo_Symbol_new[which(
+          highlight$Reference_Allele == "-"
         )] <- l_gen_nex(df = highlight[which(
-          highlight$Ref == "-"
+          highlight$Reference_Allele == "-"
         ), ], type = "INS")
       }
     } else {
-      highlight$Gene.refGene_new <- l_gen_nex(df = highlight, type = "SNV")
+      highlight$Hugo_Symbol_new <- l_gen_nex(df = highlight, type = "SNV")
     }
     # Cancer Consortium Meta-Knowledgebase
-    highlight$AAChange <- meta(df = highlight)
+    highlight$HGVSp_Short <- meta(df = highlight)
 
     # Function
-    highlight$ExonicFunc.refGene <- ex_func(df = highlight)
+    highlight$Variant_Classification <- ex_func(df = highlight)
 
     # VarSome links
     highlight$Varsome <- varsome(df = highlight, mode = "2")
@@ -833,30 +705,29 @@ highlight_detail <- function(muts_tab, Mode = "Tumor", protocol) {
     if (Mode %in% c("Tumor", "Germline")) {
       highlight$VAF <- gsub(
         pattern = "%", replacement = "",
-        x = highlight$Variant_Allele_Frequency
+        x = highlight$t_AF
       )
       highlight$VAF <- paste0(
         highlight$VAF, " (", highlight$Variant_Reads, ")"
       )
     } else if (Mode == "LoH") {
-      highlight$VAF_Normal <- gsub(
+      highlight$n_AF <- gsub(
         pattern = "%", replacement = "",
-        x = highlight$VAF_Normal, fixed = TRUE
+        x = highlight$n_AF, fixed = TRUE
       )
-      highlight$VAF_Tumor <- gsub(
+      highlight$t_AF <- gsub(
         pattern = "%",replacement = "",
-        x = highlight$VAF_Tumor, fixed = TRUE
+        x = highlight$t_AF, fixed = TRUE
       )
-      highlight$VAF_normal <- paste0(
-        highlight$VAF_Normal, " (", highlight$Count_Normal, ")"
+      highlight$n_AF <- paste0(
+        highlight$n_AF, " (", highlight$Count_Normal, ")"
       )
-      highlight$VAF_tumor <- paste0(
-        highlight$VAF_Tumor, " (", highlight$Count_Tumor, ")"
+      highlight$t_AF <- paste0(
+        highlight$t_AF, " (", highlight$Count_Tumor, ")"
       )
     }
-    # InterVar (ACMG)
-    highlight$combineInterVarClinVar <- acmg(df = highlight)[, 1]
-    highlight$Classification <- acmg(df = highlight)[, 2]
+    # ClinVar (ACMG)
+    highlight$Classification <- acmg(df = highlight)
 
     # REVEL
     res_revel <- revel(df = highlight)
@@ -871,13 +742,13 @@ highlight_detail <- function(muts_tab, Mode = "Tumor", protocol) {
       highlight <- highlight[order(
         as.numeric(gsub(
           pattern = "%", replacement = "",
-          x = highlight$Variant_Allele_Frequency
+          x = highlight$t_AF
         )),
         decreasing = TRUE
       ), , drop = FALSE]
     } else if (Mode == "LoH") {
       highlight <- highlight[order(
-        as.numeric(highlight$VAF_Tumor), decreasing = TRUE
+        as.numeric(highlight$t_AF), decreasing = TRUE
       ), , drop = FALSE]
     }
     highlight <- highlight[order(
@@ -894,20 +765,20 @@ highlight_detail <- function(muts_tab, Mode = "Tumor", protocol) {
     )] <- "both"
 
     # Population frequency
-    highlight$AF_popmax <- as.character(format(
-      as.numeric(highlight$AF_popmax), scientific = TRUE, digits = 2
+    highlight$MAX_AF <- as.character(format(
+      as.numeric(highlight$MAX_AF), scientific = TRUE, digits = 2
     ))
-    highlight$AF_popmax[is.na(highlight$AF_popmax)] <- "."
+    highlight$MAX_AF[is.na(highlight$MAX_AF)] <- "."
 
     # output
     if (Mode == "Tumor") {
       muts_tab <- highlight[, c(
-        "Gene.refGene_new",
-        "AAChange",
+        "Hugo_Symbol_new",
+        "HGVSp_Short",
         "Varsome",
         "VAF",
-        "AF_popmax",
-        "combineInterVarClinVar",
+        "MAX_AF",
+        "Classification",
         "REVEL_cat",
         "cosmic",
         "Cancergene"
@@ -918,20 +789,20 @@ highlight_detail <- function(muts_tab, Mode = "Tumor", protocol) {
         "Funktion / VarSome",
         "VAF [\\%] (Coverage)",
         "MAF",
-        "InterVar | ClinVar",
+        "ClinVar",
         "REVEL",
         "Cosmic",
         "Cancergene"
       )
     } else if (Mode == "LoH") {
       muts_tab <- highlight[, c(
-        "Gene.refGene_new",
-        "AAChange",
+        "Hugo_Symbol_new",
+        "HGVSp_Short",
         "Varsome",
-        "VAF_tumor",
-        "VAF_normal",
-        "AF_popmax",
-        "combineInterVarClinVar",
+        "t_AF",
+        "n_AF",
+        "MAX_AF",
+        "Classification",
         "REVEL_cat",
         "cosmic",
         "Cancergene"
@@ -943,19 +814,19 @@ highlight_detail <- function(muts_tab, Mode = "Tumor", protocol) {
         "VAF [\\%] (Coverage) Tumor",
         "VAF [\\%] (Coverage) Keimbahn",
         "MAF",
-        "InterVar | ClinVar",
+        "ClinVar",
         "REVEL",
         "Cosmic",
         "Cancergene"
       )
     } else if (Mode == "Germline") {
       muts_tab <- highlight[, c(
-        "Gene.refGene_new",
-        "AAChange",
+        "Hugo_Symbol_new",
+        "HGVSp_Short",
         "Varsome",
         "VAF",
-        "AF_popmax",
-        "combineInterVarClinVar",
+        "MAX_AF",
+        "Classification",
         "REVEL_cat",
         "cosmic",
         "Cancergene"
@@ -966,7 +837,7 @@ highlight_detail <- function(muts_tab, Mode = "Tumor", protocol) {
         "Funktion / VarSome",
         "VAF [\\%] (Coverage)",
         "MAF",
-        "InterVar | ClinVar",
+        "ClinVar",
         "REVEL",
         "Cosmic",
         "Cancergene"
@@ -1362,28 +1233,26 @@ pthws_mut <- function(df, protocol) {
     df <- df[, c(
       "Pathway",
       "Symbol",
-      "AAChange",
-      "ExonicFunc",
+      "HGVSp_Short",
+      "Variant_Classification",
       "VAF",
       "Reads",
       "MAF",
-      "InterVar_automated",
-      "CLNSIG",
+      "CLIN_SIG",
       "REVEL_score",
-      "COSMIC"
+      "Existing_variation"
     )]
     colnames(df) <- c(
       "Pathway",
       "Symbol",
-      "AAChange",
-      "ExonicFunction",
+      "HGVSp_Short",
+      "Variant_Classification",
       "VAF",
       "Reads",
       "MAF",
-      "InterVar",
-      "ClinVar",
+      "CLIN_SIG",
       "REVEL",
-      "COSMIC"
+      "Existing_variation"
     )
     # Pathway
     df$Pathway <- gsub(
@@ -1396,35 +1265,35 @@ pthws_mut <- function(df, protocol) {
       replacement = "Tyr Kin",
       x = df$Pathway
     )
-    # AAChange
-    df$AAChange <- substr(
-      x = df$AAChange, start = 3, stop = nchar(df$AAChange)
+    # HGVSp_Short
+    df$HGVSp_Short <- substr(
+      x = df$HGVSp_Short, start = 3, stop = nchar(df$HGVSp_Short)
     )
     # VAF
     df$VAF <- gsub(
       pattern = "%", replacement = "", x = df$VAF, fixed = TRUE
     )
     df$VAF <- paste0(df$VAF, " (", df$Reads, ")")
-    # AAChange
-    df$AAChange <- gsub(
-      pattern = "_", replacement = "\\_", x = df$AAChange, fixed = TRUE
+    # HGVSp_Short
+    df$HGVSp_Short <- gsub(
+      pattern = "_", replacement = "\\_", x = df$HGVSp_Short, fixed = TRUE
     )
     # COSMIC
     df$cosmic <- cosmic(df)
     # Function
-    df$ExonicFunction <- ex_func(df)
+    df$Variant_Classification <- ex_func(df)
     # REVEL
     res_revel <- revel(df)
     df$REVEL <- res_revel$revel
     df$REVEL_cat <- res_revel$cat
-    # InterVar (ACMG)
-    df$combineInterVarClinVar <- acmg(df = df)[, 1]
+    # ClinVar (ACMG)
+    df$Classification <- acmg(df = df)
     # Population frequency
     df$MAF <- as.character(
       format(as.numeric(df$MAF), scientific = TRUE, digits = 2)
     )
     # output
-    df <- df[, c(1:5, 7, 14, 13, 12)]
+    df <- df[, c("Pathway", "Symbol", "HGVSp_Short", "Variant_Classification", "VAF", "MAF", "Classification", "REVEL_cat", "cosmic")]
     dup <- which(duplicated(df))
     if (length(dup) > 0){
       df[dup, 4] <- paste0(df[dup, 4], ".")
@@ -1448,7 +1317,7 @@ pthws_mut <- function(df, protocol) {
       "Funktion",
       "VAF [\\%] (Coverage)",
       "MAF",
-      "InterVar | ClinVar",
+      "ClinVar",
       "REVEL",
       "Cosmic"
     )
@@ -1464,58 +1333,57 @@ topart_mut <- function(df, protocol) {
     df <- df[id_to:dim(df)[1], c(
       "Pathway",
       "Symbol",
-      "AAChange",
-      "ExonicFunc",
+      "HGVSp_Short",
+      "Variant_Classification",
       "VAF",
       "Reads",
       "MAF",
-      "InterVar_automated",
-      "CLNSIG",
+      "CLIN_SIG",
       "REVEL_score",
-      "COSMIC"
+      "Existing_variation"
     )]
     colnames(df) <- c(
       "Pathway",
       "Symbol",
-      "AAChange",
-      "ExonicFunction",
+      "HGVSp_Short",
+      "Variant_Classification",
       "VAF",
       "Reads",
       "MAF",
-      "InterVar",
-      "ClinVar",
+      "CLIN_SIG",
       "REVEL",
-      "COSMIC"
+      "Existing_variation"
     )
-    # AAChange
-    df$AAChange <- substr(
-      x = df$AAChange, start = 3, stop = nchar(df$AAChange)
+    # HGVSp_Short
+    df$HGVSp_Short <- substr(
+      x = df$HGVSp_Short, start = 3, stop = nchar(df$HGVSp_Short)
     )
     # VAF
     df$VAF <- gsub(pattern = "%", replacement = "", x = df$VAF, fixed = TRUE)
 
     df$VAF <- paste0(df$VAF, " (", df$Reads, ")")
-    # AAChange
-    df$AAChange <- gsub(
-      pattern = "_", replacement = "\\_", x = df$AAChange, fixed = TRUE
+    # HGVSp_Short
+    df$HGVSp_Short <- gsub(
+      pattern = "_", replacement = "\\_", x = df$HGVSp_Short, fixed = TRUE
     )
     # COSMIC
     df$cosmic <- cosmic(df)
     # Function
-    df$ExonicFunction <- ex_func(df)
+    df$Variant_Classification <- ex_func(df)
     # REVEL
     res_revel <- revel(df)
     df$REVEL <- res_revel$revel
     df$REVEL_cat <- res_revel$cat
-    # InterVar (ACMG)
-    df$combineInterVarClinVar <- acmg(df = df)[, 1]
+    # ClinVar (ACMG)
+    df$Classification <- acmg(df = df)
     # Population frequency
     df$MAF <- as.character(format(
       as.numeric(df$MAF), scientific = TRUE, digits = 2
     ))
 
     # output
-    df <- df[, c(1:5, 7, 14, 13, 12)]
+    print(colnames(df))
+    df <- df[, c("Pathway", "Symbol", "HGVSp_Short", "Variant_Classification", "VAF", "MAF", "Classification", "REVEL_cat", "cosmic")]
     dup <- which(duplicated(df))
     if (length(dup) > 0){
       df[dup, 4] <- paste0(df[dup, 4], ".")
@@ -1539,7 +1407,7 @@ topart_mut <- function(df, protocol) {
       "Funktion",
       "VAF [\\%] (Coverage)",
       "MAF",
-      "InterVar | ClinVar",
+      "ClinVar",
       "REVEL",
       "Cosmic"
     )
