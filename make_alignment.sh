@@ -105,12 +105,11 @@ readonly prefixsort=${DIR_TMP}/${NameD}_output.sort
 readonly sortbam=${DIR_TMP}/${NameD}_output.sort.bam
 readonly rmdupbam=${DIR_TMP}/${NameD}_output.sort.filtered.rmdup.bam
 readonly bai=${DIR_TMP}/${NameD}_output.sort.filtered.rmdup.bai
-readonly bamlist=${DIR_TMP}/${NameD}_output.sort.filtered.rmdup.bam.list
 readonly realignedbam=${DIR_TMP}/${NameD}_output.sort.filtered.rmdup.realigned.bam
 readonly realignedbai=${DIR_TMP}/${NameD}_output.sort.filtered.rmdup.realigned.bai
 readonly fixedbam=${DIR_TMP}/${NameD}_output.sort.filtered.rmdup.realigned.fixed.bam
 readonly fixedbai=${DIR_TMP}/${NameD}_output.sort.filtered.rmdup.realigned.fixed.bai
-readonly csv=${DIR_TMP}/${NameD}_output.sort.filtered.rmdup.realigned.fixed.recal_data.csv
+readonly table=${DIR_TMP}/${NameD}_output.sort.filtered.rmdup.realigned.fixed.recal_data.table
 
 # keep
 readonly recalbam=${DIR_WES}/${NameD}_output.sort.filtered.rmdup.realigned.fixed.recal.bam
@@ -149,21 +148,17 @@ ${BIN_SAMVIEW} -b -f 0x2 -q "${CFG_SAMTOOLS_MPILEUP_MINMQ}" "${sortbam}" | ${BIN
 # make bai
 ${BIN_SAMINDEX} "${rmdupbam}" "${bai}"
 
-# make bam list
-${BIN_REALIGNER_TARGER_CREATOR} -o "${bamlist}" -I "${rmdupbam}"
-
 # realign bam
-${BIN_INDEL_REALIGNER} -I "${rmdupbam}" -targetIntervals "${bamlist}" -o "${realignedbam}"
+${BIN_INDEL_REALIGNER} -I "${rmdupbam}" -O "${realignedbam}"
 
 # fix bam
 ${BIN_FIX_MATE} -INPUT "${realignedbam}" -OUTPUT "${fixedbam}" -SO coordinate -VALIDATION_STRINGENCY LENIENT -CREATE_INDEX true
 
-# make csv
-${BIN_BASE_RECALIBRATOR} -I "${fixedbam}" \
--cov ReadGroupCovariate -cov QualityScoreCovariate -cov CycleCovariate -cov ContextCovariate -o "${csv}"
+# make table
+${BIN_BASE_RECALIBRATOR} -I "${fixedbam}" -O "${table}"
 
 # recal bam
-${BIN_PRINT_READS} -I "${fixedbam}" -BQSR "${csv}" -o "${recalbam}"
+${BIN_PRINT_READS} -I "${fixedbam}" --bqsr-recal-file "${table}" -O "${recalbam}"
 
 # coverage
 ${BIN_COVERAGE} -b "${recalbam}" -a "${CFG_REFERENCE_CAPTUREREGIONS}" | grep '^all' >"${coveragetxt}"

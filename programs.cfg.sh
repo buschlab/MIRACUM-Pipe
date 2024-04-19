@@ -125,15 +125,11 @@ readonly BIN_SAMRMDUP="${BIN_SAMTOOLS} rmdup "
 readonly BIN_SAMINDEX="${BIN_SAMTOOLS} index "
 readonly BIN_STATS="${BIN_SAMTOOLS} stats "
 
-# GATK
-readonly BIN_GATK="${BIN_JAVA} -Xmx${CFG_COMMON_MEMORY} -jar ${DIR_TOOLS}/gatk/GenomeAnalysisTK.jar"
-readonly BIN_REALIGNER_TARGER_CREATOR="${BIN_GATK} -T RealignerTargetCreator -R ${FILE_GENOME} -nt ${CFG_COMMON_CPUCORES} "
-readonly BIN_INDEL_REALIGNER="${BIN_GATK} -R ${FILE_GENOME} -T IndelRealigner "
-readonly BIN_BASE_RECALIBRATOR="${BIN_GATK} -T BaseRecalibrator -l INFO -R ${FILE_GENOME} -knownSites ${CFG_REFERENCE_DBSNP} -nct ${CFG_COMMON_CPUCORES} "
-readonly BIN_PRINT_READS="${BIN_GATK} -T PrintReads -R ${FILE_GENOME} -nct ${CFG_COMMON_CPUCORES} "
-
 # GATK4
 readonly BIN_GATK4="${DIR_TOOLS}/gatk4/gatk" # --java-options '-Xmx${CFG_COMMON_MEMORY}'"
+readonly BIN_INDEL_REALIGNER="${BIN_GATK4} -R ${FILE_GENOME} LeftAlignIndels "
+readonly BIN_BASE_RECALIBRATOR="${BIN_GATK4} BaseRecalibrator -R ${FILE_GENOME} --known-sites ${CFG_REFERENCE_DBSNP} "
+readonly BIN_PRINT_READS="${BIN_GATK4} ApplyBQSR -R ${FILE_GENOME} "
 
 # PICARD
 readonly BIN_FIX_MATE="${BIN_JAVA} -Xmx${CFG_COMMON_MEMORY} -Dpicard.useLegacyParser=false -jar ${DIR_TOOLS}/picard/picard.jar FixMateInformation "
@@ -256,13 +252,11 @@ export BIN_SAMINDEX
 export BIN_MPILEUP
 export BIN_STATS
 
-export BIN_GATK
-export BIN_REALIGNER_TARGER_CREATOR
+
+export BIN_GATK4
 export BIN_INDEL_REALIGNER
 export BIN_BASE_RECALIBRATOR
 export BIN_PRINT_READS
-
-export BIN_GATK4
 
 export BIN_FIX_MATE
 

@@ -561,7 +561,7 @@ if(is.null(germ_all$muts_tab) || dim(germ_all$muts_tab)[1] == 0){
 \item bwa-mem2: 2.2.1
 \item bam-readcount: 0.8.0-unstable-7-625eea2
 \item samtools 1.10
-\item GATK: 3.8-1-0-gf15c1c3ef
+\item GATK: 4.2.4.0
 \item picard-tools: 2.20.6
 \item VEP: 111.0
 \item bedtools: 2.28.0
