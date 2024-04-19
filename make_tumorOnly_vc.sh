@@ -93,7 +93,6 @@ ${BIN_GATK4} Mutect2 -R ${FILE_GENOME} -I ${recalbam} -O ${OUTPUT_GZ} \
 ${BIN_GATK4} FilterMutectCalls -V ${OUTPUT_GZ} -R ${FILE_GENOME} -O ${OUTPUT_FILTERED_GZ} --intervals "${CFG_REFERENCE_CAPTUREREGIONS}" --min-median-base-quality "${CFG_GENERAL_MINBASEQUAL}" --min-allele-fraction "${CFG_GENERAL_MINVAF}"
 
 ${BIN_VEP} \
-  --dir /vepcache \
   --offline --cache \
   --assembly GRCh37 \
   --fork ${CFG_COMMON_CPUCORES} \
