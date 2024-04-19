@@ -60,9 +60,13 @@ apt-get install -y --no-install-recommends build-essential gcc-multilib libc-dev
   install_texlive
 
 # deps for VEP
-  apt-get install -y --no-install-recommends libarchive-zip-perl libdbd-mysql-perl libdbi-perl libmodule-build-perl libwww-perl
+  apt-get install -y --no-install-recommends libarchive-zip-perl libdbd-mysql-perl libdbi-perl libmodule-build-perl libwww-perl libbio-perl-perl
+
+# python dependencies
 
   python3 -m pip install --upgrade pip
   python3 -m pip install -r /opt/MIRACUM-Pipe/debian/requirements.txt
-  
+
+# cleanup  
+
   apt-get -y autoremove
