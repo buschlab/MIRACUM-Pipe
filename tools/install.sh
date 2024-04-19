@@ -2,8 +2,8 @@
 
 # variables
 readonly VERSION_TRIMMOMATIC="0.39"
-readonly VERSION_PICARD="2.27.1"
-readonly VERSION_BEDTOOLS="2.30.0"
+readonly VERSION_PICARD="3.1.1"
+readonly VERSION_BEDTOOLS="2.31.1"
 readonly VERSION_VEP_MAJOR="111"
 readonly VERSION_VEP="${VERSION_VEP_MAJOR}.0"
 
