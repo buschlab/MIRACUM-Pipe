@@ -5,15 +5,6 @@ readonly DIR_SCRIPT=$(
   pwd -P
 )
 
-function install_java8()
-{
-  ## install jre8
-  apt-get install -y --no-install-recommends apt-transport-https ca-certificates wget dirmngr gnupg software-properties-common && \
-  wget -qO - https://packages.adoptium.net/artifactory/api/gpg/key/public | apt-key add - && \
-  add-apt-repository --yes https://packages.adoptium.net/artifactory/deb/ && \
-  apt-get update && apt-get install -y --no-install-recommends temurin-8-jdk
-}
-
 function install_texlive()
 {
   apt-get install -y --no-install-recommends texlive texlive-lang-german texlive-latex-extra
@@ -31,8 +22,7 @@ function install_texlive()
 function install_R()
 {
   echo "deb http://cloud.r-project.org/bin/linux/debian buster-cran40/" >> /etc/apt/sources.list && \
-  apt-key add "/opt/MIRACUM-Pipe/debian/r_key.asc"
-  #apt-key adv --keyserver keyserver.ubuntu.com --recv-key B8F25A8A73EACF41
+  apt-key adv --keyserver keyserver.ubuntu.com --recv-key 95C0FAF38DB3CCAD0C080A7BDC78B2DDEABC47B7
   apt-get update && apt-get install -y --no-install-recommends -t buster-cran40 r-base-dev
   R CMD javareconf
 }
@@ -52,10 +42,6 @@ apt-get install -y --no-install-recommends build-essential gcc-multilib libc-dev
   perl-base \
   python3 python3-pysam python3-pip python3-numpy python3-scipy python3-matplotlib python3-reportlab python3-pandas python3-biopython python3-pyfaidx python3-pyvcf cython python3-setuptools python3-dev libpython3-all-dev python3-future python3-wheel \
   libsnappy-java && \
-  install_java8 && \
-  apt-get -y purge  default-jre default-jdk-headless \
-                    openjdk-11-jdk openjdk-11-jdk-headless \
-                    openjdk-11-jre openjdk-11-jre-headless && \
   install_R && \
   install_texlive
 
