@@ -4,6 +4,7 @@
 readonly VERSION_TRIMMOMATIC="0.39"
 readonly VERSION_PICARD="3.1.1"
 readonly VERSION_BEDTOOLS="2.31.1"
+readonly VERSION_BWAMEM2="2.2.1"
 readonly VERSION_VEP_MAJOR="111"
 readonly VERSION_VEP="${VERSION_VEP_MAJOR}.0"
 
@@ -148,7 +149,7 @@ rm -rf ${DIR_SCRIPT}/bam-readcount/build
 # bwa-mem2 #
 #######
 cd ${DIR_SCRIPT}
-wget https://github.com/bwa-mem2/bwa-mem2/releases/download/v2.2.1/bwa-mem2-2.2.1_x64-linux.tar.bz2 -O bwa-mem2.tar.bz2
+wget https://github.com/bwa-mem2/bwa-mem2/releases/download/v${VERSION_BWAMEM2}/bwa-mem2-${VERSION_BWAMEM2}_x64-linux.tar.bz2 -O bwa-mem2.tar.bz2
 tar -xf bwa-mem2.tar.bz2
 rm bwa-mem2*.tar.bz2
 mv bwa-mem2* bwa-mem2

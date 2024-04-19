@@ -15,7 +15,24 @@ assets/input/*
 assets/output/*
 !assets/output/.gitkeep
 
+assets/references
+
 docker/*.log
 
 .idea
 .vscode
+
+tools/vep
+tools/vcf2maf
+
+databases/actionable_genes.txt
+databases/cancerGeneList.tsv
+databases/DGIdb_interactions.tsv
+databases/fannsdb.tsv.gz*
+databases/h.all.*
+databases/hallmarksOfCancer_GeneSets.RData
+databases/hg19all.wig.gz
+databases/hotspots_v2.xls
+databases/microsatellite_sites_hg19
+databases/oncokb_biomarker_drug_associations.tsv
+databases/vep/*

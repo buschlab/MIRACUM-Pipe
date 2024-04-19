@@ -556,17 +556,20 @@ if(is.null(germ_all$muts_tab) || dim(germ_all$muts_tab)[1] == 0){
 
 \subsection{Programmversionen}
 \begin{itemize}
-\item FastQC: 0.11.10.devel
+\item FastQC: 0.12.1
 \item Trimmomatic: 0.39
 \item bwa-mem2: 2.2.1
 \item bam-readcount: 0.8.0-unstable-7-625eea2
-\item samtools 1.10
+\item samtools 1.20
 \item GATK: 4.2.4.0
-\item picard-tools: 2.20.6
+\item picard-tools: 3.1.1
 \item VEP: 111.0
-\item bedtools: 2.28.0
-\item Control-FREEC: 11.6
-\item Java: openjdk-8-hotspot
+\item bedtools: 2.31.1
+\item Control-FREEC: 11.6b
+\item sequenza: 3.0.0
+\item msisensor2: 0.1
+\item MSIsensor-pro: 1.2.0
+\item Java: 11.0.22+7-1
 \end{itemize}
 
 \subsection{VEP Datenbanken}
