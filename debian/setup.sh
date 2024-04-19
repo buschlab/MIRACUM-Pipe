@@ -22,7 +22,7 @@ function install_texlive()
 function install_R()
 {
   echo "deb http://cloud.r-project.org/bin/linux/debian buster-cran40/" >> /etc/apt/sources.list && \
-  apt-key adv --keyserver keyserver.ubuntu.com --recv-key 95C0FAF38DB3CCAD0C080A7BDC78B2DDEABC47B7
+  apt-key adv --keyserver keyserver.ubuntu.com --recv-key B8F25A8A73EACF41
   apt-get update && apt-get install -y --no-install-recommends -t buster-cran40 r-base-dev
   R CMD javareconf
 }
@@ -41,7 +41,8 @@ apt-get install -y --no-install-recommends build-essential gcc-multilib libc-dev
   ant \
   perl-base \
   python3 python3-pysam python3-pip python3-numpy python3-scipy python3-matplotlib python3-reportlab python3-pandas python3-biopython python3-pyfaidx python3-pyvcf cython python3-setuptools python3-dev libpython3-all-dev python3-future python3-wheel \
-  libsnappy-java && \
+  libsnappy-java \
+  gnupg2 && \
   install_R && \
   install_texlive
 
