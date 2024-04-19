@@ -102,11 +102,11 @@ mv ensembl-vep-release-${VERSION_VEP} vep
 # VEP INSTALL
 
 cd ${DIR_SCRIPT}/vep
-perl INSTALL.pl -n -a alcfp -s homo_sapiens -y GRCh37 -g CADD,REVEL
+perl INSTALL.pl -n -a alcfp -s homo_sapiens_refseq -y GRCh37 -g CADD,REVEL
 
 # Index reference fasta
 
-cd ~/.vep/homo_sapiens/${VERSION_VEP_MAJOR}_GRCh37
+cd ~/.vep/homo_sapiens_refseq/${VERSION_VEP_MAJOR}_GRCh37
 gunzip Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz
 bgzip --index Homo_sapiens.GRCh37.75.dna.primary_assembly.fa
 

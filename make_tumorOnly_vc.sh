@@ -114,6 +114,7 @@ ${BIN_VEP} \
   --allele_number \
   --mane \
   --hgvs \
+  --refseq \
   --plugin CADD,${DIR_DATABASE}/vep/CADD_GRCh37/whole_genome_SNVs.tsv.gz,${DIR_DATABASE}/vep/CADD_GRCh37/gnomad.genomes-exomes.r4.0.indel.tsv.gz \
   --plugin REVEL,${DIR_DATABASE}/vep/REVEL/new_tabbed_revel.tsv.gz \
   --no_stats --quiet
