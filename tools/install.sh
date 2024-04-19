@@ -4,7 +4,8 @@
 readonly VERSION_TRIMMOMATIC="0.39"
 readonly VERSION_PICARD="2.27.1"
 readonly VERSION_BEDTOOLS="2.30.0"
-readonly VERSION_VEP="111.0"
+readonly VERSION_VEP_MAJOR="111"
+readonly VERSION_VEP="${VERSION_VEP_MAJOR}.0"
 
 ########
 readonly DIR_SCRIPT=$(
@@ -102,6 +103,12 @@ mv ensembl-vep-release-${VERSION_VEP} vep
 
 cd ${DIR_SCRIPT}/vep
 perl INSTALL.pl -n -a alcfp -s homo_sapiens -y GRCh37 -g CADD,REVEL
+
+# Index reference fasta
+
+cd ~/.vep/homo_sapiens/${VERSION_VEP_MAJOR}_GRCh37
+gunzip Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz
+bgzip --index Homo_sapiens.GRCh37.75.dna.primary_assembly.fa
 
 # VCF2MAF
 cd ${DIR_SCRIPT}
