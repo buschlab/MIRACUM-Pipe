@@ -114,6 +114,7 @@ bgzip --index Homo_sapiens.GRCh37.75.dna.primary_assembly.fa
 # VCF2MAF
 cd ${DIR_SCRIPT}
 wget https://github.com/mskcc/vcf2maf/archive/refs/tags/v1.6.21.tar.gz -O vcf2maf.tar.gz
+tar -xzf vcf2maf.tar.gz
 rm vcf2maf.tar.gz
 mv vcf2maf-* vcf2maf
 
