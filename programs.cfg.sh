@@ -127,7 +127,7 @@ readonly BIN_STATS="${BIN_SAMTOOLS} stats "
 
 # GATK4
 readonly BIN_GATK4="${DIR_TOOLS}/gatk4/gatk" # --java-options '-Xmx${CFG_COMMON_MEMORY}'"
-readonly BIN_INDEL_REALIGNER="${BIN_GATK4} -R ${FILE_GENOME} LeftAlignIndels "
+readonly BIN_INDEL_REALIGNER="${BIN_GATK4} LeftAlignIndels -R ${FILE_GENOME} "
 readonly BIN_BASE_RECALIBRATOR="${BIN_GATK4} BaseRecalibrator -R ${FILE_GENOME} --known-sites ${CFG_REFERENCE_DBSNP} "
 readonly BIN_PRINT_READS="${BIN_GATK4} ApplyBQSR -R ${FILE_GENOME} "
 
