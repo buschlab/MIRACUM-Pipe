@@ -117,8 +117,8 @@ ${BIN_VEP} \
   --af_gnomad \
   --pubmed \
   --allele_number \
-  --mane \
   --hgvs \
+  --hgvsg \
   --refseq \
   --plugin CADD,${DIR_DATABASE}/vep/CADD_GRCh37/whole_genome_SNVs.tsv.gz,${DIR_DATABASE}/vep/CADD_GRCh37/gnomad.genomes-exomes.r4.0.indel.tsv.gz \
   --plugin REVEL,${DIR_DATABASE}/vep/REVEL/new_tabbed_revel.tsv.gz \
@@ -133,7 +133,7 @@ ${BIN_VCF2MAF} \
   --tumor-id ${NameTD} \
   --normal-id ${NameGD} \
   --retain-fmt GT,AF \
-  --retain-ann am_class,am_pathogenicity,CADD_PHRED,MAX_AF,gnomADe_AFR,gnomADe_AMR,gnomADe_ASJ,gnomADe_EAS,gnomADe_FIN,gnomADe_OTH,gnomADe_SAS,REVEL
+  --retain-ann CADD_PHRED,MAX_AF,gnomADe_AFR,gnomADe_AMR,gnomADe_ASJ,gnomADe_EAS,gnomADe_FIN,gnomADe_OTH,gnomADe_SAS,REVEL
 
 # Haplotype Caller
 ${BIN_GATK4} HaplotypeCaller -R ${FILE_GENOME} -I ${recalbamTD} -I ${recalbamGD} -O ${GD_OUTPUT_GZ} \
@@ -143,7 +143,7 @@ ${BIN_VEP} \
   --offline --cache \
   --assembly GRCh37 \
   --fork ${CFG_COMMON_CPUCORES} \
-  --input_file  ${GD_OUTPUT_FILTERED_GZ} \
+  --input_file  ${GD_OUTPUT_GZ} \
   --output_file ${GD_OUTPUT}_vep.vcf \
   --vcf \
   --species homo_sapiens \
@@ -158,8 +158,8 @@ ${BIN_VEP} \
   --af_gnomad \
   --pubmed \
   --allele_number \
-  --mane \
   --hgvs \
+  --hgvsg \
   --refseq \
   --plugin CADD,${DIR_DATABASE}/vep/CADD_GRCh37/whole_genome_SNVs.tsv.gz,${DIR_DATABASE}/vep/CADD_GRCh37/gnomad.genomes-exomes.r4.0.indel.tsv.gz \
   --plugin REVEL,${DIR_DATABASE}/vep/REVEL/new_tabbed_revel.tsv.gz \
@@ -174,7 +174,7 @@ ${BIN_VCF2MAF} \
   --tumor-id ${NameTD} \
   --normal-id ${NameGD} \
   --retain-fmt GT,AF \
-  --retain-ann am_class,am_pathogenicity,CADD_PHRED,MAX_AF,gnomADe_AFR,gnomADe_AMR,gnomADe_ASJ,gnomADe_EAS,gnomADe_FIN,gnomADe_OTH,gnomADe_SAS,REVEL
+  --retain-ann CADD_PHRED,MAX_AF,gnomADe_AFR,gnomADe_AMR,gnomADe_ASJ,gnomADe_EAS,gnomADe_FIN,gnomADe_OTH,gnomADe_SAS,REVEL
 
 # MSI
 if [ ! -f "${MICROSATELLITE_SITES}" ]; then

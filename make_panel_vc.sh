@@ -111,8 +111,8 @@ ${BIN_VEP} \
   --af_gnomad \
   --pubmed \
   --allele_number \
-  --mane \
   --hgvs \
+  --hgvsg \
   --refseq \
   --plugin CADD,${DIR_DATABASE}/vep/CADD_GRCh37/whole_genome_SNVs.tsv.gz,${DIR_DATABASE}/vep/CADD_GRCh37/gnomad.genomes-exomes.r4.0.indel.tsv.gz \
   --plugin REVEL,${DIR_DATABASE}/vep/REVEL/new_tabbed_revel.tsv.gz \
@@ -126,7 +126,7 @@ ${BIN_VCF2MAF} \
   --maf-center ${CFG_CENTER} --ncbi-build GRCh37 \
   --tumor-id ${NameTD} \
   --retain-fmt GT,AF \
-  --retain-ann am_class,am_pathogenicity,CADD_PHRED,MAX_AF,gnomADe_AFR,gnomADe_AMR,gnomADe_ASJ,gnomADe_EAS,gnomADe_FIN,gnomADe_OTH,gnomADe_SAS,REVEL
+  --retain-ann CADD_PHRED,MAX_AF,gnomADe_AFR,gnomADe_AMR,gnomADe_ASJ,gnomADe_EAS,gnomADe_FIN,gnomADe_OTH,gnomADe_SAS,REVEL
 
 # MSI
 ${MSISENSOR2} -t "${recalbam}" -o "${MSI_OUTPUT}"
