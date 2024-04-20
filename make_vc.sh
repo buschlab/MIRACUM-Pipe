@@ -84,7 +84,7 @@ readonly recalbamTD=${DIR_WES}/${NameTD}_output.sort.filtered.rmdup.realigned.fi
 
 # keep
 readonly TD_OUTPUT_GZ=${DIR_WES}/${NameTD}_gatk4_mutect2.vcf.gz
-readonly GD_OUTPUT_GZ=${DIR_WES}/${NameTD}_gatk4_haplotype.vcf.gz
+readonly GD_OUTPUT_GZ=${DIR_WES}/${NameGD}_gatk4_haplotype.vcf.gz
 readonly TD_OUTPUT_FILTERED_GZ=${DIR_WES}/${NameTD}_gatk4_mutect2_filtered.vcf.gz
 readonly TD_OUTPUT=${DIR_WES}/${NameTD}_gatk4_mutect2_filtered
 readonly GD_OUTPUT=${DIR_WES}/${NameGD}_gatk4_haplotype
@@ -133,7 +133,7 @@ ${BIN_VCF2MAF} \
   --tumor-id ${NameTD} \
   --normal-id ${NameGD} \
   --retain-fmt GT,AF \
-  --retain-ann CADD_PHRED,MAX_AF,gnomADe_AFR,gnomADe_AMR,gnomADe_ASJ,gnomADe_EAS,gnomADe_FIN,gnomADe_OTH,gnomADe_SAS,REVEL
+  --retain-ann HGVSg,CADD_PHRED,MAX_AF,gnomADe_AFR,gnomADe_AMR,gnomADe_ASJ,gnomADe_EAS,gnomADe_FIN,gnomADe_OTH,gnomADe_SAS,REVEL
 
 # Haplotype Caller
 ${BIN_GATK4} HaplotypeCaller -R ${FILE_GENOME} -I ${recalbamTD} -I ${recalbamGD} -O ${GD_OUTPUT_GZ} \
@@ -174,7 +174,7 @@ ${BIN_VCF2MAF} \
   --tumor-id ${NameTD} \
   --normal-id ${NameGD} \
   --retain-fmt GT,AF \
-  --retain-ann CADD_PHRED,MAX_AF,gnomADe_AFR,gnomADe_AMR,gnomADe_ASJ,gnomADe_EAS,gnomADe_FIN,gnomADe_OTH,gnomADe_SAS,REVEL
+  --retain-ann HGVSg,CADD_PHRED,MAX_AF,gnomADe_AFR,gnomADe_AMR,gnomADe_ASJ,gnomADe_EAS,gnomADe_FIN,gnomADe_OTH,gnomADe_SAS,REVEL
 
 # MSI
 if [ ! -f "${MICROSATELLITE_SITES}" ]; then
