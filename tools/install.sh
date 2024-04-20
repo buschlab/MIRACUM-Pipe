@@ -180,6 +180,10 @@ autoconf -Wno-syntax
 # build samtools and htslib
 make
 
+# link samtools in path
+ln -sf /opt/MIRACUM-Pipe/tools/samtools/samtools /usr/bin/samtools
+
+# cleanup
 rm -f ${DIR_SCRIPT}/samtools/*.o
 
 # htslib is built by samtools
