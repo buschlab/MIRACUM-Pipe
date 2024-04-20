@@ -377,75 +377,47 @@ mutation_analysis_result <- mutation_analysis(
 )
 
 # Combine MAF files to obtain one complete maf per patient
-if (protocol == "somaticGermline" | protocol == "somatic") {
-  if (protocol == "somaticGermline") {
-      maf_comb <- gtools::smartbind(
-        filt_result_td$maf,
-        filt_result_gd$maf,
-        filt_result_loh$maf
-      )
-      write.table(
-        x = maf_comb,
-        file = maf_complete,
-        append = F,
-        quote = F,
-        sep = "\t",
-        col.names = T,
-        row.names = F
-      )
-      if (nrow(filt_result_gd$maf) > 0) {
-        write.table(
-          x = filt_result_gd$maf,
-          file = maf_gd,
-          append = F,
-          quote = F,
-          sep = "\t",
-          col.names = T,
-          row.names = F
-        )
-      }
-  } else {
-    maf_comb <- gtools::smartbind(
-      filt_result_td$maf,
-      filt_result_loh$maf
-    )
-    write.table(
-      x = maf_comb,
-      file = maf_complete,
-      append = F,
-      quote = F,
-      sep = "\t",
-      col.names = T,
-      row.names = F
-    )
-  }
-  if (nrow(filt_result_td$maf) > 0) {
-    write.table(
-      x = filt_result_td$maf,
-      file = maf_td,
-      append = F,
-      quote = F,
-      sep = "\t",
-      col.names = T,
-      row.names = F
-    )
-  }
-    if (nrow(filt_result_loh$maf) > 0) {
-    write.table(
-      x = filt_result_loh$maf,
-      file = maf_loh,
-      append = F,
-      quote = F,
-      sep = "\t",
-      col.names = T,
-      row.names = F
-    )
-  }
-} else {
-  maf_comb <- filt_result_td$maf
+maf_comb <- rbind(
+  filt_result_td$maf,
+  filt_result_gd$maf,
+  filt_result_loh$maf
+)
+write.table(
+  x = maf_comb,
+  file = maf_complete,
+  append = F,
+  quote = F,
+  sep = "\t",
+  col.names = T,
+  row.names = F
+)
+
+if (!is.null(filt_result_td) && !is.character(filt_result_td$maf) && nrow(filt_result_td$maf) > 0) {
   write.table(
-    x = maf_comb,
-    file = maf_complete,
+    x = filt_result_td$maf,
+    file = maf_td,
+    append = F,
+    quote = F,
+    sep = "\t",
+    col.names = T,
+    row.names = F
+  )
+}
+if (!is.null(filt_result_loh) && !is.character(filt_result_loh$maf) && nrow(filt_result_loh$maf) > 0) {
+  write.table(
+    x = filt_result_gd$maf,
+    file = maf_loh,
+    append = F,
+    quote = F,
+    sep = "\t",
+    col.names = T,
+    row.names = F
+  )
+}
+if (!is.null(filt_result_gd) && !is.character(filt_result_gd$maf) && nrow(filt_result_gd$maf) > 0) {
+  write.table(
+    x = filt_result_gd$maf,
+    file = maf_gd,
     append = F,
     quote = F,
     sep = "\t",
