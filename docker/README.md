@@ -5,7 +5,7 @@ For development, we recommend to use the hierarchical docker stack, in order to 
 This stack is based on
 
 - Dockerfile_base
-    Based on `debian:10` the linux environment is included into this file. All system tools are setup.
+    Based on `debian:11` the linux environment is included into this file. All system tools are setup.
 - Dockerfile_R
   All R packages are installed on top of `Dockerfile_base` which are required.
 - Dockerfile_tools
@@ -15,7 +15,7 @@ This stack is based on
 - Dockerfile_interface
   Finally only the shell interface data are changed, based on `Dockerfile_report`.
 - Dockerfile
-  This file is used for production build and is a composition of all other docker files and bases on `debian:10`.
+  This file is used for production build and is a composition of all other docker files and bases on `debian:11`.
 
 ## Use the dockerized version
 
