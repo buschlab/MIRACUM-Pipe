@@ -21,9 +21,9 @@ function install_texlive()
 
 function install_R()
 {
-  echo "deb http://cloud.r-project.org/bin/linux/debian bullseye-cran40/" >> /etc/apt/sources.list && \
+  echo "deb http://cloud.r-project.org/bin/linux/debian buster-cran40/" >> /etc/apt/sources.list && \
   apt-key adv --keyserver keyserver.ubuntu.com --recv-key B8F25A8A73EACF41
-  apt-get update && apt-get install -y --no-install-recommends -t bullseye-cran40 r-base-dev
+  apt-get update && apt-get install -y --no-install-recommends -t buster-cran40 r-base-dev
   R CMD javareconf
 }
 
