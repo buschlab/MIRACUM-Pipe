@@ -51,8 +51,8 @@ apt-get install -y --no-install-recommends build-essential gcc-multilib libc-dev
 
 # python dependencies
 
-  python3 -m pip install --upgrade pip
-  python3 -m pip install -r /opt/MIRACUM-Pipe/debian/requirements.txt
+  python3 -m pip install --break-system-packages --upgrade pip
+  python3 -m pip install --break-system-packages -r /opt/MIRACUM-Pipe/debian/requirements.txt
 
 # cleanup  
 
