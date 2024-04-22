@@ -197,11 +197,31 @@ echo "$DIR_SCRIPT/htslib" > /etc/ld.so.conf.d/htslib.conf
 #################
 # fusioncatcher #
 #################
-#cd ${DIR_SCRIPT}
-#wget http://sf.net/projects/fusioncatcher/files/bootstrap.py -O bootstrap.py
-#python bootstrap.py --prefix=${DIR_SCRIPT} -t -y
-cd ${DIR_SCRIPT}/fusioncatcher/tools/
-./install_tools.sh
+mkdir -p ~/miniconda3
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda3/miniconda.sh
+bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
+rm -rf ~/miniconda3/miniconda.sh
+/root/miniconda3/bin/conda init bash
+
+source /root/.bashrc
+
+conda config --prepend channels bioconda
+conda config --prepend channels conda-forge
+
+conda create -n fc -y fusioncatcher
+
+cat >/usr/bin/fusioncatcher <<EOI
+#!/bin/bash
+
+source /root/.bashrc
+conda activate fc
+
+\$(fusioncatcher '\$@')
+
+conda deactivate
+EOI
+
+chmod +x /usr/bin/fusioncatcher
 
 ##################
 # sequenza-utils #

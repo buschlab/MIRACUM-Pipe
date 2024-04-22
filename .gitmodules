@@ -19,9 +19,6 @@
 [submodule "tools/msisensor-pro"]
 	path = tools/msisensor-pro
 	url = https://github.com/xjtu-omics/msisensor-pro
-[submodule "tools/fusioncatcher"]
-	path = tools/fusioncatcher
-	url = https://github.com/ndaniel/fusioncatcher
 [submodule "tools/bam-matcher"]
 	path = tools/bam-matcher
 	url = https://github.com/buschlab/bam-matcher.git

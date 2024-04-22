@@ -149,8 +149,8 @@ readonly FILE_REFERENCE_MAPPABILITY="${DIR_REF}/mappability/$(get_config_value r
 readonly BIN_RSCRIPT=$(command -v Rscript)
 
 # fusioncatcher
-readonly FUSIONCATCHER_DB="${DIR_TOOLS}/fusioncatcher/data/current"
-readonly BIN_FUSIONCATCHER="${DIR_TOOLS}/fusioncatcher/bin/fusioncatcher.py -p ${CFG_COMMON_CPUCORES} -d ${FUSIONCATCHER_DB} "
+readonly FUSIONCATCHER_DB="${DIR_DATABASE}/fusioncatcher/data/current"
+readonly BIN_FUSIONCATCHER="/usr/bin/fusioncatcher -p ${CFG_COMMON_CPUCORES} -d ${FUSIONCATCHER_DB} "
 
 # msisnesor2
 readonly MSISENSOR2="${DIR_TOOLS}/msisensor2/msisensor2 msi -b ${CFG_COMMON_CPUCORES} -M ${DIR_TOOLS}/msisensor2/models_hg19_GRCh37"

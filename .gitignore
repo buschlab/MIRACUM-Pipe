@@ -36,3 +36,4 @@ databases/hotspots_v2.xls
 databases/microsatellite_sites_hg19
 databases/oncokb_biomarker_drug_associations.tsv
 databases/vep/*
+databases/fusioncatcher/*
