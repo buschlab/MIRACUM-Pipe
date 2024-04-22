@@ -2,7 +2,7 @@
 
 # variables
 readonly VERSION_TRIMMOMATIC="0.39"
-readonly VERSION_PICARD="2.27.5"
+readonly VERSION_PICARD="3.1.1"
 readonly VERSION_BEDTOOLS="2.31.1"
 readonly VERSION_BWAMEM2="2.2.1"
 readonly VERSION_VEP_MAJOR="111"
@@ -223,11 +223,6 @@ EOI
 
 chmod +x /usr/bin/fusioncatcher
 
-##################
-# sequenza-utils #
-##################
-#pip3 install sequenza-utils
-
 ##############
 # msisensor2 #
 ##############
@@ -238,8 +233,6 @@ chmod +x msisensor2
 # msisensor-pro #
 #################
 cd ${DIR_SCRIPT}/msisensor-pro
-#wget https://github.com/xjtu-omics/msisensor-pro/raw/master/binary/msisensor-pro
-#chmod +x msisensor-pro
 ./INSTALL
 
 ############
