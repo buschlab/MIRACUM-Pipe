@@ -983,6 +983,3 @@ if (protocol == "panelTumor") {
 }
 
 save.image("Report.RData")
-
-knitr::knit("/home/nreimer/git/MIRACUM-Pipe/RScripts/Report.Rnw")
-tinytex::latexmk("Report.tex")

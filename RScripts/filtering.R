@@ -139,8 +139,6 @@ filtering <- function(
   }
 
   if (dim(x)[1] != 0) {
-    # mane select
-    #x <- maneselect(x, maneselectfile)
 
     # Include GeneName
     x$Start_Position <- as.numeric(as.character(x$Start_Position))

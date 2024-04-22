@@ -126,7 +126,8 @@ ${BIN_VCF2MAF} \
   --maf-center ${CFG_CENTER} --ncbi-build GRCh37 \
   --tumor-id ${NameTD} \
   --retain-fmt GT,AF \
-  --retain-ann HGVSg,CADD_PHRED,MAX_AF,gnomADe_AFR,gnomADe_AMR,gnomADe_ASJ,gnomADe_EAS,gnomADe_FIN,gnomADe_OTH,gnomADe_SAS,REVEL
+  --retain-ann HGVSg,CADD_PHRED,MAX_AF,gnomADe_AFR,gnomADe_AMR,gnomADe_ASJ,gnomADe_EAS,gnomADe_FIN,gnomADe_OTH,gnomADe_SAS,REVEL \
+  --custom-enst ${DIR_DATABASE}/refseq_selected.txt
   
 # MSI
 ${MSISENSOR2} -t "${recalbam}" -o "${MSI_OUTPUT}"

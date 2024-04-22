@@ -133,7 +133,8 @@ ${BIN_VCF2MAF} \
   --tumor-id ${NameTD} \
   --normal-id ${NameGD} \
   --retain-fmt GT,AF \
-  --retain-ann HGVSg,CADD_PHRED,MAX_AF,gnomADe_AFR,gnomADe_AMR,gnomADe_ASJ,gnomADe_EAS,gnomADe_FIN,gnomADe_OTH,gnomADe_SAS,REVEL
+  --retain-ann HGVSg,CADD_PHRED,MAX_AF,gnomADe_AFR,gnomADe_AMR,gnomADe_ASJ,gnomADe_EAS,gnomADe_FIN,gnomADe_OTH,gnomADe_SAS,REVEL \
+  --custom-enst ${DIR_DATABASE}/refseq_selected.txt
 
 # Haplotype Caller
 ${BIN_GATK4} HaplotypeCaller -R ${FILE_GENOME} -I ${recalbamTD} -I ${recalbamGD} -O ${GD_OUTPUT_GZ} \
@@ -174,7 +175,8 @@ ${BIN_VCF2MAF} \
   --tumor-id ${NameTD} \
   --normal-id ${NameGD} \
   --retain-fmt GT,AF \
-  --retain-ann HGVSg,CADD_PHRED,MAX_AF,gnomADe_AFR,gnomADe_AMR,gnomADe_ASJ,gnomADe_EAS,gnomADe_FIN,gnomADe_OTH,gnomADe_SAS,REVEL
+  --retain-ann HGVSg,CADD_PHRED,MAX_AF,gnomADe_AFR,gnomADe_AMR,gnomADe_ASJ,gnomADe_EAS,gnomADe_FIN,gnomADe_OTH,gnomADe_SAS,REVEL \
+  --custom-enst ${DIR_DATABASE}/refseq_selected.txt
 
 # MSI
 if [ ! -f "${MICROSATELLITE_SITES}" ]; then
