@@ -21,9 +21,9 @@ function install_texlive()
 
 function install_R()
 {
-  echo "deb http://cloud.r-project.org/bin/linux/debian buster-cran40/" >> /etc/apt/sources.list && \
+  echo "deb http://cloud.r-project.org/bin/linux/debian bookworm-cran40/" >> /etc/apt/sources.list && \
   apt-key adv --keyserver keyserver.ubuntu.com --recv-key B8F25A8A73EACF41
-  apt-get update && apt-get install -y --no-install-recommends -t buster-cran40 r-base-dev
+  apt-get update && apt-get install -y --no-install-recommends -t bookworm-cran40 r-base-dev
   R CMD javareconf
 }
 
@@ -35,12 +35,12 @@ apt-get update & apt-get upgrade -y
 apt-get install -y --no-install-recommends build-essential gcc-multilib libc-dev git-core cmake patch cmake ca-certificates \
   autoconf wget zip unzip zlib1g-dev libbz2-dev liblzma-dev libssl-dev libmariadb-dev tabix libmpfr-dev \
   libncurses5-dev libxml2-dev libcairo2-dev libxt-dev libgit2-dev libcurl4-gnutls-dev libncursesw5-dev libhts-dev libncurses5-dev \
-  python python-dev python-numpy python-biopython python-xlrd python-openpyxl libharfbuzz-dev libfribidi-dev libtiff-dev\
+  libharfbuzz-dev libfribidi-dev libtiff-dev\
   gfortran \
   default-jre \
   ant \
   perl-base \
-  python3 python3-pysam python3-pip python3-numpy python3-scipy python3-matplotlib python3-reportlab python3-pandas python3-biopython python3-pyfaidx python3-pyvcf cython python3-setuptools python3-dev libpython3-all-dev python3-future python3-wheel \
+  python3 python3-pysam python3-pip python3-numpy python3-scipy python3-matplotlib python3-reportlab python3-pandas python3-biopython python3-pyfaidx python3-pyvcf python3-setuptools python3-dev libpython3-all-dev python3-future python3-wheel \
   libsnappy-java \
   gnupg2 && \
   install_R && \
