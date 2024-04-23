@@ -247,8 +247,8 @@ agfusion download -g hg38
 # bam-matcher #
 ###############
 cd ${DIR_SCRIPT}/bam-matcher
-pip3 install --upgrade numpy
-pip3 install -r requirements.txt
+pip3 install --break-system-packages --upgrade numpy
+pip3 install --break-system-packages -r requirements.txt
 
 cat >"${DIR_SCRIPT}"/bam-matcher/bam-matcher.conf <<EOI
 [VariantCallers]
