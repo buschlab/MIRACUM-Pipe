@@ -221,6 +221,8 @@ conda activate fc
 conda deactivate
 EOI
 
+conda deactivate
+
 chmod +x /usr/bin/fusioncatcher
 
 ##############
