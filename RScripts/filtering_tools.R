@@ -224,7 +224,7 @@ ishs <- function(x, dbfile){
   #' @note required in x: Hugo_Symbol, Start, HGVSp_Short
   # lisths <- read.delim(dbfile, header = T,
   #                      sep = "\t", colClasses = "character")
-  lisths <- read_xls(path = dbfile, sheet = 1)
+  lisths <- readxl::read_xls(path = dbfile, sheet = 1)
   x$is_hotspot <- 0
   idh <- which (x$Hugo_Symbol %in% lisths$Hugo_Symbol)
   phs <- which (lisths$Hugo_Symbol %in% x$Hugo_Symbol)
@@ -286,8 +286,7 @@ isihs <- function(x, dbfile){
   #' @note required in x: Hugo_Symbol, Start, HGVSp_Short
   # lisths <- read.delim(dbfile, header = T,
   #                      sep = "\t", colClasses = "character")
-  library(readxl)
-  lisths <- read_xls(path = dbfile, sheet = 2)
+  lisths <- readxl::read_xls(path = dbfile, sheet = 2)
 
   # list should already habe a hotspot column for snps
   fs <- which(x$Variant_Classification != "Frame_Shift_Del")
