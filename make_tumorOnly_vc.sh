@@ -122,8 +122,10 @@ ${BIN_VCF2MAF} \
   --inhibit-vep \
   --input-vcf ${OUTPUT}_vep.vcf \
   --output-maf ${OUTPUT}_vep.maf \
-  --verbose --ref-fasta ${FILE_GENOME} \
-  --maf-center ${CFG_CENTER} --ncbi-build GRCh37 \
+  --verbose \
+  --ref-fasta ${FILE_GENOME} \
+  --maf-center "${CFG_CENTER}" \
+  --ncbi-build GRCh37 \
   --tumor-id ${NameTD} \
   --retain-fmt GT,AF \
   --retain-ann HGVSg,CADD_PHRED,MAX_AF,gnomADe_AFR,gnomADe_AMR,gnomADe_ASJ,gnomADe_EAS,gnomADe_FIN,gnomADe_OTH,gnomADe_SAS,REVEL \

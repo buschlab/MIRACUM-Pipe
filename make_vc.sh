@@ -84,6 +84,11 @@ readonly recalbamTD=${DIR_WES}/${NameTD}_output.sort.filtered.rmdup.realigned.fi
 
 # keep
 readonly TD_OUTPUT_GZ=${DIR_WES}/${NameTD}_gatk4_mutect2.vcf.gz
+readonly TD_OUTPUT_F1R2=${DIR_WES}/${NameTD}_gatk4_mutect2-f1r2.tar.gz
+readonly TD_OUTPUT_ROM=${DIR_WES}/${NameTD}_gatk4_mutect2-rom.tar.gz
+readonly TD_OUTPUT_PILEUPSUMMARIES=${DIR_WES}/${NameTD}_gatk4_mutect2-pileupsummaries.table
+readonly TD_OUTPUT_SEGMENTS=${DIR_WES}/${NameTD}_gatk4_mutect2-segments.table
+readonly TD_OUTPUT_CONTAMINATION=${DIR_WES}/${NameTD}_gatk4_mutect2-contamination.table
 readonly GD_OUTPUT_GZ=${DIR_WES}/${NameGD}_gatk4_haplotype.vcf.gz
 readonly TD_OUTPUT_FILTERED_GZ=${DIR_WES}/${NameTD}_gatk4_mutect2_filtered.vcf.gz
 readonly TD_OUTPUT=${DIR_WES}/${NameTD}_gatk4_mutect2_filtered
@@ -92,11 +97,48 @@ readonly MSI_OUTPUT=${DIR_WES}/${NameD}_MSI
 readonly BAMMATCHER_OUTPUT=${DIR_WES}/${CFG_CASE}_${PARAM_DIR_PATIENT}_bam-matcher.txt
 
 # Mutect2
-${BIN_GATK4} Mutect2 -R ${FILE_GENOME} -I ${recalbamTD} -I ${recalbamGD} --normal ${NameGD} -O ${TD_OUTPUT_GZ} \
- --callable-depth "${CFG_MUTECT_CALLABLEDEPTH}" --intervals "${CFG_REFERENCE_CAPTUREREGIONS}" --min-base-quality-score "${CFG_GENERAL_MINBASEQUAL}" --base-quality-score-threshold "${CFG_GENERAL_MINBASEQUAL}" --panel-of-normals "${CFG_MUTECT_PANELOFNORMALS}" --genotype-pon-sites --germline-resource ${CFG_MUTECT_GERMLINERESOURCE} --genotype-germline-sites 
+${BIN_GATK4} Mutect2 \
+  -R ${FILE_GENOME} \
+  -I ${recalbamTD} \
+  -I ${recalbamGD} \
+  --normal ${NameGD} \
+  -O ${TD_OUTPUT_GZ} \
+  --callable-depth "${CFG_MUTECT_CALLABLEDEPTH}" \
+  --intervals "${CFG_REFERENCE_CAPTUREREGIONS}" \
+  --min-base-quality-score "${CFG_GENERAL_MINBASEQUAL}" \
+  --base-quality-score-threshold "${CFG_GENERAL_MINBASEQUAL}" \
+  --panel-of-normals "${CFG_MUTECT_PANELOFNORMALS}" \
+  --genotype-pon-sites \
+  --germline-resource ${CFG_MUTECT_GERMLINERESOURCE} \
+  --genotype-germline-sites \
+  --f1r2-tar-gz ${TD_OUTPUT_F1R2}
+
+${BIN_GATK4} LearnReadOrientationModel \
+  -I ${TD_OUTPUT_F1R2} \
+  -O ${TD_OUTPUT_ROM}
+
+${BIN_GATK4} GetPileupSummaries \
+  -I ${recalbamTD} \
+  -V ${CFG_MUTECT_GERMLINERESOURCE} \
+  -L ${CFG_MUTECT_GERMLINERESOURCE} \
+  -O ${TD_OUTPUT_PILEUPSUMMARIES}
+
+${BIN_GATK4} CalculateContamination \
+    -I ${TD_OUTPUT_PILEUPSUMMARIES} \
+    -tumor-segmentation ${TD_OUTPUT_SEGMENTS} \
+    -O ${TD_OUTPUT_CONTAMINATION}
 
 # Filter
-${BIN_GATK4} FilterMutectCalls -V ${TD_OUTPUT_GZ} -R ${FILE_GENOME} -O ${TD_OUTPUT_FILTERED_GZ} --intervals "${CFG_REFERENCE_CAPTUREREGIONS}" --min-median-base-quality "${CFG_GENERAL_MINBASEQUAL}" --min-allele-fraction "${CFG_GENERAL_MINVAF}"
+${BIN_GATK4} FilterMutectCalls \
+  -V ${TD_OUTPUT_GZ} \
+  -R ${FILE_GENOME} \
+  -O ${TD_OUTPUT_FILTERED_GZ} \
+  --intervals "${CFG_REFERENCE_CAPTUREREGIONS}" \
+  --min-median-base-quality "${CFG_GENERAL_MINBASEQUAL}" \
+  --min-allele-fraction "${CFG_GENERAL_MINVAF}" \
+  --ob-priors ${TD_OUTPUT_ROM} \
+  --tumor-segmentation ${TD_OUTPUT_SEGMENTS} \
+  --contamination-table ${TD_OUTPUT_CONTAMINATION} \
 
 ${BIN_VEP} \
   --offline --cache \
@@ -128,8 +170,10 @@ ${BIN_VCF2MAF} \
   --inhibit-vep \
   --input-vcf ${TD_OUTPUT}_vep.vcf \
   --output-maf ${TD_OUTPUT}_vep.maf \
-  --verbose --ref-fasta ${FILE_GENOME} \
-  --maf-center ${CFG_CENTER} --ncbi-build GRCh37 \
+  --verbose \
+  --ref-fasta ${FILE_GENOME} \
+  --maf-center "${CFG_CENTER}" \
+  --ncbi-build GRCh37 \
   --tumor-id ${NameTD} \
   --normal-id ${NameGD} \
   --retain-fmt GT,AF \
@@ -170,8 +214,10 @@ ${BIN_VCF2MAF} \
   --inhibit-vep \
   --input-vcf ${GD_OUTPUT}_vep.vcf \
   --output-maf ${GD_OUTPUT}_vep.maf \
-  --verbose --ref-fasta ${FILE_GENOME} \
-  --maf-center ${CFG_CENTER} --ncbi-build GRCh37 \
+  --verbose \
+  --ref-fasta ${FILE_GENOME} \
+  --maf-center "${CFG_CENTER}" \
+  --ncbi-build GRCh37 \
   --tumor-id ${NameTD} \
   --normal-id ${NameGD} \
   --retain-fmt GT,AF \
