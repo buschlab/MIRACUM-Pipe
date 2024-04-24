@@ -1382,7 +1382,6 @@ topart_mut <- function(df, protocol) {
     ))
 
     # output
-    print(colnames(df))
     df <- df[, c("Pathway", "Symbol", "HGVSp_Short", "Variant_Classification", "VAF", "MAF", "Classification", "REVEL_cat", "cosmic")]
     dup <- which(duplicated(df))
     if (length(dup) > 0){

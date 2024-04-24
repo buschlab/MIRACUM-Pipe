@@ -560,7 +560,6 @@ rare <- function(x, maf = 0.001){
   #' @details Only the rare mutations are kept. 
   keep <- c()
   gnomad <- as.numeric(x$MAX_AF)
-  print(colnames(x))
   for (n in 1:length(gnomad)){
     if (is.na(gnomad[n]) | gnomad[n] <= maf){
       keep <- c(keep, n)
