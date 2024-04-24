@@ -259,8 +259,6 @@ reference:
   dbSNP: snp150hg19.vcf.gz
   # Mappability file needed for calling CNVs with ControlFREEC (located in reference/mappability)
   mappability: out100m2_hg19.gem
-  # file used for mane select database
-  maneselect: MANE.GRCh38.v1.2.summary.txt
   sequencing: # all located in references/sequencing
     # target region covered by the sequencer in .bed format
     captureRegions: V5UTR.bed

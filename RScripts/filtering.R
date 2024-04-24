@@ -15,8 +15,7 @@ filtering <- function(
   actionable_genes = NA,
   covered_exons = covered_exons,
   cov_t = 1,
-  sureselect_type,
-  maneselectfile
+  sureselect_type
   ) {
   #' Filter Variants
   #'
