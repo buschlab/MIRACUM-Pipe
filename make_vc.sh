@@ -138,7 +138,7 @@ ${BIN_GATK4} FilterMutectCalls \
   --min-allele-fraction "${CFG_GENERAL_MINVAF}" \
   --ob-priors ${TD_OUTPUT_ROM} \
   --tumor-segmentation ${TD_OUTPUT_SEGMENTS} \
-  --contamination-table ${TD_OUTPUT_CONTAMINATION} \
+  --contamination-table ${TD_OUTPUT_CONTAMINATION}
 
 ${BIN_VEP} \
   --offline --cache \

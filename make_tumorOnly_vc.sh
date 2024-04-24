@@ -72,25 +72,61 @@ fi
 [[ -d "${DIR_ANALYSES}" ]] || mkdir -p "${DIR_ANALYSES}"
 
 # names
-readonly NameD=${CFG_CASE}_${PARAM_DIR_PATIENT}_vc
 readonly NameTD=${CFG_CASE}_${PARAM_DIR_PATIENT}_td
-
-# temp
-readonly mpileup=${DIR_TMP}/${NameD}_mpileup # DIR_WES!
 
 # keep
 readonly recalbam=${DIR_WES}/${NameTD}_output.sort.rmdup.realigned.fixed.recal.bam
 readonly OUTPUT_GZ=${DIR_WES}/${NameTD}_gatk4_mutect2.vcf.gz
+readonly OUTPUT_F1R2=${DIR_WES}/${NameTD}_gatk4_mutect2-f1r2.tar.gz
+readonly OUTPUT_ROM=${DIR_WES}/${NameTD}_gatk4_mutect2-rom.tar.gz
+readonly OUTPUT_PILEUPSUMMARIES=${DIR_WES}/${NameTD}_gatk4_mutect2-pileupsummaries.table
+readonly OUTPUT_SEGMENTS=${DIR_WES}/${NameTD}_gatk4_mutect2-segments.table
+readonly OUTPUT_CONTAMINATION=${DIR_WES}/${NameTD}_gatk4_mutect2-contamination.table
 readonly OUTPUT_FILTERED_GZ=${DIR_WES}/${NameTD}_gatk4_mutect2_filtered.vcf.gz
 readonly OUTPUT=${DIR_WES}/${NameTD}_gatk4_mutect2_filtered
 readonly MSI_OUTPUT=${DIR_WES}/${NameTD}_MSI
 
 # Mutect2
-${BIN_GATK4} Mutect2 -R ${FILE_GENOME} -I ${recalbam} -O ${OUTPUT_GZ} \
- --callable-depth "${CFG_TUMORONLY_MUTECT_CALLABLEDEPTH}" --intervals "${CFG_REFERENCE_CAPTUREREGIONS}" --min-base-quality-score "${CFG_GENERAL_MINBASEQUAL}" --base-quality-score-threshold "${CFG_GENERAL_MINBASEQUAL}" --panel-of-normals "${CFG_TUMORONLY_MUTECT_PANELOFNORMALS}" --genotype-pon-sites --germline-resource ${CFG_TUMORONLY_MUTECT_GERMLINERESOURCE} --genotype-germline-sites 
+${BIN_GATK4} Mutect2 \
+  -R ${FILE_GENOME} \
+  -I ${recalbam} \
+  -O ${OUTPUT_GZ} \
+  --callable-depth "${CFG_TUMORONLY_MUTECT_CALLABLEDEPTH}" \
+  --intervals "${CFG_REFERENCE_CAPTUREREGIONS}" \
+  --min-base-quality-score "${CFG_GENERAL_MINBASEQUAL}" \
+  --base-quality-score-threshold "${CFG_GENERAL_MINBASEQUAL}" \
+  --panel-of-normals "${CFG_TUMORONLY_MUTECT_PANELOFNORMALS}" \
+  --genotype-pon-sites \
+  --germline-resource ${CFG_TUMORONLY_MUTECT_GERMLINERESOURCE} \
+  --genotype-germline-sites \
+  --f1r2-tar-gz ${OUTPUT_F1R2}
+
+${BIN_GATK4} LearnReadOrientationModel \
+  -I ${OUTPUT_F1R2} \
+  -O ${OUTPUT_ROM}
+
+${BIN_GATK4} GetPileupSummaries \
+  -I ${recalbamTD} \
+  -V ${CFG_TUMORONLY_MUTECT_GERMLINERESOURCE} \
+  -L ${CFG_TUMORONLY_MUTECT_GERMLINERESOURCE} \
+  -O ${OUTPUT_PILEUPSUMMARIES}
+
+${BIN_GATK4} CalculateContamination \
+  -I ${OUTPUT_PILEUPSUMMARIES} \
+  -tumor-segmentation ${OUTPUT_SEGMENTS} \
+  -O ${OUTPUT_CONTAMINATION}
 
 # Filter
-${BIN_GATK4} FilterMutectCalls -V ${OUTPUT_GZ} -R ${FILE_GENOME} -O ${OUTPUT_FILTERED_GZ} --intervals "${CFG_REFERENCE_CAPTUREREGIONS}" --min-median-base-quality "${CFG_GENERAL_MINBASEQUAL}" --min-allele-fraction "${CFG_GENERAL_MINVAF}"
+${BIN_GATK4} FilterMutectCalls \
+  -V ${OUTPUT_GZ} \
+  -R ${FILE_GENOME} \
+  -O ${OUTPUT_FILTERED_GZ} \
+  --intervals "${CFG_REFERENCE_CAPTUREREGIONS}" \
+  --min-median-base-quality "${CFG_GENERAL_MINBASEQUAL}" \
+  --min-allele-fraction "${CFG_GENERAL_MINVAF}" \
+  --ob-priors ${OUTPUT_ROM} \
+  --tumor-segmentation ${OUTPUT_SEGMENTS} \
+  --contamination-table ${OUTPUT_CONTAMINATION}
 
 ${BIN_VEP} \
   --offline --cache \
