@@ -387,38 +387,42 @@ write.table(
   row.names = F
 )
 
-if (!is.null(filt_result_td) && !is.character(filt_result_td$maf) && nrow(filt_result_td$maf) > 0) {
-  write.table(
-    x = filt_result_td$maf,
-    file = maf_td,
-    append = F,
-    quote = F,
-    sep = "\t",
-    col.names = T,
-    row.names = F
-  )
-}
-if (!is.null(filt_result_loh) && !is.character(filt_result_loh$maf) && nrow(filt_result_loh$maf) > 0) {
-  write.table(
-    x = filt_result_gd$maf,
-    file = maf_loh,
-    append = F,
-    quote = F,
-    sep = "\t",
-    col.names = T,
-    row.names = F
-  )
-}
-if (!is.null(filt_result_gd) && !is.character(filt_result_gd$maf) && nrow(filt_result_gd$maf) > 0) {
-  write.table(
-    x = filt_result_gd$maf,
-    file = maf_gd,
-    append = F,
-    quote = F,
-    sep = "\t",
-    col.names = T,
-    row.names = F
-  )
+if (str_starts(protocol, "somatic")) {
+
+  if (!is.null(filt_result_td) && !is.character(filt_result_td$maf) && nrow(filt_result_td$maf) > 0) {
+    write.table(
+      x = filt_result_td$maf,
+      file = maf_td,
+      append = F,
+      quote = F,
+      sep = "\t",
+      col.names = T,
+      row.names = F
+    )
+  }
+  if (!is.null(filt_result_loh) && !is.character(filt_result_loh$maf) && nrow(filt_result_loh$maf) > 0) {
+    write.table(
+      x = filt_result_gd$maf,
+      file = maf_loh,
+      append = F,
+      quote = F,
+      sep = "\t",
+      col.names = T,
+      row.names = F
+    )
+  }
+  if (!is.null(filt_result_gd) && !is.character(filt_result_gd$maf) && nrow(filt_result_gd$maf) > 0) {
+    write.table(
+      x = filt_result_gd$maf,
+      file = maf_gd,
+      append = F,
+      quote = F,
+      sep = "\t",
+      col.names = T,
+      row.names = F
+    )
+  }
+
 }
 
 ########################
@@ -573,10 +577,10 @@ if (protocol == "somaticGermline" | protocol == "somatic") {
     path_output = path_output,
     outfile_cbioportal = outfile_mutsig_cbioportal
   )
-  mut_sig <- data.frame(Signature = mut_sig_analysis$CosmicValid_cutoffGen_LCDlist$out_sig_ind_df$sig,
+  mut_sig_ana <- data.frame(Signature = mut_sig_analysis$CosmicValid_cutoffGen_LCDlist$out_sig_ind_df$sig,
                         Process = mut_sig_analysis$CosmicValid_cutoffGen_LCDlist$out_sig_ind_df$process,
                         Frequency = mut_sig_analysis$CosmicValid_cutoffGen_LCDlist$norm_exposures[,1])
-  rownames(mut_sig) <- mut_sig$Signature
+  rownames(mut_sig_ana) <- mut_sig_ana$Signature
 }
 
 # Write Excel File
@@ -615,7 +619,7 @@ if (protocol == "somaticGermline") {
     output <- list(
       Mutations = filt_result_td$table,
       CopyNumberVariations = cnv_analysis_results$cnvs_annotated$CNVsAnnotated,
-      Mutation_Signatures = mut_sig
+      Mutation_Signatures = mut_sig_ana
     )
     write.xlsx(
       x = output,
@@ -628,7 +632,7 @@ if (protocol == "somaticGermline") {
   output <- list(
     Mutations = filt_result_td$table,
     CopyNumberVariations = cnv_analysis_results$cnvs_annotated$CNVsAnnotated,
-    Mutation_Signatures = mut_sig
+    Mutation_Signatures = mut_sig_ana
   )
   write.xlsx(
     x = output,
@@ -646,9 +650,9 @@ if(protocol == "panelTumor" & sureselect_type == "TSO500") {
   } else {
     msi_helper <- "Instable"
   }
-  brca_helper <- which(mut_sig ==  "AC3")
-  if (length(brca_helper) == 1 & mut_sig["AC3", 3] * 100 > 1) {
-    brca_helper <- paste0(round(mut_sig["AC3", 3] * 100, digits = 1))
+  brca_helper <- which(mut_sig_ana ==  "AC3")
+  if (length(brca_helper) == 1 & mut_sig_ana["AC3", 3] * 100 > 1) {
+    brca_helper <- paste0(round(mut_sig_ana["AC3", 3] * 100, digits = 1))
   } else {
     brca_helper <- "<1%"
   }
@@ -705,9 +709,9 @@ if (protocol == "tumorOnly") {
   } else {
     msi_helper <- "Instable"
   }
-  brca_helper <- which(mut_sig ==  "AC3")
-  if (length(brca_helper) == 1 & mut_sig["AC3", 3]*100 > 1) {
-    brca_helper <- paste0(round(mut_sig["AC3", 3]*100, digits = 1))
+  brca_helper <- which(mut_sig_ana ==  "AC3")
+  if (length(brca_helper) == 1 & mut_sig_ana["AC3", 3]*100 > 1) {
+    brca_helper <- paste0(round(mut_sig_ana["AC3", 3]*100, digits = 1))
   } else {
     brca_helper <- "<1%"
   }
@@ -888,10 +892,6 @@ highlight_table <- highlight_table(
 
 sq_tab <- summary_quality(stats = stats, protocol = protocol)
 
-som_muts <- sum_muts(
-  tmp = mutation_analysis_result$mut_tab
-)
-
 sum_mut_cg <- highlight_detail(
   muts_tab = mutation_analysis_result$ts_og,
   Mode = "Tumor",
@@ -941,6 +941,10 @@ if (protocol == "somaticGermline") {
 
 if (str_starts(protocol, "somatic")) {
 
+  som_muts <- sum_muts(
+    tmp = mutation_analysis_result$mut_tab
+  )
+
   if (length(which(
       mutation_analysis_result$table_loh_mutations$is_oncogene == 1 |
       mutation_analysis_result$table_loh_mutations$is_tumorsuppressor == 1
@@ -962,6 +966,8 @@ if (str_starts(protocol, "somatic")) {
     Mode = "LoH",
     protocol = protocol
   )
+} else {
+    som_muts <- mutation_analysis_result$mut_tab
 }
 
 if (protocol == "panelTumor") {

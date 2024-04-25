@@ -206,7 +206,7 @@ Untersucht werden die Mutationssignaturen basierend auf den COSMIC Mutation Sign
 Der TopArt-Score besteht aus vier verschiedenen Anteilen. Die ersten beiden Kategorien P1 und P2 sind phänotypische Kriterien. Für den TopArt-Score P1 ist wichtig, ob die \textit{BRCAness}-Signatur vorhanden ist. Ist sie nicht vorhanden, bekommt der Patient in dieser Kategorie null Punkte. Ist die Signatur vorhanden, das KI enthält aber die Null, erhält der Patietn einen Punkt. Enthält das KI die null nicht, so gibt es zwei Punkte. Das zweite phänotypische Kriterium P2 können wir nicht auswerten.
 
 <<mut_sig, echo=FALSE, eval=TRUE, results='tex'>>=
-tmp <- mut_sig
+tmp <- mut_sig_ana
 tmp <- tmp[, c(1:3)]
 tmp[,3] <- tmp[,3]*100
 colnames(tmp) <- c("Signatur", "Beschreibung", "Anteil in %")
