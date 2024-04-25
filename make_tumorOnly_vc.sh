@@ -106,7 +106,7 @@ ${BIN_GATK4} LearnReadOrientationModel \
   -O ${OUTPUT_ROM}
 
 ${BIN_GATK4} GetPileupSummaries \
-  -I ${recalbamTD} \
+  -I ${recalbam} \
   -V ${CFG_TUMORONLY_MUTECT_GERMLINERESOURCE} \
   -L ${CFG_TUMORONLY_MUTECT_GERMLINERESOURCE} \
   -O ${OUTPUT_PILEUPSUMMARIES}
