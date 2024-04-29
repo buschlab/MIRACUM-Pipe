@@ -112,7 +112,7 @@ readonly coverageexons=${DIR_WES}/${NameD}_coverage.exons.txt
 # Panel Files are spread over multiple files, e.g. 4
 # filenames without extension in yaml file!
 
-if [[ ${CFG_PANEL_FILE_NUMBER} -gt 1]]
+if [[ ${CFG_PANEL_FILE_NUMBER} -gt 1 ]]
 then
   file_numbers=$(seq -s "" 1 ${CFG_PANEL_FILE_NUMBER})
   # tmp merged fastq
