@@ -61,11 +61,15 @@ conf <- modifyList(conf, conf_patient)
 # Parameter #
 
 protocol <- ifelse(conf$common$protocol == "wes", ifelse(conf$common$germline, "somaticGermline", "somatic"), conf$common$protocol)
+if (protocol == "panel") {
+  protocol <- "panelTumor"
+}
 sample <- paste(protocol, id, sep = "_")
 path_output <- paste(path_assets, "output", sample, "Analyses/", sep = "/")
 path_input <- paste(path_assets, "output", sample, "WES/", sep = "/")
 germline <- conf$common$files$germline_R1
 tumor <- conf$common$files$tumor_R1
+lanes <- as.numeric(conf$common$files$panel$numberOfFiles)
 targets_txt <- paste0(path_sequencing, "/", conf$reference$sequencing$captureGenes)
 author <- conf$common$author
 center <- conf$common$center
@@ -128,13 +132,16 @@ if (protocol == "somaticGermline" | protocol == "somatic") {
   )
 }
 if (protocol == "panelTumor") {
+  if (lanes > 1) {
+    tumor <- paste0(sample, "_td_merged_R1")
+  }
   tumor <- paste0(
     path_input, strsplit(x = tumor, split = ".", fixed = T)[[1]][1],
     "_fastqc/Images/per_base_quality.png"
   )
   tumor_bsqr <- paste0(
     path_input, sample,
-    "_td_output.sort.filtered.rmdup.realigned.fixed.recal_fastqc/Images/per_base_quality.png"
+    "_td_output.sort.rmdup.realigned.fixed.recal_fastqc/Images/per_base_quality.png"
   )
 }
 if (protocol == "tumorOnly") {

@@ -46,7 +46,6 @@ packages <- c(
     "bedr",
     "stringr",
     "plyr",
-    "gtools",
     "fastqcr"
 )
 BiocManager::install(pkgs = packages, update  = TRUE, ask = FALSE)
