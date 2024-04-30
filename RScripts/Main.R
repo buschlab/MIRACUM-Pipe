@@ -409,7 +409,7 @@ if (str_starts(protocol, "somatic")) {
   }
   if (!is.null(filt_result_loh) && !is.character(filt_result_loh$maf) && nrow(filt_result_loh$maf) > 0) {
     write.table(
-      x = filt_result_gd$maf,
+      x = filt_result_loh$maf,
       file = maf_loh,
       append = F,
       quote = F,
