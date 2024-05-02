@@ -151,3 +151,5 @@ EOI
 # run CNV calling
 export PATH="${BIN_SAMTOOLS}:${PATH}"
 ${BIN_FREEC} -conf "${DIR_WES}"/CNV_config.txt
+
+rm ${DIR_CNV_OUTPUT}/*.pileup
