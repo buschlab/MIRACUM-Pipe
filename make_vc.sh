@@ -108,9 +108,7 @@ ${BIN_GATK4} Mutect2 \
   --min-base-quality-score "${CFG_GENERAL_MINBASEQUAL}" \
   --base-quality-score-threshold "${CFG_GENERAL_MINBASEQUAL}" \
   --panel-of-normals "${CFG_MUTECT_PANELOFNORMALS}" \
-  --genotype-pon-sites \
   --germline-resource ${CFG_MUTECT_GERMLINERESOURCE} \
-  --genotype-germline-sites \
   --f1r2-tar-gz ${TD_OUTPUT_F1R2}
 
 ${BIN_GATK4} LearnReadOrientationModel \
@@ -181,8 +179,36 @@ ${BIN_VCF2MAF} \
   --custom-enst ${DIR_DATABASE}/refseq_selected.txt
 
 # Haplotype Caller
-${BIN_GATK4} HaplotypeCaller -R ${FILE_GENOME} -I ${recalbamTD} -I ${recalbamGD} -O ${GD_OUTPUT_GZ} \
---intervals "${CFG_REFERENCE_CAPTUREREGIONS}" --min-base-quality-score "${CFG_GENERAL_MINBASEQUAL}" --base-quality-score-threshold "${CFG_GENERAL_MINBASEQUAL}"
+${BIN_GATK4} HaplotypeCaller \
+  -R ${FILE_GENOME} \
+  -I ${recalbamTD} \
+  -O ${GD_OUTPUT_GZ}_t \
+  --intervals "${CFG_REFERENCE_CAPTUREREGIONS}" \
+  --min-base-quality-score "${CFG_GENERAL_MINBASEQUAL}" \
+  --base-quality-score-threshold "${CFG_GENERAL_MINBASEQUAL}" \
+  --adaptive-pruning \
+  -ERC GVCF
+
+${BIN_GATK4} HaplotypeCaller \
+  -R ${FILE_GENOME} \
+  -I ${recalbamGD} \
+  -O ${GD_OUTPUT_GZ}_g \
+  --intervals "${CFG_REFERENCE_CAPTUREREGIONS}" \
+  --min-base-quality-score "${CFG_GENERAL_MINBASEQUAL}" \
+  --base-quality-score-threshold "${CFG_GENERAL_MINBASEQUAL}" \
+  --adaptive-pruning \
+  -ERC GVCF
+
+${BIN_GATK4} CombineGVCFs \
+  -R ${FILE_GENOME} \
+  --variant ${GD_OUTPUT_GZ}_t \
+  --variant ${GD_OUTPUT_GZ}_g \
+  -O ${GD_OUTPUT_GZ}_c
+
+${BIN_GATK4} GenotypeGVCFs \
+  -R ${FILE_GENOME} \
+  -V ${GD_OUTPUT_GZ}_c \
+  -O ${GD_OUTPUT_GZ}
 
 ${BIN_VEP} \
   --offline --cache \
