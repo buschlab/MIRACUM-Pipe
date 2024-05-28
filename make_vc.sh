@@ -172,8 +172,10 @@ ${BIN_VCF2MAF} \
   --ref-fasta ${FILE_GENOME} \
   --maf-center "${CFG_CENTER}" \
   --ncbi-build GRCh37 \
-  --tumor-id ${NameTD} \
-  --normal-id ${NameGD} \
+  --tumor-id ${PARAM_DIR_PATIENT}_TD \
+  --vcf-tumor-id ${NameTD} \
+  --normal-id ${PARAM_DIR_PATIENT}_GD \
+  --vcf-normal-id ${NameGD} \
   --retain-fmt GT,AF \
   --retain-ann HGVSg,CADD_PHRED,MAX_AF,gnomADe_AFR,gnomADe_AMR,gnomADe_ASJ,gnomADe_EAS,gnomADe_FIN,gnomADe_OTH,gnomADe_SAS,REVEL \
   --custom-enst ${DIR_DATABASE}/refseq_selected.txt
@@ -244,8 +246,10 @@ ${BIN_VCF2MAF} \
   --ref-fasta ${FILE_GENOME} \
   --maf-center "${CFG_CENTER}" \
   --ncbi-build GRCh37 \
-  --tumor-id ${NameTD} \
-  --normal-id ${NameGD} \
+  --tumor-id ${PARAM_DIR_PATIENT}_TD \
+  --vcf-tumor-id ${NameTD} \
+  --normal-id ${PARAM_DIR_PATIENT}_GD \
+  --vcf-normal-id ${NameGD} \
   --retain-fmt GT,AF \
   --retain-ann HGVSg,CADD_PHRED,MAX_AF,gnomADe_AFR,gnomADe_AMR,gnomADe_ASJ,gnomADe_EAS,gnomADe_FIN,gnomADe_OTH,gnomADe_SAS,REVEL \
   --custom-enst ${DIR_DATABASE}/refseq_selected.txt
