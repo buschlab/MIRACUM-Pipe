@@ -57,6 +57,8 @@ filtering <- function(
   # Read Data
   x <- read.delim(file = snpfile, header = T, stringsAsFactors = F, comment.char = "#")
   x$HGVSp_Short <- str_replace_all(x$HGVSp_Short, "%3D", "=")
+  x$t_GT <- str_replace_all(x$t_GT, "|", "/")
+  x$n_GT <- str_replace_all(x$n_GT, "|", "/")
   
   # Filter for LoHs based on VarScan algorithm
   if (mode == "LOH") {
