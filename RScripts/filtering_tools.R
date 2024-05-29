@@ -105,9 +105,6 @@ vrz <- function(x, mode, protocol = "Tumor_Normal", manifest){
     x$Zygosity <- "hom"
     x$Zygosity[x$t_GT == "0/1"] <- "het"
     x$Type <- "Somatic"
-    x$n_AF <- as.numeric(x$n_AF)
-    x$t_AF <- as.numeric(x$t_AF)
-  } else {
     x$n_AF <- as.numeric(x$n_alt_count) / as.numeric(x$n_depth)
     x$t_AF <- as.numeric(x$t_alt_count) / as.numeric(x$t_depth)
   }
