@@ -101,12 +101,9 @@ ${BIN_GATK4} Mutect2 \
   -R ${FILE_GENOME} \
   -I ${recalbamTD} \
   -I ${recalbamGD} \
-  --normal ${NameGD} \
+  -normal ${NameGD} \
   -O ${TD_OUTPUT_GZ} \
-  --callable-depth "${CFG_MUTECT_CALLABLEDEPTH}" \
   --intervals "${CFG_REFERENCE_CAPTUREREGIONS}" \
-  --min-base-quality-score "${CFG_GENERAL_MINBASEQUAL}" \
-  --base-quality-score-threshold "${CFG_GENERAL_MINBASEQUAL}" \
   --panel-of-normals "${CFG_MUTECT_PANELOFNORMALS}" \
   --germline-resource ${CFG_MUTECT_GERMLINERESOURCE} \
   --f1r2-tar-gz ${TD_OUTPUT_F1R2}
