@@ -114,9 +114,6 @@ readonly BIN_CUT="cut -f1,2,3"
 readonly BIN_BWAMEM="${DIR_TOOLS}/bwa-mem2/bwa-mem2 mem -M "
 readonly BIN_BWAMEMINDEX="${DIR_TOOLS}/bwa-mem2/bwa-mem2 index"
 
-# BAM-Readcount
-readonly BIN_BAM_READCOUNT="${DIR_TOOLS}/bam-readcount/bin/bam-readcount -q ${CFG_SAMTOOLS_MPILEUP_MINMQ} -b ${CFG_GENERAL_MINBASEQUAL} -w 1 -f ${FILE_GENOME} "
-
 # SAMTOOLS
 readonly BIN_SAMTOOLS="${DIR_TOOLS}/samtools/samtools" # path to samtools
 readonly BIN_SAMVIEW="${BIN_SAMTOOLS} view -@ ${CFG_COMMON_CPUCORES} "
@@ -241,8 +238,6 @@ export BIN_CUT
 
 export BIN_BWAMEM
 export BIN_BWAMEMINDEX
-
-export BIN_BAM_READCOUNT
 
 export BIN_SAMTOOLS
 export BIN_SAMVIEW

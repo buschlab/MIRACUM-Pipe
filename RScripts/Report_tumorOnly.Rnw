@@ -413,7 +413,6 @@ if(is.null(som_all$muts_tab) || dim(som_all$muts_tab)[1] == 0) {
 \item FastQC: 0.12.1
 \item Trimmomatic: 0.39
 \item bwa-mem2: 2.2.1
-\item bam-readcount: 0.8.0-unstable-7-625eea2
 \item samtools 1.20
 \item GATK: 4.2.4.0
 \item picard-tools: 3.1.1

@@ -160,7 +160,7 @@ ${BIN_STATS} "${bam}" >"${statstxt}"
 ${BIN_SAMSORT} "${bam}" -T "${prefixsort}" -o "${sortbam}"
 
 # rmdup bam
-${BIN_SAMVIEW} -b -f 0x2 -q "${CFG_SAMTOOLS_MPILEUP_MINMQ}" "${sortbam}" | ${BIN_SAMRMDUP} - "${rmdupbam}"
+${BIN_SAMVIEW} -b -f 0x2 -q 1 "${sortbam}" | ${BIN_SAMRMDUP} - "${rmdupbam}"
 
 # make bai
 ${BIN_SAMINDEX} "${rmdupbam}" "${bai}"

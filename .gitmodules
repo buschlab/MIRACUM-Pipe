@@ -1,9 +1,6 @@
 [submodule "tools/FastQC"]
 	path = tools/FastQC
 	url = https://github.com/s-andrews/FastQC
-[submodule "tools/bam-readcount"]
-	path = tools/bam-readcount
-	url = https://github.com/genome/bam-readcount
 [submodule "tools/samtools"]
 	path = tools/samtools
 	url = https://github.com/samtools/samtools

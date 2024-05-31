@@ -135,17 +135,6 @@ mkdir -p bin
 chmod +x src/freec
 mv src/freec bin
 
-#################
-# bam-readcount #
-#################
-cd ${DIR_SCRIPT}/bam-readcount
-mkdir -p build && cd build
-cmake ../ && make
-
-# move file
-mv ${DIR_SCRIPT}/bam-readcount/build/bin ${DIR_SCRIPT}/bam-readcount/bin
-rm -rf ${DIR_SCRIPT}/bam-readcount/build
-
 #######
 # bwa-mem2 #
 #######
