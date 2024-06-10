@@ -144,6 +144,16 @@ actionable <- function(x, column, actionable_genes) {
   return(x[actionable_matches,])
 }
 
+updateGeneNames <- function(x) {
+  if(nrow(x) == 0) {
+    return(x)
+  }
+
+  newSymbols <- as.character(mget(as.character(mget(c(x$Hugo_Symbol), envir = org.Hs.egALIAS2EG, ifnotfound=NA)), envir = org.Hs.egSYMBOL, ifnotfound=NA))
+  x$Hugo_Symbol[newSymbols != "NA"] <- newSymbols[newSymbols != "NA"]
+  return(x)
+}
+
 ### Database Queries
 isflag <- function(x, dbfile){
   #' Flags

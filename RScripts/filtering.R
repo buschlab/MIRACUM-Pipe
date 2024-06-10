@@ -63,7 +63,10 @@ filtering <- function(
   # Filter for LoHs based on VarScan algorithm
   if (mode == "LOH") {
     x <- extract_lohs(x) 
-  }  
+  }
+
+  x <- updateGeneNames(x)
+  
   # Filter for actionable genes in Germline
   if (protocol == "somaticGermline" && mode == "N") {
     x <- actionable(x, "Hugo_Symbol", actionable_genes)
