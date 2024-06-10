@@ -97,7 +97,7 @@ vrz <- function(x, mode, protocol = "Tumor_Normal", manifest){
   #' @details We extract VAF and Readcounts both for Tumor and Normal
   #' @details out of the column "Otherinfo". The dataframe x should contain
   #' @details only mutations calls with a lack of heterozygosity.
-  if (dim(x)[1] == 0) {
+  if (nrow(x) == 0) {
     return(x)
   }
   if (mode == "T") {
@@ -105,8 +105,6 @@ vrz <- function(x, mode, protocol = "Tumor_Normal", manifest){
     x$Zygosity <- "hom"
     x$Zygosity[x$t_GT == "0/1"] <- "het"
     x$Type <- "Somatic"
-    x$n_AF <- as.numeric(x$n_alt_count) / as.numeric(x$n_depth)
-    x$t_AF <- as.numeric(x$t_alt_count) / as.numeric(x$t_depth)
   }
   if (mode == "N") {
     x$Variant_Reads <- paste(x$n_alt_count, x$n_depth, sep = "|")
@@ -120,8 +118,8 @@ vrz <- function(x, mode, protocol = "Tumor_Normal", manifest){
     x$Type <- "LoH"
   }
   
-  x$n_AF <- format(round(x$n_AF * 100), nsmall = 2)
-  x$t_AF <- format(round(x$t_AF * 100), nsmall = 2)
+  x$n_AF <- format(round(100 * as.numeric(x$n_alt_count) / as.numeric(x$n_depth), 2), nsmall = 2)
+  x$t_AF <- format(round(100 * as.numeric(x$t_alt_count) / as.numeric(x$t_depth), 2), nsmall = 2)
   
   return(x)
 }
