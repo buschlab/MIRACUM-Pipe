@@ -57,14 +57,13 @@ filtering <- function(
   # Read Data
   x <- read.delim(file = snpfile, header = T, stringsAsFactors = F, comment.char = "#")
   x$HGVSp_Short <- str_replace_all(x$HGVSp_Short, "%3D", "=")
-  x$t_GT <- str_replace_all(x$t_GT, "|", "/")
-  x$n_GT <- str_replace_all(x$n_GT, "|", "/")
+  x$t_GT <- str_replace_all(x$t_GT, "\\|", "/")
+  x$n_GT <- str_replace_all(x$n_GT, "\\|", "/")
   
   # Filter for LoHs based on VarScan algorithm
   if (mode == "LOH") {
     x <- extract_lohs(x) 
-  }
-  
+  }  
   # Filter for actionable genes in Germline
   if (protocol == "somaticGermline" && mode == "N") {
     x <- actionable(x, "Hugo_Symbol", actionable_genes)
@@ -139,7 +138,7 @@ filtering <- function(
     }
   }
 
-  if (dim(x)[1] != 0) {
+  if (nrow(x)) {
 
     # Include GeneName
     x$Start_Position <- as.numeric(as.character(x$Start_Position))
