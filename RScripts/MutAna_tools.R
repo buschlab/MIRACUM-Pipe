@@ -399,10 +399,14 @@ circos_colors <- function(
     list1 <- list(x_s_indel)
     idxs <- list(1:nrow(x_s_indel))
     circoscolors <- c("#008000CC")
-  } else if (no_indel_somatic == TRUE & no_snp == FALSE & no_loh == FALSE & no_indel_loh == FALSE){
+  } else if (no_indel_somatic == TRUE & no_snp == FALSE & no_loh == FALSE & no_indel_loh == FALSE & no_snp_loh == FALSE){
     list1 <- list(x_s_snp, x_l_snp, x_l_indel)
     idxs <- list(1:nrow(x_s_snp), 1:nrow(x_l_snp), 1:nrow(x_l_indel))
     circoscolors <- c("#FF0000CC", "#00FFFFCC", "#8000FFCC")
+  } else if (no_indel_somatic == TRUE & no_snp == FALSE & no_loh == FALSE & no_indel_loh == FALSE && no_snp_loh == TRUE){
+    list1 <- list(x_s_snp, x_l_indel)
+    idxs <- list(1:nrow(x_s_snp), 1:nrow(x_l_indel))
+    circoscolors <- c("#FF0000CC", "#8000FFCC")
   } else if (no_indel_somatic == TRUE & no_snp == FALSE & no_loh == FALSE & no_indel_loh == TRUE){
     list1 <- list(x_s_snp, x_l_snp)
     idxs <- list(1:nrow(x_s_snp), 1:nrow(x_l_snp))
