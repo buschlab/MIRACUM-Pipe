@@ -789,34 +789,39 @@ get_type <- function(
                           & x$seqnames == cnvs$chr)]
       return(cn)
     }
-    gene_loci_onc$cn <- "-"
-    gene_loci_onc$Type <- "focal"
-    for (i in 1:dim(gene_loci_onc)[1]) {
-      if(length(get_cn(gene_loci_onc[i, ])) > 0) {
-        gene_loci_onc$cn[i] <- get_cn(gene_loci_onc[i, ])
-        gene_loci_onc$Type[i] <- "complete"
-      } else {
-        gene_loci_onc$cn[i] <- paste0(
-          Oncogenes$copy.number[grep(gene_loci_onc$gene_name[i],
-          x = Oncogenes$Oncogene)],
-          sep = "",
-          collapse = ", "
-        )
+    
+    if (nrow(gene_loci_onc) > 0) {
+      gene_loci_onc$cn <- "-"
+      gene_loci_onc$Type <- "focal"
+      for (i in 1:dim(gene_loci_onc)[1]) {
+        if(length(get_cn(gene_loci_onc[i, ])) > 0) {
+          gene_loci_onc$cn[i] <- get_cn(gene_loci_onc[i, ])
+          gene_loci_onc$Type[i] <- "complete"
+        } else {
+          gene_loci_onc$cn[i] <- paste0(
+            Oncogenes$copy.number[grep(gene_loci_onc$gene_name[i],
+            x = Oncogenes$Oncogene)],
+            sep = "",
+            collapse = ", "
+          )
+        }
       }
     }
 
-    gene_loci_tsg$cn <- "-"
-    gene_loci_tsg$Type <- "focal"
-    for (i in 1:dim(gene_loci_tsg)[1]) {
-      if(length(get_cn(gene_loci_tsg[i, ])) > 0) {
-        gene_loci_tsg$cn[i] <- get_cn(gene_loci_tsg[i, ])
-        gene_loci_tsg$Type[i] <- "complete"
-      } else {
-        gene_loci_tsg$cn[i] <- paste0(
-          Tumorsuppressor$copy.number[grep(gene_loci_tsg$gene_name[i],
-          x = Tumorsuppressor$TumorSuppressor)],
-          sep = "", collapse = ", "
-        )
+    if (nrow(gene_loci_tsg) > 0) {
+      gene_loci_tsg$cn <- "-"
+      gene_loci_tsg$Type <- "focal"
+      for (i in 1:dim(gene_loci_tsg)[1]) {
+        if(length(get_cn(gene_loci_tsg[i, ])) > 0) {
+          gene_loci_tsg$cn[i] <- get_cn(gene_loci_tsg[i, ])
+          gene_loci_tsg$Type[i] <- "complete"
+        } else {
+          gene_loci_tsg$cn[i] <- paste0(
+            Tumorsuppressor$copy.number[grep(gene_loci_tsg$gene_name[i],
+            x = Tumorsuppressor$TumorSuppressor)],
+            sep = "", collapse = ", "
+          )
+        }
       }
     }
 
