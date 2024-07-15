@@ -78,7 +78,8 @@ sureselect_type <- conf$reference$sequencing$captureRegionName
 ref_genome <- paste0(path_genome, "/", conf$reference$genome)
 target_capture_cor_factors <- paste0(path_data, "/", conf$reference$sequencing$captureCorFactors)
 vaf <- conf$general$minVAF * 100
-min_var_count <- as.numeric(conf[[conf$common$protocol]]$mutect$callableDepth) / 2
+min_coverage <- as.numeric(conf[[conf$common$protocol]]$mutect$callableDepth)
+min_var_count <- min_coverage / 2
 maf_cutoff <- conf$general$maf_cutoff
 actionable_genes <- ifelse(is.null(conf$reference$sequencing$actionableGenes), NA, paste0(path_data, "/", conf$reference$sequencing$actionableGenes))
 covered_exons <- paste0(path_sequencing, "/", conf$reference$sequencing$coveredExons)
@@ -272,7 +273,8 @@ if (protocol == "somatic" | protocol == "somaticGermline") {
     maf = maf_cutoff,
     covered_exons = covered_exons,
     cov_t = stats$cover_exons$perc[[2]][1],
-    sureselect_type = sureselect_type
+    sureselect_type = sureselect_type,
+    min_coverage = min_coverage
   )
 
   # LOH
@@ -291,7 +293,8 @@ if (protocol == "somatic" | protocol == "somaticGermline") {
     maf = maf_cutoff,
     covered_exons = covered_exons,
     cov_t = 1,
-    sureselect_type = sureselect_type
+    sureselect_type = sureselect_type,
+    min_coverage = min_coverage
   )
 
   if (protocol == "somaticGermline") {
@@ -312,7 +315,8 @@ if (protocol == "somatic" | protocol == "somaticGermline") {
       actionable_genes = actionable_genes,
       covered_exons = covered_exons,
       cov_t = stats$cover_exons$perc[[1]][1],
-      sureselect_type = sureselect_type
+      sureselect_type = sureselect_type,
+      min_coverage = min_coverage
     )
     loh_correction <- loh_correction(
       filt_loh = filt_result_loh,
@@ -356,7 +360,8 @@ if (protocol == "panelTumor" | protocol == "tumorOnly") {
     maf = maf_cutoff,
     covered_exons = covered_exons,
     cov_t = stats$cover_exons$perc[[1]][1],
-    sureselect_type = sureselect_type
+    sureselect_type = sureselect_type,
+    min_coverage = min_coverage
   )
 
 }

@@ -125,12 +125,21 @@ vrz <- function(x, mode, protocol = "Tumor_Normal", manifest){
 }
 
 
-mrc <- function(x, min_var_count){
-  vrc <- strsplit(x = as.character(x$Variant_Reads), split = "|", fixed = TRUE)
-  vrc <- unlist(lapply(vrc, function(x){return(x[[1]])}))
-  id_np <- which(as.numeric(vrc) < min_var_count)
-  if (length(id_np) > 0){
-    x <- x[-id_np, ]
+mrc <- function(x, min_var_count, min_coverage, mode = mode){
+  if (mode != "LOH") {
+    rc <- strsplit(x = as.character(x$Variant_Reads), split = "|", fixed = TRUE)
+    vrc <- unlist(lapply(rc, function(x){return(x[[1]])}))
+    rrc <- unlist(lapply(rc, function(x){return(x[[2]])}))
+    x <- x[as.numeric(vrc) >= min_var_count & as.numeric(rrc) >= min_coverage, ]
+  } else {
+    rct <- strsplit(x = as.character(x$Count_Tumor), split = "|", fixed = TRUE)
+    vrct <- unlist(lapply(rct, function(x){return(x[[1]])}))
+    rrct <- unlist(lapply(rct, function(x){return(x[[2]])}))
+    x <- x[as.numeric(rrct) >= min_coverage, ]
+    rcn <- strsplit(x = as.character(x$Count_Normal), split = "|", fixed = TRUE)
+    vrcn <- unlist(lapply(rct, function(x){return(x[[1]])}))
+    rrcn <- unlist(lapply(rct, function(x){return(x[[2]])}))
+    x <- x[as.numeric(vrcn) >= min_var_count & as.numeric(rrcn) >= min_coverage, ]
   }
   return(x)
 }

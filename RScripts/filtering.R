@@ -15,7 +15,8 @@ filtering <- function(
   actionable_genes = NA,
   covered_exons = covered_exons,
   cov_t = 1,
-  sureselect_type
+  sureselect_type,
+  min_coverage = 40
   ) {
   #' Filter Variants
   #'
@@ -94,9 +95,9 @@ filtering <- function(
       
   # VAF Filter
   x <- exclude(x, vaf = vaf)
-    
-  # Remove Variants with Variant Read Count below 4/20
-  x <- mrc(x = x, min_var_count = min_var_count)
+
+  # Remove Variants with Variant Read Count below 4/20 and Coverage below 8/40
+  x <- mrc(x = x, min_var_count = min_var_count, min_coverage = min_coverage, mode = mode)
     
   # Filter for exonic function
   x <- filt(x, "Intron")
@@ -106,6 +107,7 @@ filtering <- function(
   x <- filt(x, "IGR")
   x <- filt(x, "3'Flank")
   x <- filt(x, "5'Flank")
+  x <- filt(x, "Targeted_Region")
   
   # TMB calculation for WES
   if (protocol == "somaticGermline" | protocol == "somatic"){
