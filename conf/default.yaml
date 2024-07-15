@@ -51,6 +51,10 @@ wes:
     #--germline-resource; Population vcf of germline sequencing containing allele fractions.  Default value: null
     germlineResource: somatic-b37_af-only-gnomad.raw.sites.vcf
 
+  getpileupsummaries:
+    # a vcf with known variant sites
+    knownVariantSites: somatic-b37_small_exac_common_3.vcf
+
   filterMutectCalls:
     #--contamination-estimate 0.5?; Estimate of contamination.  Default value: 0.0 (evtl. tumor purity)
     #--intervals V6UTR.bed; One or more genomic intervals over which to operate  This argument may be specified 0 or more times. Default value: null
@@ -115,6 +119,10 @@ panel:
     panelOfNormals: somatic-b37_Mutect2-exome-panel.vcf
     #--germline-resource; Population vcf of germline sequencing containing allele fractions.  Default value: null
     germlineResource: somatic-b37_af-only-gnomad.raw.sites.vcf
+
+  getpileupsummaries:
+    # a vcf with known variant sites
+    knownVariantSites: somatic-b37_small_exac_common_3.vcf
 
   filterMutectCalls:
     #--contamination-estimate 0.5?; Estimate of contamination.  Default value: 0.0 (evtl. tumor purity)
@@ -185,6 +193,10 @@ tumorOnly:
     panelOfNormals: somatic-b37_Mutect2-exome-panel.vcf
     #--germline-resource; Population vcf of germline sequencing containing allele fractions.  Default value: null
     germlineResource: somatic-b37_af-only-gnomad.raw.sites.vcf
+
+  getpileupsummaries:
+    # a vcf with known variant sites
+    knownVariantSites: somatic-b37_small_exac_common_3.vcf
 
   filterMutectCalls:
     #--contamination-estimate 0.5?; Estimate of contamination.  Default value: 0.0 (evtl. tumor purity)

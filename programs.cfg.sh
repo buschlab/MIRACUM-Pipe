@@ -79,13 +79,13 @@ readonly CFG_GENERAL_MINGERMLINEVAF=$(get_config_value general.minGermlineVAF "$
 readonly CFG_MUTECT_CALLABLEDEPTH=$(get_config_value wes.mutect.callableDepth "${PARAM_DIR_PATIENT}")
 readonly CFG_MUTECT_PANELOFNORMALS="${DIR_REF}/genome/$(get_config_value wes.mutect.panelOfNormals "${PARAM_DIR_PATIENT}")"
 readonly CFG_MUTECT_GERMLINERESOURCE="${DIR_REF}/genome/$(get_config_value wes.mutect.germlineResource "${PARAM_DIR_PATIENT}")"
+readonly CFG_MUTECT_GETPILEUPSUMMARIES_KNOWNVARIANTSITES="${DIR_REF}/genome/$(get_config_value wes.mutect.getpileupsummaries.knownVariantSites "${PARAM_DIR_PATIENT}")"
 
 # Panel Parameter
 # mutect2
 readonly CFG_PANEL_MUTECT_CALLABLEDEPTH=$(get_config_value panel.mutect.callableDepth "${PARAM_DIR_PATIENT}")
 readonly CFG_PANEL_MUTECT_PANELOFNORMALS="${DIR_REF}/genome/$(get_config_value panel.mutect.panelOfNormals "${PARAM_DIR_PATIENT}")"
-readonly CFG_PANEL_MUTECT_GERMLINERESOURCE="${DIR_REF}/genome/$(get_config_value panel.mutect.germlineResource "${PARAM_DIR_PATIENT}")"
-
+readonly CFG_PANEL_MUTECT_GETPILEUPSUMMARIES_KNOWNVARIANTSITES="${DIR_REF}/genome/$(get_config_value wes.mutect.getpileupsummaries.knownVariantSites "${PARAM_DIR_PATIENT}")"
 
 # Fusions
 readonly CFG_FUSION_GENES="${DIR_SEQUENCING}/$(get_config_value panel.fusions.fusionGenes "${PARAM_DIR_PATIENT}")"
@@ -98,6 +98,7 @@ readonly CFG_AMPLIFICATION_GENES="${DIR_SEQUENCING}/$(get_config_value panel.amp
 readonly CFG_TUMORONLY_MUTECT_CALLABLEDEPTH=$(get_config_value tumorOnly.mutect.callableDepth "${PARAM_DIR_PATIENT}")
 readonly CFG_TUMORONLY_MUTECT_PANELOFNORMALS="${DIR_REF}/genome/$(get_config_value tumorOnly.mutect.panelOfNormals "${PARAM_DIR_PATIENT}")"
 readonly CFG_TUMORONLY_MUTECT_GERMLINERESOURCE="${DIR_REF}/genome/$(get_config_value tumorOnly.mutect.germlineResource "${PARAM_DIR_PATIENT}")"
+readonly CFG_TUMORONLY_MUTECT_GETPILEUPSUMMARIES_KNOWNVARIANTSITES="${DIR_REF}/genome/$(get_config_value wes.mutect.getpileupsummaries.knownVariantSites "${PARAM_DIR_PATIENT}")"
 
 ## Tools and paths
 # Paths
@@ -217,14 +218,17 @@ export CFG_GENERAL_MINGERMLINEVAF
 export CFG_PANEL_MUTECT_CALLABLEDEPTH
 export CFG_PANEL_MUTECT_PANELOFNORMALS
 export CFG_PANEL_MUTECT_GERMLINERESOURCE
+export CFG_PANEL_MUTECT_GETPILEUPSUMMARIES_KNOWNVARIANTSITES
 
 export CFG_TUMORONLY_MUTECT_CALLABLEDEPTH
 export CFG_TUMORONLY_MUTECT_PANELOFNORMALS
 export CFG_TUMORONLY_MUTECT_GERMLINERESOURCE
+export CFG_TUMORONLY_MUTECT_GETPILEUPSUMMARIES_KNOWNVARIANTSITES
 
 export CFG_MUTECT_CALLABLEDEPTH
 export CFG_MUTECT_PANELOFNORMALS
 export CFG_MUTECT_GERMLINERESOURCE
+export CFG_MUTECT_GETPILEUPSUMMARIES_KNOWNVARIANTSITES
 
 export CFG_FUSION_GENES
 export CFG_AMPLIFICATION_GENES

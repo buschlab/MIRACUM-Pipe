@@ -106,7 +106,8 @@ ${BIN_GATK4} Mutect2 \
   --intervals "${CFG_REFERENCE_CAPTUREREGIONS}" \
   --panel-of-normals "${CFG_MUTECT_PANELOFNORMALS}" \
   --germline-resource ${CFG_MUTECT_GERMLINERESOURCE} \
-  --f1r2-tar-gz ${TD_OUTPUT_F1R2}
+  --f1r2-tar-gz ${TD_OUTPUT_F1R2} \
+  --dont-use-soft-clipped-bases true
 
 ${BIN_GATK4} LearnReadOrientationModel \
   -I ${TD_OUTPUT_F1R2} \
@@ -114,8 +115,8 @@ ${BIN_GATK4} LearnReadOrientationModel \
 
 ${BIN_GATK4} GetPileupSummaries \
   -I ${recalbamTD} \
-  -V ${CFG_MUTECT_GERMLINERESOURCE} \
-  -L ${CFG_MUTECT_GERMLINERESOURCE} \
+  -V ${CFG_MUTECT_GETPILEUPSUMMARIES_KNOWNVARIANTSITES} \
+  -L ${CFG_MUTECT_GETPILEUPSUMMARIES_KNOWNVARIANTSITES} \
   -O ${TD_OUTPUT_PILEUPSUMMARIES}
 
 ${BIN_GATK4} CalculateContamination \
@@ -159,7 +160,7 @@ ${BIN_VEP} \
   --refseq \
   --plugin CADD,${DIR_DATABASE}/vep/CADD_GRCh37/whole_genome_SNVs.tsv.gz,${DIR_DATABASE}/vep/CADD_GRCh37/gnomad.genomes-exomes.r4.0.indel.tsv.gz \
   --plugin REVEL,${DIR_DATABASE}/vep/REVEL/new_tabbed_revel.tsv.gz \
-  --no_stats --quiet
+  --quiet
 
 ${BIN_VCF2MAF} \
   --inhibit-vep \
@@ -186,7 +187,8 @@ ${BIN_GATK4} HaplotypeCaller \
   --min-base-quality-score "${CFG_GENERAL_MINBASEQUAL}" \
   --base-quality-score-threshold "${CFG_GENERAL_MINBASEQUAL}" \
   --adaptive-pruning \
-  -ERC GVCF
+  -ERC GVCF \
+  --dont-use-soft-clipped-bases true
 
 ${BIN_GATK4} HaplotypeCaller \
   -R ${FILE_GENOME} \
@@ -196,7 +198,8 @@ ${BIN_GATK4} HaplotypeCaller \
   --min-base-quality-score "${CFG_GENERAL_MINBASEQUAL}" \
   --base-quality-score-threshold "${CFG_GENERAL_MINBASEQUAL}" \
   --adaptive-pruning \
-  -ERC GVCF
+  -ERC GVCF \
+  --dont-use-soft-clipped-bases true
 
 ${BIN_GATK4} CombineGVCFs \
   -R ${FILE_GENOME} \
@@ -233,7 +236,7 @@ ${BIN_VEP} \
   --refseq \
   --plugin CADD,${DIR_DATABASE}/vep/CADD_GRCh37/whole_genome_SNVs.tsv.gz,${DIR_DATABASE}/vep/CADD_GRCh37/gnomad.genomes-exomes.r4.0.indel.tsv.gz \
   --plugin REVEL,${DIR_DATABASE}/vep/REVEL/new_tabbed_revel.tsv.gz \
-  --no_stats --quiet
+  --quiet
 
 ${BIN_VCF2MAF} \
   --inhibit-vep \

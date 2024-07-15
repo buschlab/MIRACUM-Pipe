@@ -91,15 +91,11 @@ ${BIN_GATK4} Mutect2 \
   -R ${FILE_GENOME} \
   -I ${recalbam} \
   -O ${OUTPUT_GZ} \
-  --callable-depth "${CFG_PANEL_MUTECT_CALLABLEDEPTH}" \
   --intervals "${CFG_REFERENCE_CAPTUREREGIONS}" \
-  --min-base-quality-score "${CFG_GENERAL_MINBASEQUAL}" \
-  --base-quality-score-threshold "${CFG_GENERAL_MINBASEQUAL}" \
   --panel-of-normals "${CFG_PANEL_MUTECT_PANELOFNORMALS}" \
-  --genotype-pon-sites \
   --germline-resource ${CFG_PANEL_MUTECT_GERMLINERESOURCE} \
-  --genotype-germline-sites \
-  --f1r2-tar-gz ${OUTPUT_F1R2}
+  --f1r2-tar-gz ${OUTPUT_F1R2} \
+  --dont-use-soft-clipped-bases true
 
 ${BIN_GATK4} LearnReadOrientationModel \
   -I ${OUTPUT_F1R2} \
@@ -107,8 +103,8 @@ ${BIN_GATK4} LearnReadOrientationModel \
 
 ${BIN_GATK4} GetPileupSummaries \
   -I ${recalbam} \
-  -V ${CFG_TUMORONLY_MUTECT_GERMLINERESOURCE} \
-  -L ${CFG_TUMORONLY_MUTECT_GERMLINERESOURCE} \
+  -V ${CFG_PANEL_MUTECT_GETPILEUPSUMMARIES_KNOWNVARIANTSITES} \
+  -L ${CFG_PANEL_MUTECT_GETPILEUPSUMMARIES_KNOWNVARIANTSITES} \
   -O ${OUTPUT_PILEUPSUMMARIES}
 
 ${BIN_GATK4} CalculateContamination \
@@ -152,7 +148,7 @@ ${BIN_VEP} \
   --refseq \
   --plugin CADD,${DIR_DATABASE}/vep/CADD_GRCh37/whole_genome_SNVs.tsv.gz,${DIR_DATABASE}/vep/CADD_GRCh37/gnomad.genomes-exomes.r4.0.indel.tsv.gz \
   --plugin REVEL,${DIR_DATABASE}/vep/REVEL/new_tabbed_revel.tsv.gz \
-  --no_stats --quiet
+  --quiet
 
 ${BIN_VCF2MAF} \
   --inhibit-vep \
