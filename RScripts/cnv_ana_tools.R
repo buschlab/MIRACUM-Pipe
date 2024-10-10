@@ -662,29 +662,30 @@ cnvs2cbioportal <- function(cnvs, id, outfile_cbioportal, gender, ampl_genes = N
   require(tidyr)
   require(stringi)
 
+  cnvs$cn <- unlist(lapply(stringr::str_split(cnvs$cn, ", "), function(x) max(as.numeric(x))))
   # due to the conversion to -2:2 (GISTIC) sex chromosomes by a male individuum need adjustments because these are only present as a single copy
   if (gender == "XY") {
-    ids <- which(cnvs$Chr %in% c("X", "Y") & cnvs$CopyNumber >= 1)
-    cnvs[ids, "CopyNumber"] <- cnvs[ids, "CopyNumber"] + 1
+    ids <- which(cnvs$seqnames %in% c("X", "Y") & cnvs$cn >= 1)
+    cnvs[ids, "cn"] <- cnvs[ids, "cn"] + 1
   }
 
-  cnvs.sub <- subset(cnvs, select = c("CopyNumber", "Gene"))
+  cnvs.sub <- subset(cnvs, select = c("cn", "gene_name"))
   cnvs.sub.extended <- na.omit(cnvs.sub)
   # remove empty genes
-  cnvs.sub.extended <- cnvs.sub.extended[!stri_isempty(cnvs.sub.extended$Gene), ]
+  cnvs.sub.extended <- cnvs.sub.extended[!stri_isempty(cnvs.sub.extended$gene_name), ]
   cnvs.sub.extended$Entrez <- unlist(
     lapply(
       mget(
-        as.character(cnvs.sub.extended$Gene),
+        as.character(cnvs.sub.extended$gene_name),
         org.Hs.egSYMBOL2EG,
         ifnotfound = NA
       ), function(x) x[1]
     )
   )
   cnvs.out <- data.frame(
-    Hugo_Symbol = cnvs.sub.extended$Gene,
+    Hugo_Symbol = cnvs.sub.extended$gene_name,
     Entrez_Gene_Id = cnvs.sub.extended$Entrez,
-    Sample_ID = cnvs.sub.extended$CopyNumber
+    Sample_ID = cnvs.sub.extended$cn
   )
 
   # how to deal with multiple copy number variations for a single gene?

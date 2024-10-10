@@ -121,23 +121,6 @@ cnv_analysis <- function(
     cec = cec
   )
 
-  if (dim(out)[1] != 0) {
-    cnvs2cbioportal(
-      out,
-      id,
-      outfile_cbioportal,
-      gender = gender,
-      ampl_genes = ampl_genes,
-      ploidy = ploidy
-    )
-    freec2seg(
-      cnvs_file,
-      cpn_file,
-      id,
-      outfile_seg
-    )
-  }
-
   if (sureselect_type == "TSO500") {
     if(dim(out)[1] != 0) {
       db <- read.delim(
@@ -161,6 +144,23 @@ cnv_analysis <- function(
         "OG", out$Cancergene[which(out$is_oncogene == 1)])
 
       type <- get_type(Oncogenes = out, sureselect_type = sureselect_type)
+
+      if (dim(out)[1] != 0) {
+        cnvs2cbioportal(
+          type$gene_loci,
+          id,
+          outfile_cbioportal,
+          gender = gender,
+          ampl_genes = ampl_genes,
+          ploidy = ploidy
+        )
+        freec2seg(
+          cnvs_file,
+          cpn_file,
+          id,
+          outfile_seg
+        )
+      }
 
       # merge outputs
       out <- merge(
@@ -193,6 +193,23 @@ cnv_analysis <- function(
     sureselect_type = sureselect_type
   )
 
+  if (dim(out)[1] != 0) {
+
+    cnvs2cbioportal(
+      rbind(type$gene_loci_onc, type$gene_loci_tsg),
+      id,
+      outfile_cbioportal,
+      gender = gender,
+      ampl_genes = ampl_genes,
+      ploidy = ploidy
+    )
+    freec2seg(
+      cnvs_file,
+      cpn_file,
+      id,
+      outfile_seg
+    )
+  }
 
   return(
     list(
